@@ -22,6 +22,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.network.ConnectivityMonitor
+import com.electricdreams.numo.core.network.MintReachabilityMonitor
 import com.electricdreams.numo.core.util.NetworkUtils
 import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
 import com.electricdreams.numo.ui.offline.OfflineStripController
@@ -997,12 +998,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         offlinePill.setOnClickListener {
             OfflineExplainerActivity.start(this, paymentOnScreen = confirmsAfterReconnect())
         }
-        ViewCompat.replaceAccessibilityAction(
-            offlinePill,
-            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
-            getString(R.string.offline_strip_action_details),
-            null
-        )
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -1063,15 +1058,16 @@ class PaymentRequestActivity : AppCompatActivity() {
                 .start()
             return
         }
-        val offline = mode == OfflineStripView.Mode.OFFLINE
-        val color = ContextCompat.getColor(
-            this,
-            if (offline) R.color.color_warning else R.color.color_success_green
+        text.setText(mode.title)
+        text.setTextColor(ContextCompat.getColor(this, mode.color))
+        pill.isClickable = mode.isProblem
+        pill.isFocusable = mode.isProblem
+        ViewCompat.replaceAccessibilityAction(
+            pill,
+            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
+            mode.action?.let(::getString),
+            null
         )
-        text.setText(if (offline) R.string.offline_strip_title else R.string.offline_strip_back_online_title)
-        text.setTextColor(color)
-        pill.isClickable = offline
-        pill.isFocusable = offline
         if (pill.visibility != View.VISIBLE) {
             pill.alpha = 0f
             pill.scaleX = PILL_HIDDEN_SCALE
@@ -1389,6 +1385,9 @@ class PaymentRequestActivity : AppCompatActivity() {
                 lightningStarted = false // Other available methods can still be offered.
                 updateUnifiedQrCode()
                 
+                // The mint may be down: check now so the header can say so.
+                MintReachabilityMonitor.getInstance(this@PaymentRequestActivity).reportFailure()
+
                 // Keep Cashu and Arkoor available when Lightning cannot create its quote.
                 val errorMsg = getString(R.string.payment_request_lightning_error_failed, message)
                 Toast.makeText(this@PaymentRequestActivity, errorMsg, Toast.LENGTH_LONG).show()

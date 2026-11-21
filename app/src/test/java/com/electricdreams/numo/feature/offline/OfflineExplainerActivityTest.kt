@@ -3,15 +3,19 @@ package com.electricdreams.numo.feature.offline
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Looper
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityManager
+import android.widget.TextView
 import androidx.core.view.children
 import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.network.ConnectivityMonitor
+import com.electricdreams.numo.core.network.ConnectionProblem
+import com.electricdreams.numo.core.network.MintReachabilityMonitor
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityOfflineExplainerBinding
 import com.electricdreams.numo.databinding.ItemOfflineCapabilityBinding
@@ -43,16 +47,16 @@ import java.time.Duration
 class OfflineExplainerActivityTest {
 
     private lateinit var context: Context
-    private val online = MutableStateFlow(false)
+    private val problem = MutableStateFlow<ConnectionProblem?>(ConnectionProblem.OFFLINE)
     private val dispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         context = ApplicationProvider.getApplicationContext()
-        val monitor = mock<ConnectivityMonitor>()
-        whenever(monitor.isOnline).thenReturn(online)
-        setSingleton(ConnectivityMonitor::class.java, monitor)
+        val monitor = mock<MintReachabilityMonitor>()
+        whenever(monitor.problem).thenReturn(problem)
+        setSingleton(MintReachabilityMonitor::class.java, monitor)
         setSingleton(BitcoinPriceWorker::class.java, null)
         setSingleton(CurrencyManager::class.java, null)
         BitcoinPriceWorker.isTesting = true
@@ -75,7 +79,7 @@ class OfflineExplainerActivityTest {
         BitcoinPriceWorker.getInstance(context).stop()
         BitcoinPriceWorker.isTesting = false
         setSingleton(BitcoinPriceWorker::class.java, null)
-        setSingleton(ConnectivityMonitor::class.java, null)
+        setSingleton(MintReachabilityMonitor::class.java, null)
         CurrencyManager.getInstance(context).setCurrencyChangeListener(null)
         Dispatchers.resetMain()
     }
@@ -90,19 +94,19 @@ class OfflineExplainerActivityTest {
                 val binding = binding(activity)
                 assertOffline(activity, binding)
 
-                online.value = true
+                problem.value = null
                 finishAnimations()
                 assertOnline(activity, binding)
                 dispatcher.scheduler.advanceTimeBy(2_000L)
                 dispatcher.scheduler.runCurrent()
                 assertFalse(activity.isFinishing)
 
-                online.value = false
+                problem.value = ConnectionProblem.OFFLINE
                 finishAnimations()
                 assertOffline(activity, binding)
                 assertFalse(activity.isFinishing)
 
-                online.value = true
+                problem.value = null
                 finishAnimations()
                 assertOnline(activity, binding)
                 assertFalse(activity.isFinishing)
@@ -117,7 +121,7 @@ class OfflineExplainerActivityTest {
                 assertOffline(activity, binding(activity))
 
                 controller.pause().stop()
-                online.value = true
+                problem.value = null
                 controller.start().resume()
                 finishAnimations()
 
@@ -128,10 +132,10 @@ class OfflineExplainerActivityTest {
 
                 controller.pause().stop().start().resume()
                 assertFalse(activity.isFinishing)
-                online.value = false
+                problem.value = ConnectionProblem.OFFLINE
                 finishAnimations()
                 assertOffline(activity, binding(activity))
-                online.value = true
+                problem.value = null
                 finishAnimations()
                 assertOnline(activity, binding(activity))
                 assertFalse(activity.isFinishing)
@@ -140,7 +144,7 @@ class OfflineExplainerActivityTest {
 
     @Test
     fun `explainer opened while already online still closes with TalkBack enabled`() {
-        online.value = true
+        problem.value = null
         Robolectric.buildActivity(OfflineExplainerActivity::class.java)
             .setup().use { controller ->
                 assertTrue(controller.get().isFinishing)
@@ -154,8 +158,8 @@ class OfflineExplainerActivityTest {
                 val activity = controller.get()
                 val binding = binding(activity)
 
-                online.value = true
-                online.value = false
+                problem.value = null
+                problem.value = ConnectionProblem.OFFLINE
                 finishAnimations()
 
                 assertOffline(activity, binding)
@@ -173,14 +177,71 @@ class OfflineExplainerActivityTest {
         Robolectric.buildActivity(OfflineExplainerActivity::class.java)
             .setup().visible().use { controller ->
                 val activity = controller.get()
-                online.value = true
-                online.value = false
+                problem.value = null
+                problem.value = ConnectionProblem.OFFLINE
                 dispatcher.scheduler.advanceTimeBy(2_000L)
                 dispatcher.scheduler.runCurrent()
                 finishAnimations()
 
                 assertOffline(activity, binding(activity))
                 assertFalse(activity.isFinishing)
+            }
+    }
+
+    @Test
+    fun `mint explainer names the mint and what needs it, then celebrates when it answers`() {
+        problem.value = ConnectionProblem.MINT_UNREACHABLE
+        Robolectric.buildActivity(OfflineExplainerActivity::class.java)
+            .setup().visible().use { controller ->
+                val activity = controller.get()
+                val binding = binding(activity)
+                val host = Uri.parse(
+                    MintManager.getInstance(context).getPreferredLightningMint()
+                ).host
+
+                assertEquals(activity.getString(R.string.mint_explainer_title), binding.title.text)
+                assertEquals(
+                    activity.getString(R.string.mint_explainer_subtitle, host),
+                    binding.subtitle.text
+                )
+                assertEquals(
+                    listOf(
+                        activity.getString(R.string.mint_explainer_group_needs_mint),
+                        activity.getString(R.string.mint_explainer_group_still_works),
+                    ),
+                    binding.capabilityGroups.children
+                        .map { it.findViewById<TextView>(R.id.group_title).text.toString() }
+                        .toList()
+                )
+                val rows = rows(binding)
+                assertRow(activity, rows.getValue(activity.getString(R.string.offline_feature_new_charges)),
+                    R.string.offline_status_unavailable, R.drawable.ic_status_unavailable)
+                assertRow(activity, rows.getValue(activity.getString(R.string.offline_feature_catalog)),
+                    R.string.offline_status_available, R.drawable.ic_status_available)
+                assertFalse(activity.getString(R.string.offline_feature_exchange_rate) in rows)
+
+                problem.value = null
+                finishAnimations()
+
+                assertEquals(
+                    activity.getString(R.string.mint_explainer_reconnected_title),
+                    binding.title.text
+                )
+                assertFalse(activity.isFinishing)
+            }
+    }
+
+    @Test
+    fun `explainer switches to the offline explanation when the phone drops off the network`() {
+        problem.value = ConnectionProblem.MINT_UNREACHABLE
+        Robolectric.buildActivity(OfflineExplainerActivity::class.java)
+            .setup().visible().use { controller ->
+                val activity = controller.get()
+
+                problem.value = ConnectionProblem.OFFLINE
+                finishAnimations()
+
+                assertOffline(activity, binding(activity))
             }
     }
 

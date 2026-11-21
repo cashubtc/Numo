@@ -12,11 +12,14 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.network.ConnectivityMonitor
+import com.electricdreams.numo.core.network.ConnectionProblem
+import com.electricdreams.numo.core.network.MintReachabilityMonitor
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.databinding.ActivityOfflineExplainerBinding
 import com.electricdreams.numo.databinding.ItemOfflineCapabilityBinding
 import com.electricdreams.numo.databinding.ItemOfflineCapabilityGroupBinding
@@ -31,7 +34,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Full-screen answer to "why can't I charge?": what needs internet, then what still works.
+ * Full-screen answer to "why can't I charge?": what needs internet (or the mint, when only the
+ * mint is unreachable), then what still works.
  *
  * If the connection returns while it's open, it flips to "You're back online.", ticks the rows
  * green, and closes itself (unless TalkBack is on, where a time limit would cut the user off).
@@ -41,7 +45,8 @@ class OfflineExplainerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOfflineExplainerBinding
     private val rowViews = mutableListOf<Pair<Row, ItemOfflineCapabilityBinding>>()
     // Keep this history when observation restarts after returning from network settings.
-    private var sawOffline = false
+    private var shownProblem: ConnectionProblem? = null
+    private var paymentOnScreen = false
     private var celebrating = false
     private var autoCloseJob: Job? = null
 
@@ -52,27 +57,51 @@ class OfflineExplainerActivity : AppCompatActivity() {
         applySettingsWindowInsets(this, binding.root)
 
         binding.closeButton.setOnClickListener { finish() }
-        val paymentOnScreen = intent.getBooleanExtra(EXTRA_PAYMENT_ON_SCREEN, false)
-        renderGroups(OfflineCapabilities.groups(OfflineCapabilities.Config.from(this, paymentOnScreen)))
-        observeConnectivity()
+        paymentOnScreen = intent.getBooleanExtra(EXTRA_PAYMENT_ON_SCREEN, false)
+        observeProblem()
     }
 
-    private fun observeConnectivity() {
+    private fun observeProblem() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ConnectivityMonitor.getInstance(this@OfflineExplainerActivity).isOnline
-                    .collect { online ->
+                MintReachabilityMonitor.getInstance(this@OfflineExplainerActivity).problem
+                    .collect { problem ->
                         when {
-                            !online -> {
-                                sawOffline = true
-                                restoreOffline()
-                            }
-                            sawOffline -> celebrate()
-                            // Opened while already online: nothing to explain.
+                            problem != null -> show(problem)
+                            shownProblem != null -> celebrate()
+                            // Opened with nothing wrong: nothing to explain.
                             else -> finish()
                         }
                     }
             }
+        }
+    }
+
+    /** Explains [problem], whether it's new, replaces another, or returns mid-celebration. */
+    private fun show(problem: ConnectionProblem) {
+        val changed = problem != shownProblem
+        if (!changed && !celebrating) return
+        shownProblem = problem
+        celebrating = false
+        autoCloseJob?.cancel()
+        autoCloseJob = null
+
+        restoreIcon(binding.heroBadge, R.drawable.ic_status_degraded)
+        restoreText(binding.title, getString(titleFor(problem)))
+        restoreText(binding.subtitle, subtitleFor(problem))
+        if (changed) {
+            val config = OfflineCapabilities.Config.from(this, paymentOnScreen, problem)
+            renderGroups(OfflineCapabilities.groups(config))
+            return
+        }
+        rowViews.forEach { (row, item) ->
+            restoreIcon(item.capabilityIcon, iconFor(row.status))
+            val status = statusTextFor(row)
+            restoreText(item.capabilityStatus, status)
+            setStatus(
+                row, item, status,
+                outdated = row.feature == Feature.EXCHANGE_RATE && row.status == Status.DEGRADED
+            )
         }
     }
 
@@ -85,10 +114,15 @@ class OfflineExplainerActivity : AppCompatActivity() {
             val groupBinding = ItemOfflineCapabilityGroupBinding.inflate(
                 layoutInflater, binding.capabilityGroups, true
             )
+            val mintOnly = shownProblem == ConnectionProblem.MINT_UNREACHABLE
             groupBinding.groupTitle.setText(
                 when (group) {
-                    Group.NEEDS_INTERNET -> R.string.offline_explainer_group_needs_internet
-                    Group.WORKS_OFFLINE -> R.string.offline_explainer_group_works_offline
+                    Group.NEEDS_INTERNET ->
+                        if (mintOnly) R.string.mint_explainer_group_needs_mint
+                        else R.string.offline_explainer_group_needs_internet
+                    Group.WORKS_OFFLINE ->
+                        if (mintOnly) R.string.mint_explainer_group_still_works
+                        else R.string.offline_explainer_group_works_offline
                 }
             )
             rows.forEach { row ->
@@ -114,23 +148,17 @@ class OfflineExplainerActivity : AppCompatActivity() {
         )
     }
 
-    private fun restoreOffline() {
-        if (!celebrating) return
-        celebrating = false
-        autoCloseJob?.cancel()
-        autoCloseJob = null
+    @StringRes
+    private fun titleFor(problem: ConnectionProblem): Int = when (problem) {
+        ConnectionProblem.OFFLINE -> R.string.offline_explainer_title
+        ConnectionProblem.MINT_UNREACHABLE -> R.string.mint_explainer_title
+    }
 
-        restoreIcon(binding.heroBadge, R.drawable.ic_status_degraded)
-        restoreText(binding.title, getString(R.string.offline_explainer_title))
-        restoreText(binding.subtitle, getString(R.string.offline_explainer_subtitle))
-        rowViews.forEach { (row, item) ->
-            restoreIcon(item.capabilityIcon, iconFor(row.status))
-            val status = statusTextFor(row)
-            restoreText(item.capabilityStatus, status)
-            setStatus(
-                row, item, status,
-                outdated = row.feature == Feature.EXCHANGE_RATE && row.status == Status.DEGRADED
-            )
+    private fun subtitleFor(problem: ConnectionProblem): String = when (problem) {
+        ConnectionProblem.OFFLINE -> getString(R.string.offline_explainer_subtitle)
+        ConnectionProblem.MINT_UNREACHABLE -> {
+            val mint = MintManager.getInstance(this).getPreferredLightningMint().orEmpty()
+            getString(R.string.mint_explainer_subtitle, mint.toUri().host ?: mint)
         }
     }
 
@@ -153,7 +181,16 @@ class OfflineExplainerActivity : AppCompatActivity() {
         celebrating = true
 
         swapIcon(binding.heroBadge, R.drawable.ic_status_available, startDelay = 0L)
-        crossfadeText(binding.title, getString(R.string.offline_explainer_back_online_title))
+        crossfadeText(
+            binding.title,
+            getString(
+                if (shownProblem == ConnectionProblem.MINT_UNREACHABLE) {
+                    R.string.mint_explainer_reconnected_title
+                } else {
+                    R.string.offline_explainer_back_online_title
+                }
+            )
+        )
         crossfadeText(binding.subtitle, getString(R.string.offline_explainer_back_online_subtitle))
 
         var delayMs = ROW_STAGGER_START_MS
@@ -216,7 +253,13 @@ class OfflineExplainerActivity : AppCompatActivity() {
         row.status == Status.AVAILABLE -> getString(R.string.offline_status_available)
         row.updatedAt != null ->
             getString(R.string.offline_status_using_rate, formatUpdatedAt(row.updatedAt))
-        row.feature == Feature.PAYMENT_ON_SCREEN -> getString(R.string.offline_status_confirms_later)
+        row.feature == Feature.PAYMENT_ON_SCREEN -> getString(
+            if (shownProblem == ConnectionProblem.MINT_UNREACHABLE) {
+                R.string.mint_status_confirms_later
+            } else {
+                R.string.offline_status_confirms_later
+            }
+        )
         row.feature == Feature.AUTO_WITHDRAW -> getString(R.string.offline_status_paused)
         else -> getString(R.string.offline_status_unavailable)
     }

@@ -1,6 +1,7 @@
 package com.electricdreams.numo.feature.offline
 
 import android.content.Context
+import com.electricdreams.numo.core.network.ConnectionProblem
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsManager
@@ -44,9 +45,15 @@ object OfflineCapabilities {
         val priceUpdatedAt: Long?,
         /** Opened from a payment request whose code a customer can still pay. */
         val paymentOnScreen: Boolean = false,
+        /** What's wrong: with only the mint unreachable, everything that isn't the mint works. */
+        val problem: ConnectionProblem = ConnectionProblem.OFFLINE,
     ) {
         companion object {
-            fun from(context: Context, paymentOnScreen: Boolean): Config {
+            fun from(
+                context: Context,
+                paymentOnScreen: Boolean,
+                problem: ConnectionProblem = ConnectionProblem.OFFLINE,
+            ): Config {
                 val prefs = PreferenceStore.app(context)
                 val usesBtcPayCatalog = prefs.getBoolean("btcpay_enabled", false) &&
                     !prefs.getString("btcpay_pos_app_id", null).isNullOrBlank()
@@ -56,6 +63,7 @@ object OfflineCapabilities {
                     usesBtcPayCatalog = usesBtcPayCatalog,
                     priceUpdatedAt = BitcoinPriceWorker.getInstance(context).getPriceUpdatedAt(),
                     paymentOnScreen = paymentOnScreen,
+                    problem = problem,
                 )
             }
         }
@@ -66,14 +74,17 @@ object OfflineCapabilities {
      * (✓ before !), and among equals what matters most for a sale leads.
      */
     fun rows(config: Config): List<Row> {
+        val mintOnly = config.problem == ConnectionProblem.MINT_UNREACHABLE
         val catalog = Row(
             Feature.CATALOG,
-            if (config.usesBtcPayCatalog) Status.UNAVAILABLE else Status.AVAILABLE
+            if (config.usesBtcPayCatalog && !mintOnly) Status.UNAVAILABLE else Status.AVAILABLE
         )
-        val exchangeRate = if (config.priceUpdatedAt != null) {
-            Row(Feature.EXCHANGE_RATE, Status.DEGRADED, config.priceUpdatedAt)
-        } else {
-            Row(Feature.EXCHANGE_RATE, Status.UNAVAILABLE)
+        val exchangeRate = when {
+            // The rate doesn't come from the mint, so its state says nothing about it.
+            mintOnly -> null
+            config.priceUpdatedAt != null ->
+                Row(Feature.EXCHANGE_RATE, Status.DEGRADED, config.priceUpdatedAt)
+            else -> Row(Feature.EXCHANGE_RATE, Status.UNAVAILABLE)
         }
         return listOfNotNull(
             Row(Feature.NEW_CHARGES, Status.UNAVAILABLE),
