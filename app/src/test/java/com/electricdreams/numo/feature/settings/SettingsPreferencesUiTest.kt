@@ -10,6 +10,7 @@ import com.google.android.material.radiobutton.MaterialRadioButton
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -21,6 +22,8 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.payment.DefaultPaymentMethodManager
 import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
+import com.electricdreams.numo.payment.card.StripeCardConfig
+import com.electricdreams.numo.payment.card.StripeTerminalManager
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -135,5 +138,40 @@ class SettingsPreferencesUiTest {
                 assertFalse(DeveloperPrefs.isLightningInvoiceDelayed(activity))
             }
         }
+    }
+
+    @Test
+    fun `Stripe reader uses the saved developer switch for discovery`() {
+        val config = StripeCardConfig("rk_test_example", "tml_example")
+        DeveloperPrefs.setDeveloperModeEnabled(context, true)
+        ActivityScenario.launch(DeveloperSettingsActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val toggle = activity.findViewById<MaterialSwitch>(R.id.simulate_stripe_reader_switch)
+                assertFalse(toggle.isChecked)
+                assertFalse(StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+                toggle.performClick()
+            }
+            scenario.recreate()
+            scenario.onActivity { activity ->
+                val toggle = activity.findViewById<MaterialSwitch>(R.id.simulate_stripe_reader_switch)
+                assertTrue(toggle.isChecked)
+                assertTrue(StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+                toggle.performClick()
+                assertFalse(StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+            }
+        }
+    }
+
+    @Test
+    fun `simulated Stripe reader rejects live credentials before discovery`() {
+        val config = StripeCardConfig("rk_live_example", "tml_example")
+        DeveloperPrefs.setDeveloperModeEnabled(context, true)
+        DeveloperPrefs.setStripeReaderSimulated(context, true)
+        val failure = assertThrows(StripeTerminalManager.CardPaymentException::class.java) {
+            StripeTerminalManager.readerDiscoveryConfig(context, config)
+        }
+        assertEquals(StripeTerminalManager.FailureReason.SIMULATION_REQUIRES_TEST_KEY, failure.reason)
+        DeveloperPrefs.setDeveloperModeEnabled(context, false)
+        assertFalse(StripeTerminalManager.readerDiscoveryConfig(context, config).isSimulated)
     }
 }

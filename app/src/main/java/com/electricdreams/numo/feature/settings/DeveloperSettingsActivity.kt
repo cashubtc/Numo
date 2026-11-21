@@ -50,6 +50,11 @@ class DeveloperSettingsActivity : AppCompatActivity() {
         binding.delayLightningInvoiceItem.setOnClickListener {
             binding.delayLightningInvoiceSwitch.performClick()
         }
+
+        binding.simulateStripeReaderSwitch.isChecked = DeveloperPrefs.isStripeReaderSimulated(this)
+        binding.simulateStripeReaderSwitch.setOnCheckedChangeListener { _, checked ->
+            DeveloperPrefs.setStripeReaderSimulated(this, checked)
+        }
     }
 
     private fun showRestartOnboardingDialog() {
