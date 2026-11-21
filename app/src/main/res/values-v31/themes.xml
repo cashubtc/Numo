@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Splash Screen Theme for Android 12+ (API 31+) -->
     <!-- Uses the new windowSplashScreen* attributes -->
     <style name="Theme.Numo.Splash" parent="Theme.Numo">
+        <!-- Brand-colored surface with light content: tell the platform it is
+             already dark so system dark-theme color inversion leaves it alone. -->
+        <item name="android:isLightTheme" tools:targetApi="29">false</item>
         <!-- Splash screen background: Navy -->
         <item name="android:windowSplashScreenBackground">@color/numo_navy</item>
         <!-- No icon - just solid navy background -->
