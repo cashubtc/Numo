@@ -1012,6 +1012,17 @@
     <string name="offline_status_updating">업데이트 중…</string>
     <string name="offline_row_content_description">%1$s, %2$s</string>
     <string name="offline_row_content_description_outdated">%1$s, 오래된 정보. %2$s</string>
+    <string name="mint_strip_title">민트에 연결할 수 없음</string>
+    <string name="mint_strip_subtitle">새 결제가 실패할 수 있습니다</string>
+    <string name="mint_strip_reconnected_title">민트 연결됨</string>
+    <string name="mint_strip_reconnected_subtitle">새 결제를 다시 받을 수 있습니다</string>
+    <string name="mint_strip_action_details">계속 사용할 수 있는 기능 보기</string>
+    <string name="mint_explainer_title">민트에 연결할 수 없습니다.</string>
+    <string name="mint_explainer_subtitle">휴대폰은 연결되어 있지만 %1$s이(가) 응답하지 않습니다. 이 네트워크에서 인터넷이 되는지 확인하거나 잠시 후 다시 시도하세요.</string>
+    <string name="mint_explainer_reconnected_title">민트에 다시 연결되었습니다.</string>
+    <string name="mint_explainer_group_needs_mint">민트 필요</string>
+    <string name="mint_explainer_group_still_works">계속 사용 가능</string>
+    <string name="mint_status_confirms_later">민트가 응답하면 확인됩니다</string>
     <string name="payment_request_arkoor_address">Ark 주소</string>
     <string name="payment_request_arkoor_waiting">표시된 금액을 이 Ark 주소로 보내세요</string>
     <string name="payment_request_arkoor_retrying">민트에 다시 연결 중…</string>

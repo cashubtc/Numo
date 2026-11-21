@@ -1,5 +1,6 @@
 package com.electricdreams.numo.feature.offline
 
+import com.electricdreams.numo.core.network.ConnectionProblem
 import com.electricdreams.numo.feature.offline.OfflineCapabilities.Config
 import com.electricdreams.numo.feature.offline.OfflineCapabilities.Feature
 import com.electricdreams.numo.feature.offline.OfflineCapabilities.Group
@@ -95,6 +96,31 @@ class OfflineCapabilitiesTest {
         assertEquals(
             listOf(Feature.HISTORY, Feature.EXCHANGE_RATE),
             groups[Group.WORKS_OFFLINE].orEmpty().map { it.feature }
+        )
+    }
+
+    @Test
+    fun `given only the mint is unreachable, then only what uses the mint is unavailable`() {
+        val groups = OfflineCapabilities.groups(
+            baseline.copy(
+                autoWithdrawEnabled = true,
+                usesBtcPayCatalog = true,
+                paymentOnScreen = true,
+                problem = ConnectionProblem.MINT_UNREACHABLE,
+            )
+        )
+
+        assertEquals(
+            listOf(Feature.NEW_CHARGES, Feature.WITHDRAWALS, Feature.AUTO_WITHDRAW),
+            groups[Group.NEEDS_INTERNET].orEmpty().map { it.feature }
+        )
+        assertEquals(
+            listOf(
+                Row(Feature.CATALOG, Status.AVAILABLE),
+                Row(Feature.HISTORY, Status.AVAILABLE),
+                Row(Feature.PAYMENT_ON_SCREEN, Status.DEGRADED),
+            ),
+            groups[Group.WORKS_OFFLINE]
         )
     }
 

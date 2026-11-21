@@ -8,7 +8,8 @@ import com.electricdreams.numo.NfcEnableActivity
 import com.electricdreams.numo.PaymentFailureActivity
 import com.electricdreams.numo.PaymentReceivedActivity
 import com.electricdreams.numo.PaymentRequestActivity
-import com.electricdreams.numo.core.network.ConnectivityMonitor
+import com.electricdreams.numo.core.network.ConnectionProblem
+import com.electricdreams.numo.core.network.MintReachabilityMonitor
 import com.electricdreams.numo.feature.items.BarcodeScannerActivity
 import com.electricdreams.numo.feature.items.CheckoutScannerActivity
 import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
@@ -29,8 +30,8 @@ import java.lang.ref.WeakReference
 /**
  * App-wide offline strip, Bitkey style: one implementation, every screen.
  *
- * Follows [ConnectivityMonitor] and mirrors its state onto an [OfflineStripHost] per started
- * activity. Only the resumed activity animates; the others snap so they're correct when shown.
+ * Follows [MintReachabilityMonitor.problem] (offline, or online but the mint doesn't answer) and
+ * mirrors it onto an [OfflineStripHost] per started activity. Only the resumed activity animates; the others snap so they're correct when shown.
  */
 class OfflineStripController private constructor(
     private val app: Application
@@ -46,20 +47,27 @@ class OfflineStripController private constructor(
     private fun start() {
         app.registerActivityLifecycleCallbacks(this)
         scope.launch {
-            ConnectivityMonitor.getInstance(app).isOnline.collect(::onConnectivityChanged)
+            MintReachabilityMonitor.getInstance(app).problem.collect(::onProblemChanged)
         }
     }
 
-    private fun onConnectivityChanged(online: Boolean) {
+    private fun onProblemChanged(problem: ConnectionProblem?) {
         hideJob?.cancel()
+        val recovery = when (mode) {
+            OfflineStripView.Mode.OFFLINE -> OfflineStripView.Mode.BACK_ONLINE
+            OfflineStripView.Mode.MINT_UNREACHABLE -> OfflineStripView.Mode.MINT_RECONNECTED
+            else -> null
+        }
         when {
-            !online -> setMode(OfflineStripView.Mode.OFFLINE)
-            mode != OfflineStripView.Mode.OFFLINE -> Unit
+            problem == ConnectionProblem.OFFLINE -> setMode(OfflineStripView.Mode.OFFLINE)
+            problem == ConnectionProblem.MINT_UNREACHABLE ->
+                setMode(OfflineStripView.Mode.MINT_UNREACHABLE)
+            recovery == null -> Unit
             // The explainer celebrates on its own; a second "Back online" after it closes
             // would only flash, so the screens underneath simply settle back.
             resumedActivity?.get() is OfflineExplainerActivity -> setMode(null)
             else -> {
-                setMode(OfflineStripView.Mode.BACK_ONLINE)
+                setMode(recovery)
                 hideJob = scope.launch {
                     delay(BACK_ONLINE_HOLD_MS)
                     setMode(null)
@@ -76,7 +84,7 @@ class OfflineStripController private constructor(
     }
 
     private fun onStripTapped(activity: Activity) {
-        if (mode == OfflineStripView.Mode.OFFLINE) OfflineExplainerActivity.start(activity)
+        if (mode?.isProblem == true) OfflineExplainerActivity.start(activity)
     }
 
     override fun onActivityStarted(activity: Activity) {
@@ -114,7 +122,7 @@ class OfflineStripController private constructor(
     companion object {
         private const val APP_PACKAGE = "com.electricdreams.numo"
 
-        /** How long "Back online" stays up before the strip tucks away. */
+        /** How long "Back online" or "Mint connected" stays up before the strip tucks away. */
         private const val BACK_ONLINE_HOLD_MS = 2_000L
 
         private val _stripMode = MutableStateFlow<OfflineStripView.Mode?>(null)

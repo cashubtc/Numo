@@ -88,6 +88,27 @@ class ConnectivityMonitorTest {
 
     @Test
     @Config(sdk = [26, 34])
+    fun `Android 8 and newer treat Wi-Fi that still needs a sign-in as offline`() = runTest {
+        whenever(manager.activeNetwork).thenReturn(network)
+        val monitor = ConnectivityMonitor(context, backgroundScope)
+        runCurrent()
+        assertTrue(monitor.isOnline.value)
+
+        shadowOf(capabilities).addCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL)
+        registeredCallback().onCapabilitiesChanged(network, capabilities)
+        runCurrent()
+        advanceTimeBy(ConnectivityMonitor.OFFLINE_DEBOUNCE_MS)
+        runCurrent()
+        assertFalse(monitor.isOnline.value)
+
+        shadowOf(capabilities).removeCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL)
+        registeredCallback().onCapabilitiesChanged(network, capabilities)
+        runCurrent()
+        assertTrue(monitor.isOnline.value)
+    }
+
+    @Test
+    @Config(sdk = [26, 34])
     fun `Android 8 and newer wait for capabilities after availability`() = runTest {
         val monitor = ConnectivityMonitor(context, backgroundScope)
         val callback = registeredCallback()
