@@ -1,5 +1,10 @@
 package com.electricdreams.numo.core.network
 
+import android.app.Activity
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import com.electricdreams.numo.core.prefs.PreferenceStore
+import com.electricdreams.numo.core.util.MintManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
@@ -17,6 +22,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.concurrent.TimeUnit
@@ -220,6 +226,59 @@ class MintReachabilityMonitorTest {
 
         assertTrue(probed.isEmpty())
         assertNull(monitor.problem.value)
+    }
+
+    @Test
+    fun `given the app is on screen, then rotating between two activities keeps it probing`() =
+        runTest {
+            val monitor = monitor(foreground = false)
+            val tracker = MintReachabilityMonitor.ForegroundTracker(monitor)
+            val first = mock<Activity>()
+            val second = mock<Activity>()
+
+            tracker.onActivityStarted(first)
+            tracker.onActivityStarted(second)
+            tracker.onActivityStopped(first)
+            runCurrent()
+            assertEquals(1, probed.size)
+
+            tracker.onActivityStopped(second)
+            runCurrent()
+            advanceTimeBy(MintReachabilityMonitor.HEALTHY_INTERVAL_MS)
+            runCurrent()
+            assertEquals(1, probed.size)
+        }
+
+    @Test
+    fun `the mint that issues new charges is the one watched`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PreferenceStore.app(context).putBoolean("btcpay_enabled", false)
+
+        assertEquals(
+            MintManager.getInstance(context).getPreferredLightningMint(),
+            MintReachabilityMonitor.watchedMint(context)
+        )
+    }
+
+    @Test
+    fun `given BTCPay handles checkout, then no mint is watched`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val prefs = PreferenceStore.app(context)
+        prefs.putBoolean("btcpay_enabled", true)
+        prefs.putString("btcpay_server_url", "https://btcpay.example")
+        prefs.putString("btcpay_api_key", "key")
+
+        // Incomplete BTCPay setup falls back to the local wallet, so the mint still matters.
+        assertEquals(
+            MintManager.getInstance(context).getPreferredLightningMint(),
+            MintReachabilityMonitor.watchedMint(context)
+        )
+
+        prefs.putString("btcpay_store_id", "store")
+        assertNull(MintReachabilityMonitor.watchedMint(context))
+
+        // The preference store outlives a test, so leave it as the other tests expect.
+        prefs.putBoolean("btcpay_enabled", false)
     }
 
     @Test

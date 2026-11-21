@@ -1,11 +1,15 @@
 package com.electricdreams.numo
 
+import android.view.View
 import android.widget.TextView
 import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import com.electricdreams.numo.payment.PaymentTabManager
+import com.electricdreams.numo.ui.offline.OfflineStripView
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -80,6 +84,33 @@ class PaymentRequestActivityOfflineStatusTest {
         status.text = waiting
         refreshStatus()
         assertEquals(waiting, status.text.toString())
+    }
+
+    @Test
+    fun `header pill names an unreachable mint and its recovery`() {
+        activity.setContentView(R.layout.activity_payment_request)
+        val pill = activity.findViewById<View>(R.id.offline_pill)
+        val text = activity.findViewById<TextView>(R.id.offline_pill_text)
+
+        renderPill(OfflineStripView.Mode.MINT_UNREACHABLE)
+        assertEquals(View.VISIBLE, pill.visibility)
+        assertEquals(activity.getString(R.string.mint_strip_title), text.text.toString())
+        assertTrue(pill.isClickable)
+
+        renderPill(OfflineStripView.Mode.MINT_RECONNECTED)
+        assertEquals(
+            activity.getString(R.string.mint_strip_reconnected_title),
+            text.text.toString()
+        )
+        assertFalse(pill.isClickable)
+    }
+
+    private fun renderPill(mode: OfflineStripView.Mode?) {
+        ReflectionHelpers.callInstanceMethod<Void>(
+            activity,
+            "renderOfflinePill",
+            ReflectionHelpers.ClassParameter.from(OfflineStripView.Mode::class.java, mode)
+        )
     }
 
     private fun refreshStatus() {

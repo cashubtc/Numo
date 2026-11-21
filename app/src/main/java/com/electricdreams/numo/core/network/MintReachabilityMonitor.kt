@@ -116,7 +116,8 @@ class MintReachabilityMonitor internal constructor(
         reachable.value = true
     }
 
-    private class ForegroundTracker(
+    /** On screen means at least one started activity; a rotation overlaps start and stop. */
+    internal class ForegroundTracker(
         private val monitor: MintReachabilityMonitor
     ) : Application.ActivityLifecycleCallbacks {
         private var started = 0
@@ -181,7 +182,7 @@ class MintReachabilityMonitor internal constructor(
         }
 
         /** Mirrors PaymentServiceFactory: with BTCPay configured, charges never touch the mint. */
-        private fun watchedMint(context: Context): String? = try {
+        internal fun watchedMint(context: Context): String? = try {
             val prefs = PreferenceStore.app(context)
             val usesBtcPay = prefs.getBoolean("btcpay_enabled", false) &&
                 listOf("btcpay_server_url", "btcpay_api_key", "btcpay_store_id")
