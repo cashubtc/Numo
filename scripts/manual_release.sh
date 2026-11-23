@@ -159,6 +159,8 @@ publish_zapstore() {
     : "${GITHUB_SHA:?GITHUB_SHA is required}"
     : "${PRE_RELEASE:?PRE_RELEASE is required}"
     local apk="app/build/outputs/apk/release/numo-${RELEASE_VERSION}-arm64-v8a.apk"
+    local pkcs12="$RUNNER_TEMP/zapstore-release-key.p12"
+    local proof="$RUNNER_TEMP/zapstore-identity-proof.json"
     local zsp="$RUNNER_TEMP/zsp"
     local nak="$RUNNER_TEMP/nak"
     local channel="main"
@@ -173,15 +175,36 @@ publish_zapstore() {
         exit 1
     fi
 
+    if ! keytool -importkeystore -srckeystore "$KEYSTORE_PATH" -srcstoretype JKS \
+        -srcstorepass "$KEYSTORE_PASSWORD" -srckeypass "$KEY_PASSWORD" \
+        -srcalias "$KEY_ALIAS" -destkeystore "$pkcs12" -deststoretype PKCS12 \
+        -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" \
+        -destalias "$KEY_ALIAS" -noprompt; then
+        rm -f -- "$pkcs12"
+        keytool -importkeystore -srckeystore "$KEYSTORE_PATH" -srcstoretype PKCS12 \
+            -srcstorepass "$KEYSTORE_PASSWORD" -srckeypass "$KEY_PASSWORD" \
+            -srcalias "$KEY_ALIAS" -destkeystore "$pkcs12" -deststoretype PKCS12 \
+            -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" \
+            -destalias "$KEY_ALIAS" -noprompt
+    fi
+
     if [ "$PRE_RELEASE" = true ]; then
         channel="beta"
     fi
-    export KEYSTORE_KEY_PASSWORD="${KEYSTORE_KEY_PASSWORD:-$KEY_PASSWORD}"
     "$zsp" publish --quiet --skip-preview --skip-certificate-linking --overwrite-release \
         --no-color --commit "$commit" --channel "$channel" release/zapstore.yaml
-    "$zsp" identity --link-key "$KEYSTORE_PATH" --key-alias "$KEY_ALIAS" \
-        --link-key-expiry 2y --offline --no-color \
-        | "$nak" event --github wss://relay.zapstore.dev
+    "$zsp" identity --link-key "$pkcs12" --link-key-expiry 2y --offline --no-color \
+        > "$proof"
+    python3 - "$proof" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as proof_file:
+    proof = json.load(proof_file)
+if proof.get("kind") != 30509 or not proof.get("sig"):
+    raise SystemExit("Invalid Zapstore identity proof")
+PY
+    "$nak" event wss://relay.zapstore.dev < "$proof"
 }
 
 if [ "$#" -ne 1 ]; then
