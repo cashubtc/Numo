@@ -5,15 +5,19 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
@@ -427,6 +431,9 @@ class PaymentsHistoryActivityTest {
         PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
             context, paymentId, "pi_resume", "pi_resume_secret_test",
         )
+        val monitor = mock<ConnectivityMonitor>()
+        whenever(monitor.isOnlineNow()).thenReturn(true)
+        ReflectionHelpers.setStaticField(ConnectivityMonitor::class.java, "instance", monitor)
         val activity = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup().get()
         val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
         val adapter = recyclerView.adapter as PaymentsHistoryAdapter
@@ -435,6 +442,7 @@ class PaymentsHistoryActivityTest {
         adapter.bindViewHolder(holder, 1)
 
         holder.mainContent.performClick()
+        ReflectionHelpers.setStaticField(ConnectivityMonitor::class.java, "instance", null)
 
         val started = org.robolectric.Shadows.shadowOf(activity).nextStartedActivity
         assertEquals(
