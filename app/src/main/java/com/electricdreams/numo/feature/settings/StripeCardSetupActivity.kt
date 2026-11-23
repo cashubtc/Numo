@@ -215,9 +215,19 @@ class StripeCardSetupActivity : AppCompatActivity() {
         binding.stripeKeyLayout.setEndIconOnClickListener { paste(binding.stripeKeyInput) }
         binding.stripeKeyInput.doAfterTextChanged { binding.stripeKeyLayout.error = null }
         binding.stripeKeyInput.setOnEditorActionListener(submitOnAction)
-        settings.maskedKey()?.let { masked ->
-            binding.stripeKeyLayout.helperText = getString(R.string.stripe_card_key_current, masked)
-        }
+        showCurrentKey(settings.maskedKey())
+    }
+
+    /**
+     * Shows the stored key, masked, where a typed key would be. It is a placeholder, so the real
+     * key never enters the field and typing or pasting replaces it at once.
+     */
+    internal fun showCurrentKey(masked: String?) {
+        val layout = binding.stripeKeyLayout
+        // The label stays on the outline, or it would cover the placeholder until focus.
+        layout.isExpandedHintEnabled = masked == null
+        layout.placeholderText = masked
+        layout.helperText = masked?.let { getString(R.string.stripe_card_key_replace_hint) }
     }
 
     private fun submitKey() {

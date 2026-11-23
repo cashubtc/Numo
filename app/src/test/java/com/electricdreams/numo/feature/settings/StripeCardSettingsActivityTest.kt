@@ -24,7 +24,7 @@ class StripeCardSettingsActivityTest {
                     activity.findViewById<View>(R.id.test_mode_banner).visibility,
                 )
                 assertEquals(
-                    "This phone can't take cards",
+                    "This device can't take cards",
                     activity.findViewById<TextView>(R.id.status_headline).text.toString(),
                 )
                 assertEquals(View.GONE, activity.findViewById<View>(R.id.intro_container).visibility)
