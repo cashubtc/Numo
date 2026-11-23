@@ -129,7 +129,9 @@ download_release_apk() {
 install_zsp() {
     : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
     local version="0.3.4"
+    local nak_version="0.22.3"
     local zsp="$RUNNER_TEMP/zsp"
+    local nak="$RUNNER_TEMP/nak"
     curl --fail --location --retry 3 --silent --show-error \
         "https://github.com/zapstore/zsp/releases/download/v${version}/zsp-${version}-linux-amd64" \
         --output "$zsp"
@@ -137,6 +139,13 @@ install_zsp() {
         'f8240a54d08ad1d2c93f230b4e3af90f497a8be3b47bd06f3b52ac9995fb60d3' "$zsp" \
         | sha256sum --check
     chmod +x "$zsp"
+    curl --fail --location --retry 3 --silent --show-error \
+        "https://github.com/fiatjaf/nak/releases/download/v${nak_version}/nak-nodb-v${nak_version}-linux-amd64" \
+        --output "$nak"
+    printf '%s  %s\n' \
+        'a0d2b7be59572cddeb63f216fd5b0d4b63f73b4a0ae2216114ffc35a3e6c4b2b' "$nak" \
+        | sha256sum --check
+    chmod +x "$nak"
 }
 
 publish_zapstore() {
@@ -152,6 +161,7 @@ publish_zapstore() {
     local apk="app/build/outputs/apk/release/numo-${RELEASE_VERSION}-arm64-v8a.apk"
     local pkcs12="$RUNNER_TEMP/zapstore-release-key.p12"
     local zsp="$RUNNER_TEMP/zsp"
+    local nak="$RUNNER_TEMP/nak"
     local channel="main"
     local commit="${RELEASE_COMMIT:-$GITHUB_SHA}"
 
@@ -159,8 +169,8 @@ publish_zapstore() {
         echo "Zapstore APK not found: $apk" >&2
         exit 1
     fi
-    if [ ! -x "$zsp" ]; then
-        echo "zsp is not installed at $zsp" >&2
+    if [ ! -x "$zsp" ] || [ ! -x "$nak" ]; then
+        echo "Zapstore publishing tools are not installed in $RUNNER_TEMP" >&2
         exit 1
     fi
 
@@ -177,7 +187,8 @@ publish_zapstore() {
             -destalias "$KEY_ALIAS" -noprompt
     fi
 
-    "$zsp" identity --link-key "$pkcs12" --link-key-expiry 2y --no-color
+    "$zsp" identity --link-key "$pkcs12" --link-key-expiry 2y --offline --no-color \
+        | "$nak" event --github wss://relay.primal.net wss://relay.damus.io wss://relay.zapstore.dev
     if [ "$PRE_RELEASE" = true ]; then
         channel="beta"
     fi

@@ -126,7 +126,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash scripts/manual_release.sh download-release-apk
 
-      - name: Install zsp
+      - name: Install Zapstore publishing tools
         run: bash scripts/manual_release.sh install-zsp
 
       - name: Publish to Zapstore

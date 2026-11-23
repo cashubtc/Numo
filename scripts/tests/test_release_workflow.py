@@ -161,6 +161,7 @@ class ManualReleaseTest(unittest.TestCase):
         apk.write_bytes(b"signed arm64 apk")
         keytool_log = self.root / "keytool.jsonl"
         zsp_log = self.root / "zsp.jsonl"
+        nak_log = self.root / "nak.jsonl"
         fake_bin = self.root / "bin"
         fake_bin.mkdir()
         keytool = fake_bin / "keytool"
@@ -179,18 +180,29 @@ class ManualReleaseTest(unittest.TestCase):
             '#!/usr/bin/env python3\n'
             'import json, os, sys\n'
             'with open(os.environ["ZSP_LOG"], "a") as log:\n'
-            '    log.write(json.dumps(sys.argv[1:]) + "\\n")\n')
+            '    log.write(json.dumps(sys.argv[1:]) + "\\n")\n'
+            'if sys.argv[1] == "identity":\n'
+            '    print(\'{"kind":30509}\')\n')
         zsp.chmod(0o755)
+        nak = runner_temp / "nak"
+        nak.write_text(
+            '#!/usr/bin/env python3\n'
+            'import json, os, sys\n'
+            'payload = sys.stdin.read()\n'
+            'with open(os.environ["NAK_LOG"], "a") as log:\n'
+            '    log.write(json.dumps({"args": sys.argv[1:], "stdin": payload}) + "\\n")\n')
+        nak.chmod(0o755)
         self.environment.update(
             RUNNER_TEMP=str(runner_temp), GITHUB_SHA="abc123", SIGN_WITH="nsec1test",
             KEYSTORE_PASSWORD="store password", KEY_ALIAS="release", KEY_PASSWORD="key password",
-            KEYTOOL_LOG=str(keytool_log), ZSP_LOG=str(zsp_log),
+            KEYTOOL_LOG=str(keytool_log), ZSP_LOG=str(zsp_log), NAK_LOG=str(nak_log),
             PATH=f"{fake_bin}{os.pathsep}{os.environ['PATH']}")
 
         for pre_release, channel, fail_jks in (("false", "main", False), ("true", "beta", True)):
             with self.subTest(channel=channel, fail_jks=fail_jks):
                 keytool_log.write_text("")
                 zsp_log.write_text("")
+                nak_log.write_text("")
                 self.environment["PRE_RELEASE"] = pre_release
                 self.environment["FAIL_JKS"] = "1" if fail_jks else "0"
                 expected_commit = "tagcommit" if pre_release == "true" else "abc123"
@@ -205,10 +217,16 @@ class ManualReleaseTest(unittest.TestCase):
                 self.assertEqual(["JKS", "PKCS12"] if fail_jks else ["JKS"], source_types)
                 self.assertEqual([
                     ["identity", "--link-key", str(runner_temp / "zapstore-release-key.p12"),
-                     "--link-key-expiry", "2y", "--no-color"],
+                     "--link-key-expiry", "2y", "--offline", "--no-color"],
                     ["publish", "--quiet", "--skip-preview", "--no-color", "--commit", expected_commit,
                      "--channel", channel, "release/zapstore.yaml"],
                 ], [json.loads(line) for line in zsp_log.read_text().splitlines()])
+                nak_call = json.loads(nak_log.read_text())
+                self.assertEqual([
+                    "event", "--github", "wss://relay.primal.net", "wss://relay.damus.io",
+                    "wss://relay.zapstore.dev",
+                ], nak_call["args"])
+                self.assertEqual('{"kind":30509}\n', nak_call["stdin"])
                 self.assertNotIn("nsec1test", result.stdout + result.stderr)
 
     def test_manifest_uses_the_channel_latest_tools_signing_path_and_literal_notes(self):
