@@ -1,0 +1,21 @@
+repository: https://github.com/cashubtc/numo
+release_source: ../app/build/outputs/apk/release/numo-*-arm64-v8a.apk
+description: Numo is an Android Point-of-Sale application that enables merchants to receive Cashu ecash payments via tap-2-pay.
+summary: The Bitcoin PoS
+tags:
+    - bitcoin
+    - pos
+    - cashu
+    - payments
+    - PoS
+    - money
+license: MIT
+website: https://numopay.org
+images:
+    - ./images/1.jpg
+    - ./images/2.jpg
+    - ./images/3.jpg
+    - ./images/4.jpg
+    - ./images/5.jpg
+metadata_sources:
+    - github

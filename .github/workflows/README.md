@@ -10,6 +10,7 @@ Before using this workflow, you need to set up the following GitHub secrets:
 2. `KEYSTORE_PASSWORD`: The password for your keystore
 3. `KEY_ALIAS`: The alias of the key in your keystore
 4. `KEY_PASSWORD`: The password for your key
+5. `ZAPSTORE_NSEC`: The Nostr private key (`nsec1...`) used to sign the Zapstore identity link and release events
 
 ## How to Encode Your Keystore as Base64
 
@@ -48,6 +49,20 @@ The workflow will create:
 - A signed APK file
 - An Android App Bundle (AAB) for Google Play Store
 - A GitHub release with these files attached
+- A Zapstore identity link for the APK signing certificate and a published Zapstore release
+
+The Zapstore publication uses `release/zapstore.yaml` and publishes the ARM64 APK to the `main`
+channel (or `beta` for pre-releases). It then links the release signing certificate to the
+configured Nostr identity, as Zapstore requires an unlisted app's first release to precede its
+identity proof. A rejected release or identity proof fails the workflow.
+
+## Publishing an Existing Release Only to Zapstore
+
+To publish an APK that is already attached to a GitHub release, enable **Only publish an existing
+GitHub release to Zapstore** when running the workflow. Enter the existing version and version code
+as usual. The workflow skips the build, bundle, update manifest, and GitHub release draft steps;
+it downloads the release's ARM64 APK and performs only the identity link and Zapstore publication.
+Set **Is this a pre-release?** to match the existing release's Zapstore channel.
 
 ## Troubleshooting
 

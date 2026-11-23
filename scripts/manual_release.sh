@@ -113,8 +113,102 @@ create_manifest() {
         --output app/build/outputs/apk/release/update.json
 }
 
+download_release_apk() {
+    : "${RELEASE_VERSION:?RELEASE_VERSION is required}"
+    : "${GH_TOKEN:?GH_TOKEN is required}"
+    : "${GITHUB_ENV:?GITHUB_ENV is required}"
+    local apk_dir="app/build/outputs/apk/release"
+    local filename="numo-${RELEASE_VERSION}-arm64-v8a.apk"
+    local commit
+    mkdir -p -- "$apk_dir"
+    gh release download "$RELEASE_VERSION" --pattern "$filename" --dir "$apk_dir" --clobber
+    commit=$(git rev-list -n 1 "$RELEASE_VERSION" --)
+    printf 'RELEASE_COMMIT=%s\n' "$commit" >> "$GITHUB_ENV"
+}
+
+install_zsp() {
+    : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
+    local version="0.4.17"
+    local nak_version="0.22.3"
+    local zsp="$RUNNER_TEMP/zsp"
+    local nak="$RUNNER_TEMP/nak"
+    curl --fail --location --retry 3 --silent --show-error \
+        "https://github.com/zapstore/zsp/releases/download/v${version}/zsp-${version}-linux-amd64" \
+        --output "$zsp"
+    printf '%s  %s\n' \
+        '3f241da6a5dc7a85fe851d3b42b77790b651bd36c7029382a701262bda832d20' "$zsp" \
+        | sha256sum --check
+    chmod +x "$zsp"
+    curl --fail --location --retry 3 --silent --show-error \
+        "https://github.com/fiatjaf/nak/releases/download/v${nak_version}/nak-nodb-v${nak_version}-linux-amd64" \
+        --output "$nak"
+    printf '%s  %s\n' \
+        'a0d2b7be59572cddeb63f216fd5b0d4b63f73b4a0ae2216114ffc35a3e6c4b2b' "$nak" \
+        | sha256sum --check
+    chmod +x "$nak"
+}
+
+publish_zapstore() {
+    : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
+    : "${RELEASE_VERSION:?RELEASE_VERSION is required}"
+    : "${KEYSTORE_PATH:?KEYSTORE_PATH is required}"
+    : "${KEYSTORE_PASSWORD:?KEYSTORE_PASSWORD is required}"
+    : "${KEY_ALIAS:?KEY_ALIAS is required}"
+    : "${KEY_PASSWORD:?KEY_PASSWORD is required}"
+    : "${SIGN_WITH:?SIGN_WITH is required}"
+    : "${GITHUB_SHA:?GITHUB_SHA is required}"
+    : "${PRE_RELEASE:?PRE_RELEASE is required}"
+    local apk="app/build/outputs/apk/release/numo-${RELEASE_VERSION}-arm64-v8a.apk"
+    local pkcs12="$RUNNER_TEMP/zapstore-release-key.p12"
+    local proof="$RUNNER_TEMP/zapstore-identity-proof.json"
+    local zsp="$RUNNER_TEMP/zsp"
+    local nak="$RUNNER_TEMP/nak"
+    local channel="main"
+    local commit="${RELEASE_COMMIT:-$GITHUB_SHA}"
+
+    if [ ! -f "$apk" ]; then
+        echo "Zapstore APK not found: $apk" >&2
+        exit 1
+    fi
+    if [ ! -x "$zsp" ] || [ ! -x "$nak" ]; then
+        echo "Zapstore publishing tools are not installed in $RUNNER_TEMP" >&2
+        exit 1
+    fi
+
+    if ! keytool -importkeystore -srckeystore "$KEYSTORE_PATH" -srcstoretype JKS \
+        -srcstorepass "$KEYSTORE_PASSWORD" -srckeypass "$KEY_PASSWORD" \
+        -srcalias "$KEY_ALIAS" -destkeystore "$pkcs12" -deststoretype PKCS12 \
+        -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" \
+        -destalias "$KEY_ALIAS" -noprompt; then
+        rm -f -- "$pkcs12"
+        keytool -importkeystore -srckeystore "$KEYSTORE_PATH" -srcstoretype PKCS12 \
+            -srcstorepass "$KEYSTORE_PASSWORD" -srckeypass "$KEY_PASSWORD" \
+            -srcalias "$KEY_ALIAS" -destkeystore "$pkcs12" -deststoretype PKCS12 \
+            -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" \
+            -destalias "$KEY_ALIAS" -noprompt
+    fi
+
+    if [ "$PRE_RELEASE" = true ]; then
+        channel="beta"
+    fi
+    "$zsp" publish --quiet --skip-preview --skip-certificate-linking --overwrite-release \
+        --no-color --commit "$commit" --channel "$channel" release/zapstore.yaml
+    "$zsp" identity --link-key "$pkcs12" --link-key-expiry 2y --offline --no-color \
+        > "$proof"
+    python3 - "$proof" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as proof_file:
+    proof = json.load(proof_file)
+if proof.get("kind") != 30509 or not proof.get("sig"):
+    raise SystemExit("Invalid Zapstore identity proof")
+PY
+    "$nak" event wss://relay.zapstore.dev < "$proof"
+}
+
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <decode-keystore|configure-signing|enable-debug-symbols|build-apk|build-bundle|rename-artifacts|create-manifest>" >&2
+    echo "Usage: $0 <decode-keystore|configure-signing|enable-debug-symbols|build-apk|build-bundle|rename-artifacts|create-manifest|download-release-apk|install-zsp|publish-zapstore>" >&2
     exit 1
 fi
 
@@ -126,6 +220,9 @@ case "$1" in
     build-bundle) build_release bundlePlay ;;
     rename-artifacts) rename_artifacts ;;
     create-manifest) create_manifest ;;
+    download-release-apk) download_release_apk ;;
+    install-zsp) install_zsp ;;
+    publish-zapstore) publish_zapstore ;;
     *)
         echo "Unknown release command: $1" >&2
         exit 1

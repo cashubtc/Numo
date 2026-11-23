@@ -21,6 +21,11 @@ on:
         required: false
         default: 'false'
         type: boolean
+      zapstore_only:
+        description: 'Only publish an existing GitHub release to Zapstore'
+        required: false
+        default: 'false'
+        type: boolean
 
 # Add explicit permissions for the GITHUB_TOKEN
 permissions:
@@ -57,15 +62,17 @@ jobs:
 
       # Update app/build.gradle.kts with the signing configuration
       - name: Set up signing configuration
+        if: ${{ !inputs.zapstore_only }}
         run: bash scripts/manual_release.sh configure-signing
 
       # Enable native debug symbols for pre-releases
       - name: Enable debug symbols for pre-release
-        if: ${{ github.event.inputs.pre_release == 'true' }}
+        if: ${{ !inputs.zapstore_only && github.event.inputs.pre_release == 'true' }}
         run: bash scripts/manual_release.sh enable-debug-symbols
 
       # Build signed APK with release profile
       - name: Build Release APK
+        if: ${{ !inputs.zapstore_only }}
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -74,6 +81,7 @@ jobs:
 
       # Also build an Android App Bundle
       - name: Build Release Bundle (AAB)
+        if: ${{ !inputs.zapstore_only }}
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -82,9 +90,11 @@ jobs:
 
       # Rename output artifacts to include numo and the version
       - name: Rename artifacts with numo and version
+        if: ${{ !inputs.zapstore_only }}
         run: bash scripts/manual_release.sh rename-artifacts
 
       - name: Create signed update manifest
+        if: ${{ !inputs.zapstore_only }}
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -94,6 +104,7 @@ jobs:
 
       # Create a GitHub release draft with the signed APK and Bundle
       - name: Create Release Draft
+        if: ${{ !inputs.zapstore_only }}
         id: create_release
         uses: softprops/action-gh-release@v3
         with:
@@ -108,3 +119,22 @@ jobs:
             app/build/outputs/bundle/play/numo-${{ github.event.inputs.version }}.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download existing release APK
+        if: ${{ inputs.zapstore_only }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/manual_release.sh download-release-apk
+
+      - name: Install Zapstore publishing tools
+        run: bash scripts/manual_release.sh install-zsp
+
+      - name: Publish to Zapstore
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SIGN_WITH: ${{ secrets.ZAPSTORE_NSEC }}
+          PRE_RELEASE: ${{ inputs.pre_release }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/manual_release.sh publish-zapstore
