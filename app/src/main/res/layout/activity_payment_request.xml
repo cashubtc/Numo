@@ -353,7 +353,7 @@
         app:layout_constraintTop_toBottomOf="@id/icons_container" />
 
 
-    <!-- Lightning / Cashu / Unified Switcher (tabs-style) now at the bottom -->
+    <!-- Bitcoin (unified Cashu + Lightning) / Card switcher at the bottom -->
     <LinearLayout
         android:id="@+id/lightning_cashu_switch_container"
         android:layout_width="wrap_content"
@@ -382,7 +382,7 @@
                 android:id="@+id/unified_tab_icon"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:text="U"
+                android:text="₿"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:gravity="center"
@@ -408,7 +408,8 @@
             android:gravity="center"
             android:paddingHorizontal="@dimen/row_padding_vertical"
             android:orientation="horizontal"
-            android:background="@android:color/transparent">
+            android:background="@android:color/transparent"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/cashu_tab_icon"
@@ -438,7 +439,8 @@
             android:gravity="center"
             android:paddingHorizontal="@dimen/row_padding_vertical"
             android:orientation="horizontal"
-            android:background="@android:color/transparent">
+            android:background="@android:color/transparent"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/lightning_tab_icon"

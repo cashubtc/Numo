@@ -10,9 +10,9 @@ import android.widget.TextView
 import com.electricdreams.numo.R
 
 /**
- * Manages the payment method tab UI (Unified vs Cashu vs Lightning, plus optional Card).
+ * Manages the Bitcoin (unified Cashu + Lightning) and optional Card checkout tabs.
  *
- * Handles visual state switching between tabs and visibility of QR containers.
+ * Legacy Cashu/Lightning-only tabs remain as layout inputs but are hidden and cannot be selected.
  */
 class PaymentTabManager(
     private val unifiedTab: LinearLayout,
@@ -78,90 +78,45 @@ class PaymentTabManager(
             enableTransitionType(LayoutTransition.CHANGING)
         }
         
-        // Setup long click listeners to change default payment method
-        unifiedTab.setOnLongClickListener {
-            setDefaultTab(PaymentTab.UNIFIED)
-            true
-        }
-        cashuTab.setOnLongClickListener {
-            setDefaultTab(PaymentTab.CASHU)
-            true
-        }
-        lightningTab.setOnLongClickListener {
-            setDefaultTab(PaymentTab.LIGHTNING)
-            true
-        }
-        
-        // Reorder tabs based on default payment method
+        cashuTab.visibility = View.GONE
+        lightningTab.visibility = View.GONE
+        cashuTab.setOnClickListener(null)
+        lightningTab.setOnClickListener(null)
+
         reorderTabs()
 
-        // Default: show the default payment method
-        selectTab(DefaultPaymentMethodManager.getInstance(unifiedTab.context).getDefaultPaymentMethod())
+        // Bitcoin uses the unified Cashu + Lightning request and is always the initial method.
+        selectTab(PaymentTab.UNIFIED)
 
         unifiedTab.setOnClickListener { selectTab(PaymentTab.UNIFIED) }
-        cashuTab.setOnClickListener { selectTab(PaymentTab.CASHU) }
-        lightningTab.setOnClickListener { selectTab(PaymentTab.LIGHTNING) }
         cardTab?.setOnClickListener { selectTab(PaymentTab.CARD) }
     }
 
-    /** Shows or hides the Card tab. Hiding it while selected falls back to the default tab. */
+    /** Shows or hides the Card tab. Hiding it while selected falls back to Bitcoin. */
     fun setCardTabAvailable(available: Boolean) {
         val tab = cardTab ?: return
         tab.visibility = if (available) View.VISIBLE else View.GONE
         if (!available && currentTab == PaymentTab.CARD) {
-            val fallback = DefaultPaymentMethodManager.getInstance(unifiedTab.context)
-                .getDefaultPaymentMethod()
-            selectTab(if (fallback == PaymentTab.CARD) PaymentTab.UNIFIED else fallback)
+            selectTab(PaymentTab.UNIFIED)
         }
     }
-    
-    private fun setDefaultTab(tab: PaymentTab) {
-        DefaultPaymentMethodManager.getInstance(unifiedTab.context).setDefaultPaymentMethod(tab)
-        reorderTabs()
-        selectTab(tab)
-        android.widget.Toast.makeText(
-            unifiedTab.context, 
-            unifiedTab.context.getString(com.electricdreams.numo.R.string.payment_request_default_method_set, tab.name.lowercase().replaceFirstChar { it.uppercase() }), 
-            android.widget.Toast.LENGTH_SHORT
-        ).show()
-    }
-    
+
     fun reorderTabs() {
         val container = unifiedTab.parent as? ViewGroup ?: return
-        val defaultTab = DefaultPaymentMethodManager.getInstance(unifiedTab.context).getDefaultPaymentMethod()
-        
         container.removeView(unifiedTab)
         container.removeView(cashuTab)
         container.removeView(lightningTab)
         cardTab?.let { container.removeView(it) }
-        
-        when (defaultTab) {
-            PaymentTab.UNIFIED -> {
-                container.addView(unifiedTab)
-                container.addView(cashuTab)
-                container.addView(lightningTab)
-            }
-            PaymentTab.CASHU -> {
-                container.addView(cashuTab)
-                container.addView(unifiedTab)
-                container.addView(lightningTab)
-            }
-            PaymentTab.LIGHTNING -> {
-                container.addView(lightningTab)
-                container.addView(unifiedTab)
-                container.addView(cashuTab)
-            }
-            PaymentTab.CARD -> {
-                container.addView(unifiedTab)
-                container.addView(cashuTab)
-                container.addView(lightningTab)
-            }
-        }
-        // Card is always last: it is an alternative to the bitcoin methods, not a default.
+
+        container.addView(unifiedTab)
         cardTab?.let { container.addView(it) }
     }
 
     fun selectTab(tab: PaymentTab) {
+        if (tab == PaymentTab.CASHU || tab == PaymentTab.LIGHTNING) {
+            selectTab(PaymentTab.UNIFIED)
+            return
+        }
         if (currentTab == tab) return
         currentTab = tab
 
@@ -243,15 +198,15 @@ class PaymentTabManager(
     fun getCurrentTab(): PaymentTab = currentTab ?: PaymentTab.UNIFIED
 
     /**
-     * Disable a tab (e.g. when BTCPay returns no cashuPR, disable [Tab.CASHU]).
-     * Greys it out, removes its click listener, and auto-selects the other tab.
+     * Disable a legacy tab (e.g. when BTCPay returns no cashuPR, disable [Tab.CASHU]).
+     * Greys it out, removes its click listener, and selects the unified Bitcoin tab.
      */
     fun disableTab(tab: Tab) {
         val view = if (tab == Tab.CASHU) cashuTab else lightningTab
         view.isEnabled = false
         view.alpha = 0.35f
         view.setOnClickListener(null)
-        if (tab == Tab.CASHU) selectTab(PaymentTab.LIGHTNING) else selectTab(PaymentTab.CASHU)
+        selectTab(PaymentTab.UNIFIED)
     }
 
     /**

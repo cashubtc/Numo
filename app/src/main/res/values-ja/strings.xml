@@ -885,7 +885,7 @@
     <string name="pin_reset_recovery_phrase">リカバリーフレーズ</string>
     <string name="pin_reset_paste_clipboard">クリップボードから貼り付け</string>
     <string name="pin_reset_button">PINのリセット</string>
-    <string name="payment_request_tab_unified">統合された</string>
+    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">%1$d の支払い</string>
     <string name="payment_request_lightning_description">%1$d 衛星の Numo POS 支払い</string>
     <string name="onboarding_status_generating_seed">シードフレーズを生成しています…</string>
