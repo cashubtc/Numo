@@ -80,7 +80,7 @@ class TransactionDetailActivityTest {
             scenario.onActivity { activity ->
                 assertEquals("$8.50", activity.findViewById<TextView>(R.id.detail_amount).text.toString())
                 assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.row_tip).visibility)
-                assertEquals("$0.80 · 12%", activity.findViewById<TextView>(R.id.detail_tip).text.toString())
+                assertEquals("$0.80 (12%)", activity.findViewById<TextView>(R.id.detail_tip).text.toString())
             }
         }
     }

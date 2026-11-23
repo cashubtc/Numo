@@ -203,7 +203,7 @@
     <string name="mint_discovery_no_matches">No mints match your search.</string>
     <string name="mint_discovery_empty">No mint recommendations were found. Check your connection and try again.</string>
     <string name="mint_discovery_retry">Try again</string>
-    <string name="mint_discovery_rating">★ %1$s · %2$d recommendations</string>
+    <string name="mint_discovery_rating">★ %1$s (%2$d recommendations)</string>
     <string name="mint_discovery_announced">Announced on Nostr</string>
     <string name="mint_discovery_select">Select mint</string>
     <plurals name="mint_discovery_count">
@@ -668,7 +668,7 @@
     <string name="saved_baskets_empty_icon">No saved baskets</string>
     <string name="saved_baskets_empty_title">No saved baskets</string>
     <string name="saved_baskets_empty_subtitle">Save a basket to keep it open for later.\nPerfect for tabs or restaurant tables.</string>
-    <string name="saved_baskets_meta_format">%1$s • %2$s</string>
+    <string name="saved_baskets_meta_format">%1$s, %2$s</string>
     <string name="saved_baskets_action_rename">Rename</string>
     <string name="saved_baskets_action_delete">Delete</string>
     <string name="saved_baskets_rename_title">Rename Basket</string>
@@ -766,8 +766,8 @@
     <string name="auto_withdraw_threshold_subtitle">Trigger when balance exceeds</string>
     <string name="auto_withdraw_threshold_label">Threshold</string>
     <string name="auto_withdraw_threshold_hint">Trigger withdrawal when balance reaches this amount</string>
-    <string name="auto_withdraw_threshold_helper">Min: ₿1,000 • Max: ₿1,000,000</string>
-    <string name="auto_withdraw_threshold_helper_dynamic">Min: %1$s • Max: ₿1,000,000</string>
+    <string name="auto_withdraw_threshold_helper">Min: ₿1,000 – Max: ₿1,000,000</string>
+    <string name="auto_withdraw_threshold_helper_dynamic">Min: %1$s – Max: ₿1,000,000</string>
     
     <string name="auto_withdraw_percentage_title">Withdraw Amount</string>
     <string name="auto_withdraw_percentage_subtitle">Percentage of balance to send</string>
@@ -962,7 +962,7 @@
     <string name="pin_setup_continue">Continue</string>
     <string name="pin_setup_back">Back</string>
     <string name="pin_setup_enter_at_least">Enter at least %d digits</string>
-    <string name="pin_setup_more_needed">%1$d digit%2$s · %3$d more needed</string>
+    <string name="pin_setup_more_needed">%1$d digit%2$s, %3$d more needed</string>
     <string name="pin_setup_set_pin">Set PIN</string>
 
     <!-- PIN Entry Screen -->
@@ -1025,7 +1025,7 @@
     <string name="insights_quick_charge">Quick charge</string>
     <string name="insights_items_count_one">1 item</string>
     <string name="insights_items_count_other">%1$d items</string>
-    <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d more</string>
+    <string name="insights_items_lead_with_more">%1$s: %2$s +%3$d more</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
     <string name="insights_empty_day">No sales on %1$s</string>
     <plurals name="insights_sales_count">
@@ -1033,7 +1033,7 @@
         <item quantity="other">%d sales</item>
     </plurals>
     <string name="insights_tips_amount">%1$s in tips</string>
-    <string name="insights_sales_and_tips" translatable="false">%1$s · %2$s</string>
+    <string name="insights_sales_and_tips" translatable="false">%1$s, %2$s</string>
     <string name="insights_empty_title">No sales yet</string>
     <string name="insights_empty_subtitle">Every sale shows up here, with what sold and when.</string>
     <string name="insights_show_me_in">Display in</string>

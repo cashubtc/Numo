@@ -29,7 +29,6 @@ import com.electricdreams.numo.feature.pin.PinProtectionHelper
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
 import com.electricdreams.numo.payment.DefaultPaymentMethodManager
 import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
-import com.electricdreams.numo.payment.card.StripeCardSettings
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.components.SettingsRowView
 import com.electricdreams.numo.util.startActivityForResultCompat
@@ -90,11 +89,10 @@ class SettingsActivity : AppCompatActivity() {
         binding.btcpaySettingsItem.setSubtitle(getString(
             if (btcPayEnabled) R.string.settings_btcpay_enabled else R.string.settings_btcpay_disabled
         ))
-        binding.stripeCardSettingsItem.setSubtitle(getString(when {
-            !StripeTerminalManager.isDeviceSupported(this) -> R.string.settings_stripe_card_unsupported
-            StripeCardSettings.getInstance(this).isReady() -> R.string.settings_stripe_card_enabled
-            else -> R.string.settings_stripe_card_disabled
-        }))
+        binding.stripeCardSettingsItem.setSubtitle(getString(
+            if (StripeTerminalManager.isDeviceSupported(this)) R.string.settings_stripe_card_subtitle
+            else R.string.settings_stripe_card_unsupported
+        ))
         updateAvailability(binding.mintsSettingsItem, !btcPayEnabled,
             R.string.settings_item_mints_subtitle, R.string.settings_unavailable_btcpay)
         updateAvailability(binding.withdrawalsSettingsItem, !btcPayEnabled,

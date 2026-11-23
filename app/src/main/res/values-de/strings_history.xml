@@ -81,7 +81,7 @@
     <string name="history_filter_date_range_format">%1$s – %2$s</string>
     <string name="history_filter_date_picker_title">Zeitraum auswählen</string>
     <string name="history_filter_button">Filter</string>
-    <string name="history_filter_button_count">Filter · %1$d</string>
+    <string name="history_filter_button_count">Filter (%1$d)</string>
     <string name="history_filter_reset">Zurücksetzen</string>
     <string name="history_filter_status">Status</string>
     <string name="history_filter_date">Datum</string>

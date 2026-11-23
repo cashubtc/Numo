@@ -84,7 +84,7 @@
     <string name="history_filter_date_range_format">%1$s – %2$s</string>
     <string name="history_filter_date_picker_title">Seleccionar rango</string>
     <string name="history_filter_button">Filtrar</string>
-    <string name="history_filter_button_count">Filtrar · %1$d</string>
+    <string name="history_filter_button_count">Filtrar (%1$d)</string>
     <string name="history_filter_reset">Restablecer</string>
     <string name="history_filter_status">Estado</string>
     <string name="history_filter_date">Fecha</string>

@@ -51,6 +51,14 @@ class StripeCardSettings(
         get() = prefs.getBoolean(KEY_ENABLED, false)
         set(value) = prefs.putBoolean(KEY_ENABLED, value)
 
+    /**
+     * True once a full setup check has passed for the stored key and location. Setups enabled
+     * before the check existed count as passed.
+     */
+    var hasPassedCheck: Boolean
+        get() = prefs.getBoolean(KEY_CHECK_PASSED, false) || isEnabled
+        set(value) = prefs.putBoolean(KEY_CHECK_PASSED, value)
+
     /** Returns the stored configuration, or null when it is incomplete or cannot be decrypted. */
     fun loadConfig(): StripeCardConfig? {
         val encryptedKey = prefs.getString(KEY_RESTRICTED_KEY) ?: return null
@@ -64,7 +72,52 @@ class StripeCardSettings(
     /** Location ID shown in settings; it is not secret. */
     fun storedLocationId(): String = prefs.getString(KEY_LOCATION_ID) ?: ""
 
+    /** Name the merchant gave the location at Stripe, when it was picked or created in Numo. */
+    fun storedLocationName(): String? = prefs.getString(KEY_LOCATION_NAME)?.takeIf { it.isNotBlank() }
+
     fun hasStoredKey(): Boolean = prefs.getString(KEY_RESTRICTED_KEY) != null
+
+    /** The stored key, or null when there is none or it cannot be decrypted. */
+    fun storedKey(): String? {
+        val encryptedKey = prefs.getString(KEY_RESTRICTED_KEY) ?: return null
+        return cipher.decrypt(encryptedKey)?.takeIf(StripeCardConfig::isValidRestrictedKey)
+    }
+
+    /** True for a sandbox key, false for a live key, null when no key is stored. */
+    fun isTestMode(): Boolean? = storedKey()?.startsWith(StripeCardConfig.TEST_KEY_PREFIX)
+
+    /** The stored key with its secret part hidden, e.g. "rk_test_…dtS3". */
+    fun maskedKey(): String? = storedKey()?.let(::maskKey)
+
+    /**
+     * Stores the key by itself, before a location is chosen during setup.
+     *
+     * @return false when the key is not a restricted key or could not be encrypted.
+     */
+    fun saveKey(restrictedKey: String): Boolean {
+        val key = restrictedKey.trim()
+        if (!StripeCardConfig.isValidRestrictedKey(key)) return false
+        val encrypted = cipher.encrypt(key) ?: return false
+        if (key != storedKey()) requireNewCheck()
+        prefs.putString(KEY_RESTRICTED_KEY, encrypted)
+        return true
+    }
+
+    /** Stores the chosen location; [name] is null when only the ID is known. */
+    fun saveLocation(locationId: String, name: String?) {
+        if (locationId.trim() != storedLocationId()) requireNewCheck()
+        prefs.commitStrings(
+            mapOf(
+                KEY_LOCATION_ID to locationId.trim(),
+                KEY_LOCATION_NAME to name?.trim()?.takeIf { it.isNotEmpty() },
+            )
+        )
+    }
+
+    /** Remembers the name Stripe has for the stored location, once it has been looked up. */
+    fun saveLocationName(name: String) {
+        name.trim().takeIf { it.isNotEmpty() }?.let { prefs.putString(KEY_LOCATION_NAME, it) }
+    }
 
     /** @return false when the key could not be encrypted, in which case nothing is stored. */
     fun saveConfig(config: StripeCardConfig): Boolean {
@@ -78,14 +131,18 @@ class StripeCardSettings(
         return true
     }
 
-    fun saveLocationId(locationId: String) {
-        prefs.putString(KEY_LOCATION_ID, locationId.trim())
+    /** A changed key or location is unproven, so card payments stay off until a check passes. */
+    private fun requireNewCheck() {
+        prefs.putBoolean(KEY_ENABLED, false)
+        prefs.putBoolean(KEY_CHECK_PASSED, false)
     }
 
     fun clear() {
         prefs.remove(KEY_RESTRICTED_KEY)
         prefs.remove(KEY_LOCATION_ID)
+        prefs.remove(KEY_LOCATION_NAME)
         prefs.putBoolean(KEY_ENABLED, false)
+        prefs.putBoolean(KEY_CHECK_PASSED, false)
     }
 
     /** Card payments are offered only when enabled and fully configured. */
@@ -95,6 +152,20 @@ class StripeCardSettings(
         private const val KEY_ENABLED = "stripe_card_enabled"
         private const val KEY_RESTRICTED_KEY = "stripe_card_restricted_key"
         private const val KEY_LOCATION_ID = "stripe_card_location_id"
+        private const val KEY_LOCATION_NAME = "stripe_card_location_name"
+        private const val KEY_CHECK_PASSED = "stripe_card_check_passed"
+        private const val MASK_VISIBLE_SUFFIX = 4
+
+        /** Keeps the mode prefix and the last few characters, which is enough to recognise a key. */
+        fun maskKey(key: String): String {
+            val trimmed = key.trim()
+            val prefix = listOf(StripeCardConfig.LIVE_KEY_PREFIX, StripeCardConfig.TEST_KEY_PREFIX)
+                .firstOrNull(trimmed::startsWith)
+                .orEmpty()
+            val secret = trimmed.removePrefix(prefix)
+            val suffix = if (secret.length > MASK_VISIBLE_SUFFIX * 2) secret.takeLast(MASK_VISIBLE_SUFFIX) else ""
+            return "$prefix…$suffix"
+        }
         private const val KEYSTORE_ALIAS = "numo_stripe_card_key"
 
         fun getInstance(context: Context): StripeCardSettings = StripeCardSettings(

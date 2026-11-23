@@ -550,7 +550,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             }
 
             // Relative timestamp
-            val dateFormat = SimpleDateFormat("MMM d • HH:mm", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
             holder.timestampText.text = dateFormat.format(Date(entry.timestamp))
 
             // Status styling

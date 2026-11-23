@@ -151,7 +151,7 @@ class InsightsActivity : AppCompatActivity(), InsightsOptionsSheet.Host {
         EmptyStateHelper.bind(binding.emptyView.root, R.drawable.ic_receipt, title, description)
     }
 
-    /** "12 sales", then "· $4.50 in tips" when any were added. Tips never count as sales. */
+    /** "12 sales", then ", $4.50 in tips" when any were added. Tips never count as sales. */
     private fun renderSecondary(count: Int, tipSats: Long, tipFiatMinor: Long, fiat: Amount.Currency) {
         val sales = resources.getQuantityString(R.plurals.insights_sales_count, count, count)
         val hasTips = tipSats > 0 || tipFiatMinor > 0

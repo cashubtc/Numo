@@ -10,7 +10,7 @@
     <string name="basket_receipt_items_header_single">1 항목</string>
     <string name="basket_receipt_tip_label_with_percentage">팁 (%1$d%%)</string>
     <string name="basket_receipt_equivalent_label">상당</string>
-    <string name="basket_receipt_total_subtitle_with_vat">%1$s • VAT %2$s 포함</string>
+    <string name="basket_receipt_total_subtitle_with_vat">%1$s, VAT %2$s 포함</string>
     <string name="basket_receipt_vat_row_label">VAT (%1$d%%)</string>
     <string name="basket_receipt_subtotal_label">소계 (VAT 제외)</string>
     <string name="basket_receipt_items_header_multiple">%1$d 항목</string>

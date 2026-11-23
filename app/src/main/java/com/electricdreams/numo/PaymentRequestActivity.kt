@@ -1298,7 +1298,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         "Cashu".takeIf { nostrHandler?.paymentRequestBech32 != null || hcePaymentRequest != null },
         "Lightning".takeIf { lightningInvoice != null },
         getString(R.string.payment_request_arkoor).takeIf { arkoorAddress != null },
-    ).joinToString(" · ")
+    ).joinToString(", ")
 
     private fun updateUnifiedQrCode() {
         if (hasTerminalOutcome) return

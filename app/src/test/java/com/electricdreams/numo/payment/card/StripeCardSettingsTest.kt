@@ -103,6 +103,61 @@ class StripeCardSettingsTest {
         assertNull(settings.loadConfig())
         assertFalse(settings.isEnabled)
         assertFalse(settings.hasStoredKey())
+        assertFalse(settings.hasPassedCheck)
+        assertNull(settings.storedLocationName())
+    }
+
+    @Test
+    fun `the key can be saved before a location is chosen`() {
+        assertTrue(settings.saveKey(" rk_test_secretvalue1234 "))
+
+        assertEquals("rk_test_secretvalue1234", settings.storedKey())
+        assertNull(settings.loadConfig())
+        assertEquals(true, settings.isTestMode())
+        assertFalse(settings.saveKey("sk_test_secretvalue1234"))
+
+        settings.saveLocation(" tml_shop ", " Corner shop ")
+
+        assertEquals(StripeCardConfig("rk_test_secretvalue1234", "tml_shop"), settings.loadConfig())
+        assertEquals("Corner shop", settings.storedLocationName())
+    }
+
+    @Test
+    fun `the masked key shows the mode and the last characters only`() {
+        settings.saveKey("rk_live_51AbCdEfGhIjKlMnOpdtS3")
+
+        assertEquals("rk_live_…dtS3", settings.maskedKey())
+        assertEquals("rk_test_…", StripeCardSettings.maskKey("rk_test_short"))
+        assertEquals(false, settings.isTestMode())
+    }
+
+    @Test
+    fun `changing the key or location turns card payments off until a check passes`() {
+        settings.saveKey("rk_test_secretvalue1234")
+        settings.saveLocation("tml_shop", "Corner shop")
+        settings.hasPassedCheck = true
+        settings.isEnabled = true
+
+        settings.saveKey("rk_test_secretvalue1234")
+        settings.saveLocation("tml_shop", "Corner shop renamed")
+        assertTrue("saving the same values keeps card payments on", settings.isEnabled)
+
+        settings.saveLocation("tml_other", null)
+        assertFalse(settings.isEnabled)
+        assertFalse(settings.hasPassedCheck)
+        assertNull(settings.storedLocationName())
+
+        settings.hasPassedCheck = true
+        settings.saveKey("rk_test_anotherkey5678")
+        assertFalse(settings.hasPassedCheck)
+    }
+
+    @Test
+    fun `a setup enabled before the check existed counts as checked`() {
+        settings.saveConfig(StripeCardConfig("rk_test_secretvalue", "tml_shop"))
+        settings.isEnabled = true
+
+        assertTrue(settings.hasPassedCheck)
     }
 
     @Test
