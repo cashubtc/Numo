@@ -113,6 +113,19 @@ create_manifest() {
         --output app/build/outputs/apk/release/update.json
 }
 
+download_release_apk() {
+    : "${RELEASE_VERSION:?RELEASE_VERSION is required}"
+    : "${GH_TOKEN:?GH_TOKEN is required}"
+    : "${GITHUB_ENV:?GITHUB_ENV is required}"
+    local apk_dir="app/build/outputs/apk/release"
+    local filename="numo-${RELEASE_VERSION}-arm64-v8a.apk"
+    local commit
+    mkdir -p -- "$apk_dir"
+    gh release download "$RELEASE_VERSION" --pattern "$filename" --dir "$apk_dir" --clobber
+    commit=$(git rev-list -n 1 "$RELEASE_VERSION" --)
+    printf 'RELEASE_COMMIT=%s\n' "$commit" >> "$GITHUB_ENV"
+}
+
 install_zsp() {
     : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
     local version="0.3.4"
@@ -140,6 +153,7 @@ publish_zapstore() {
     local pkcs12="$RUNNER_TEMP/zapstore-release-key.p12"
     local zsp="$RUNNER_TEMP/zsp"
     local channel="main"
+    local commit="${RELEASE_COMMIT:-$GITHUB_SHA}"
 
     if [ ! -f "$apk" ]; then
         echo "Zapstore APK not found: $apk" >&2
@@ -167,12 +181,12 @@ publish_zapstore() {
     if [ "$PRE_RELEASE" = true ]; then
         channel="beta"
     fi
-    "$zsp" publish --quiet --skip-preview --no-color --commit "$GITHUB_SHA" \
+    "$zsp" publish --quiet --skip-preview --no-color --commit "$commit" \
         --channel "$channel" release/zapstore.yaml
 }
 
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <decode-keystore|configure-signing|enable-debug-symbols|build-apk|build-bundle|rename-artifacts|create-manifest|install-zsp|publish-zapstore>" >&2
+    echo "Usage: $0 <decode-keystore|configure-signing|enable-debug-symbols|build-apk|build-bundle|rename-artifacts|create-manifest|download-release-apk|install-zsp|publish-zapstore>" >&2
     exit 1
 fi
 
@@ -184,6 +198,7 @@ case "$1" in
     build-bundle) build_release bundlePlay ;;
     rename-artifacts) rename_artifacts ;;
     create-manifest) create_manifest ;;
+    download-release-apk) download_release_apk ;;
     install-zsp) install_zsp ;;
     publish-zapstore) publish_zapstore ;;
     *)

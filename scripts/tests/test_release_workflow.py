@@ -121,6 +121,38 @@ class ManualReleaseTest(unittest.TestCase):
         self.run_command("rename-artifacts")
         self.assertEqual(b"universal apk", (apk_dir / "numo-v1.10-universal.apk").read_bytes())
 
+    def test_downloads_an_existing_arm64_release_and_uses_its_tag_commit(self):
+        fake_bin = self.root / "bin"
+        fake_bin.mkdir()
+        gh_log = self.root / "gh.jsonl"
+        github_env = self.root / "github.env"
+        gh = fake_bin / "gh"
+        gh.write_text(
+            '#!/usr/bin/env python3\n'
+            'import json, os, pathlib, sys\n'
+            'with open(os.environ["GH_LOG"], "a") as log:\n'
+            '    log.write(json.dumps(sys.argv[1:]) + "\\n")\n'
+            'directory = pathlib.Path(sys.argv[sys.argv.index("--dir") + 1])\n'
+            'directory.mkdir(parents=True, exist_ok=True)\n'
+            'filename = sys.argv[sys.argv.index("--pattern") + 1]\n'
+            '(directory / filename).write_bytes(b"existing arm64 apk")\n')
+        gh.chmod(0o755)
+        git = fake_bin / "git"
+        git.write_text('#!/bin/sh\nprintf "tagcommit\\n"\n')
+        git.chmod(0o755)
+        self.environment.update(GH_TOKEN="token", GITHUB_ENV=str(github_env),
+                                GH_LOG=str(gh_log), PATH=f"{fake_bin}{os.pathsep}{os.environ['PATH']}")
+
+        self.run_command("download-release-apk")
+
+        self.assertEqual([[
+            "release", "download", "v1.10", "--pattern", "numo-v1.10-arm64-v8a.apk",
+            "--dir", "app/build/outputs/apk/release", "--clobber",
+        ]], [json.loads(line) for line in gh_log.read_text().splitlines()])
+        apk = self.root / "app/build/outputs/apk/release/numo-v1.10-arm64-v8a.apk"
+        self.assertEqual(b"existing arm64 apk", apk.read_bytes())
+        self.assertEqual("RELEASE_COMMIT=tagcommit\n", github_env.read_text())
+
     def test_zapstore_links_the_signing_key_and_publishes_the_arm64_apk(self):
         runner_temp = self.root / "runner temp"
         runner_temp.mkdir()
@@ -161,6 +193,11 @@ class ManualReleaseTest(unittest.TestCase):
                 zsp_log.write_text("")
                 self.environment["PRE_RELEASE"] = pre_release
                 self.environment["FAIL_JKS"] = "1" if fail_jks else "0"
+                expected_commit = "tagcommit" if pre_release == "true" else "abc123"
+                if pre_release == "true":
+                    self.environment["RELEASE_COMMIT"] = "tagcommit"
+                else:
+                    self.environment.pop("RELEASE_COMMIT", None)
                 result = self.run_command("publish-zapstore")
 
                 keytool_calls = [json.loads(line) for line in keytool_log.read_text().splitlines()]
@@ -169,7 +206,7 @@ class ManualReleaseTest(unittest.TestCase):
                 self.assertEqual([
                     ["identity", "--link-key", str(runner_temp / "zapstore-release-key.p12"),
                      "--link-key-expiry", "2y", "--no-color"],
-                    ["publish", "--quiet", "--skip-preview", "--no-color", "--commit", "abc123",
+                    ["publish", "--quiet", "--skip-preview", "--no-color", "--commit", expected_commit,
                      "--channel", channel, "release/zapstore.yaml"],
                 ], [json.loads(line) for line in zsp_log.read_text().splitlines()])
                 self.assertNotIn("nsec1test", result.stdout + result.stderr)

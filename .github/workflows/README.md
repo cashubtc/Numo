@@ -55,6 +55,14 @@ The Zapstore publication uses `release/zapstore.yaml`, links the release signing
 the configured Nostr identity, and publishes the ARM64 APK to the `main` channel (or `beta`
 for pre-releases).
 
+## Publishing an Existing Release Only to Zapstore
+
+To publish an APK that is already attached to a GitHub release, enable **Only publish an existing
+GitHub release to Zapstore** when running the workflow. Enter the existing version and version code
+as usual. The workflow skips the build, bundle, update manifest, and GitHub release draft steps;
+it downloads the release's ARM64 APK and performs only the identity link and Zapstore publication.
+Set **Is this a pre-release?** to match the existing release's Zapstore channel.
+
 ## Troubleshooting
 
 If the workflow fails, check:
