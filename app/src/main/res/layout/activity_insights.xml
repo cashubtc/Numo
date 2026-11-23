@@ -51,7 +51,7 @@
             android:layout_marginTop="@dimen/row_subtitle_gap"
             android:textAppearance="@style/Text.Body"
             android:textColor="@color/color_text_tertiary"
-            tools:text="23 sales · $41.20 in tips" />
+            tools:text="23 sales, $41.20 in tips" />
 
     </LinearLayout>
 

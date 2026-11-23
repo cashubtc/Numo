@@ -13,11 +13,11 @@ import java.util.Locale
  */
 object TransactionDates {
 
-    /** A list row: "Sep 27 · 10:26", or "Sep 27 · 10:26 AM" on a 12-hour phone */
+    /** A list row: "Sep 27, 10:26", or "Sep 27, 10:26 AM" on a 12-hour phone */
     fun row(context: Context, date: Date): String {
         val locale = Locale.getDefault()
         val day = SimpleDateFormat(DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)
-        return "${day.format(date)} · ${DateFormat.getTimeFormat(context).format(date)}"
+        return "${day.format(date)}, ${DateFormat.getTimeFormat(context).format(date)}"
     }
 
     /** A details headline: "September 27, 2026, 10:26 AM" */

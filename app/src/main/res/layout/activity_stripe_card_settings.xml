@@ -18,13 +18,28 @@
             app:topBarSettingsStyle="true"
             app:topBarTitle="@string/stripe_card_settings_title" />
 
+        <!-- Stays put above the scrolling content for as long as a sandbox key is connected -->
+        <TextView
+            android:id="@+id/test_mode_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/color_status_pending_bg"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/settings_page_margin"
+            android:paddingVertical="@dimen/space_s"
+            android:text="@string/stripe_card_test_mode_banner"
+            android:textAppearance="@style/Text.SettingsCaption"
+            android:textColor="@color/color_warning"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/top_bar" />
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:fillViewport="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/top_bar">
+            app:layout_constraintBottom_toTopOf="@id/get_started_button"
+            app:layout_constraintTop_toBottomOf="@id/test_mode_banner">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,226 +48,272 @@
                 android:paddingHorizontal="@dimen/settings_page_margin"
                 android:paddingBottom="24dp">
 
+                <!-- Status: one headline that says where things stand -->
                 <LinearLayout
-                    android:id="@+id/enable_toggle_row"
+                    android:id="@+id/status_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_l"
-                    android:background="@drawable/bg_settings_group"
-                    android:clickable="true"
-                    android:clipToOutline="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:minHeight="@dimen/settings_switch_height"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="0dp"
-                    android:paddingVertical="@dimen/settings_row_padding"
-                    android:screenReaderFocusable="true">
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/status_headline"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:accessibilityHeading="true"
+                        android:textAppearance="@style/Text.Heading1" />
+
+                    <TextView
+                        android:id="@+id/status_body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:textAppearance="@style/Text.SettingsBody" />
+
+                    <!-- What needs fixing, one line per failed check -->
+                    <LinearLayout
+                        android:id="@+id/attention_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:orientation="vertical"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fix_button"
+                        style="@style/Widget.Numo.Button.Dialog.Confirm"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_l"
+                        android:minHeight="56dp"
+                        android:text="@string/stripe_card_see_fixes"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+                <!-- Not set up: connect Numo to Stripe, and what that gives you -->
+                <LinearLayout
+                    android:id="@+id/intro_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/stripe_card_enable_title"
-                            android:textAppearance="@style/Text.RowTitle" />
-
-                        <TextView
-                            android:id="@+id/enable_subtitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                            android:text="@string/stripe_card_enable_subtitle"
-                            android:textAppearance="@style/Text.SettingsCaption" />
-
-                    </LinearLayout>
-
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/stripe_card_enable_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="@string/stripe_card_enable_title"
-                        android:minHeight="48dp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    style="@style/Widget.Numo.SettingsGroup"
-                    android:layout_marginTop="@dimen/space_m">
-
-                    <com.electricdreams.numo.ui.components.SettingsRowView
-                        android:id="@+id/stripe_tutorial_row"
-                        style="@style/Widget.Numo.SettingsRow"
-                        app:rowIcon="@drawable/ic_document"
-                        app:rowTitle="@string/stripe_tutorial_entry_title"
-                        app:rowSubtitle="@string/stripe_tutorial_entry_subtitle" />
-
-                </LinearLayout>
-
-                <TextView
-                    style="@style/Widget.Numo.SettingsSectionTitle"
-                    android:layout_marginTop="@dimen/settings_section_gap"
-                    android:accessibilityHeading="true"
-                    android:text="@string/stripe_card_section_account"
-                    android:textAllCaps="false" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_settings_group"
-                    android:clipToOutline="true"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="0dp"
-                    android:paddingVertical="@dimen/settings_row_padding">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/stripe_restricted_key_layout"
-                        style="@style/Widget.Numo.SettingsTextInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/stripe_card_restricted_key_label"
-                        app:endIconMode="password_toggle">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/stripe_restricted_key_input"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:importantForAutofill="no"
-                            android:inputType="textPassword"
-                            android:minHeight="56dp"
-                            android:padding="@dimen/settings_row_padding"
-                            android:paddingTop="16dp"
-                            android:paddingBottom="16dp"
-                            android:textAppearance="@style/Text.SettingsInput"
-                            android:textColor="@color/color_text_primary"
-                            android:textColorHint="?attr/colorOnSurfaceVariant" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/stripe_location_layout"
-                        style="@style/Widget.Numo.SettingsTextInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:hint="@string/stripe_card_location_label">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/stripe_location_input"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:importantForAutofill="no"
-                            android:inputType="text"
-                            android:minHeight="56dp"
-                            android:padding="@dimen/settings_row_padding"
-                            android:paddingTop="16dp"
-                            android:paddingBottom="16dp"
-                            android:textAppearance="@style/Text.SettingsInput"
-                            android:textColor="@color/color_text_primary"
-                            android:textColorHint="?attr/colorOnSurfaceVariant" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                </LinearLayout>
-
-                <TextView
-                    style="@style/Widget.Numo.SettingsSectionTitle"
-                    android:layout_marginTop="@dimen/settings_section_gap"
-                    android:accessibilityHeading="true"
-                    android:text="@string/stripe_card_section_test"
-                    android:textAllCaps="false" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_settings_group"
-                    android:clipToOutline="true"
-                    android:orientation="vertical"
-                    android:padding="0dp">
-
-                    <LinearLayout
-                        android:id="@+id/test_connection_row"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_row_ripple"
-                        android:clickable="true"
-                        android:focusable="true"
+                        android:layout_marginTop="@dimen/space_3xl"
                         android:gravity="center_vertical"
-                        android:minHeight="@dimen/settings_switch_height"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="0dp"
-                        android:paddingVertical="@dimen/settings_row_padding"
-                        android:screenReaderFocusable="true">
+                        android:importantForAccessibility="noHideDescendants"
+                        android:orientation="horizontal">
 
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="@dimen/settings_row_icon_gap"
-                            android:importantForAccessibility="no"
-                            android:padding="@dimen/settings_icon_padding"
-                            android:src="@drawable/ic_link"
-                            app:tint="?attr/colorPrimary" />
+                        <FrameLayout
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:background="@drawable/bg_connect_tile_clip"
+                            android:clipToOutline="true">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_stripe_mark" />
+
+                        </FrameLayout>
 
                         <LinearLayout
-                            android:layout_width="0dp"
+                            android:id="@+id/intro_dots"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/stripe_card_test_title"
-                                android:textAppearance="@style/Text.RowTitle" />
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="0.3"
+                                android:background="@drawable/bg_connect_dot" />
 
-                            <TextView
-                                android:id="@+id/test_connection_status"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                                android:text="@string/stripe_card_test_subtitle"
-                                android:textAppearance="@style/Text.SettingsCaption" />
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="0.6"
+                                android:background="@drawable/bg_connect_dot" />
+
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="1"
+                                android:background="@drawable/bg_connect_dot" />
+
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="0.6"
+                                android:background="@drawable/bg_connect_dot" />
+
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="0.3"
+                                android:background="@drawable/bg_connect_dot" />
 
                         </LinearLayout>
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_chevron_forward"
-                            app:tint="@color/color_text_tertiary" />
+                        <FrameLayout
+                            android:id="@+id/intro_numo_tile"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:background="@drawable/bg_connect_tile_numo"
+                            android:clipToOutline="true">
+
+                            <!-- The launcher foreground carries its own safe-zone padding -->
+                            <ImageView
+                                android:layout_width="96dp"
+                                android:layout_height="96dp"
+                                android:layout_gravity="center"
+                                android:src="@mipmap/ic_launcher_foreground" />
+
+                        </FrameLayout>
 
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:id="@+id/remove_key_row"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_row_ripple"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:accessibilityHeading="true"
+                        android:gravity="center"
+                        android:text="@string/stripe_card_headline_intro"
+                        android:textAppearance="@style/Text.Heading1" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:gravity="center"
+                        android:text="@string/stripe_card_body_intro"
+                        android:textAppearance="@style/Text.SettingsBody" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="@dimen/space_l"
+                                android:background="@drawable/bg_connect_tile"
+                                android:importantForAccessibility="no"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_card"
+                                app:tint="@color/color_text_primary" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_intro_tap"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="@dimen/space_l"
+                                android:background="@drawable/bg_connect_tile"
+                                android:importantForAccessibility="no"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_bank"
+                                app:tint="@color/color_text_primary" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_intro_money"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="@dimen/space_l"
+                                android:background="@drawable/bg_connect_tile"
+                                android:importantForAccessibility="no"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_key"
+                                app:tint="@color/color_text_primary" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_intro_key"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Set up: pause switch, account, check, disconnect -->
+                <LinearLayout
+                    android:id="@+id/configured_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:id="@+id/enable_toggle_row"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:background="@drawable/bg_settings_group"
                         android:clickable="true"
+                        android:clipToOutline="true"
                         android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
                         android:gravity="center_vertical"
                         android:minHeight="@dimen/settings_switch_height"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="0dp"
                         android:paddingVertical="@dimen/settings_row_padding"
                         android:screenReaderFocusable="true">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="@dimen/settings_row_icon_gap"
-                            android:importantForAccessibility="no"
-                            android:padding="@dimen/settings_icon_padding"
-                            android:src="@drawable/ic_trash"
-                            app:tint="@color/color_error" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -263,24 +324,70 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/stripe_card_remove_title"
+                                android:text="@string/stripe_card_enable_title"
                                 android:textAppearance="@style/Text.RowTitle" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                                android:text="@string/stripe_card_remove_subtitle"
+                                android:text="@string/stripe_card_enable_subtitle"
                                 android:textAppearance="@style/Text.SettingsCaption" />
 
                         </LinearLayout>
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_chevron_forward"
-                            app:tint="@color/color_text_tertiary" />
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/stripe_card_enable_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/stripe_card_enable_title"
+                            android:minHeight="48dp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/Widget.Numo.SettingsSectionTitle"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:text="@string/stripe_card_section_account" />
+
+                    <LinearLayout style="@style/Widget.Numo.SettingsGroup">
+
+                        <com.electricdreams.numo.ui.components.SettingsRowView
+                            android:id="@+id/key_row"
+                            style="@style/Widget.Numo.SettingsRow"
+                            app:rowIcon="@drawable/ic_key"
+                            app:rowTitle="@string/stripe_card_key_row_title" />
+
+                        <com.electricdreams.numo.ui.components.SettingsRowView
+                            android:id="@+id/location_row"
+                            style="@style/Widget.Numo.SettingsRow"
+                            app:rowIcon="@drawable/ic_location_pin"
+                            app:rowTitle="@string/stripe_card_location_row_title" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/Widget.Numo.SettingsSectionTitle"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:text="@string/stripe_card_section_check" />
+
+                    <LinearLayout style="@style/Widget.Numo.SettingsGroup">
+
+                        <com.electricdreams.numo.ui.components.SettingsRowView
+                            android:id="@+id/check_row"
+                            style="@style/Widget.Numo.SettingsRow"
+                            app:rowIcon="@drawable/ic_checkmark_circle"
+                            app:rowSubtitle="@string/stripe_card_check_row_subtitle"
+                            app:rowTitle="@string/stripe_card_check_row_title" />
+
+                        <com.electricdreams.numo.ui.components.SettingsRowView
+                            android:id="@+id/disconnect_row"
+                            style="@style/Widget.Numo.SettingsRow"
+                            app:rowIcon="@drawable/ic_trash"
+                            app:rowIconTint="@color/color_error"
+                            app:rowShowChevron="false"
+                            app:rowTitle="@string/stripe_card_disconnect_title"
+                            app:rowTitleColor="@color/color_error" />
 
                     </LinearLayout>
 
@@ -289,6 +396,20 @@
             </LinearLayout>
 
         </ScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/get_started_button"
+            style="@style/Widget.Numo.Button.Dialog.Confirm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+            android:layout_marginBottom="@dimen/space_l"
+            android:minHeight="56dp"
+            android:text="@string/stripe_card_get_started"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

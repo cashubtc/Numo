@@ -44,7 +44,7 @@
         android:layout_marginEnd="@dimen/space_l"
         app:layout_constraintEnd_toStartOf="@id/tx_total"
         app:layout_constraintTop_toBottomOf="@id/tx_title"
-        tools:text="Sat · 13:11" />
+        tools:text="Sat, 13:11" />
 
     <TextView
         android:id="@+id/tx_total"

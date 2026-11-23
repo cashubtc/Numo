@@ -600,7 +600,7 @@
     <string name="saved_baskets_empty_icon">保存されたバスケットはありません</string>
     <string name="saved_baskets_empty_title">保存されたバスケットはありません</string>
     <string name="saved_baskets_empty_subtitle">後で使えるようにバスケットを保存しておきます。\nタブやレストランのテーブルに最適です。</string>
-    <string name="saved_baskets_meta_format">%1$s • %2$s</string>
+    <string name="saved_baskets_meta_format">%1$s、%2$s</string>
     <string name="saved_baskets_action_rename">名前の変更</string>
     <string name="saved_baskets_action_delete">消去</string>
     <string name="saved_baskets_rename_title">バスケットの名前を変更</string>
@@ -693,7 +693,7 @@
     <string name="auto_withdraw_threshold_subtitle">残高超過時に発動</string>
     <string name="auto_withdraw_threshold_label">しきい値</string>
     <string name="auto_withdraw_threshold_hint">残高がこの金額に達すると引き出しがトリガーされます</string>
-    <string name="auto_withdraw_threshold_helper">最小: ₿1,000 • 最大: ₿1,000,000</string>
+    <string name="auto_withdraw_threshold_helper">最小: ₿1,000 – 最大: ₿1,000,000</string>
     
     <string name="auto_withdraw_percentage_title">出金金額</string>
     <string name="auto_withdraw_percentage_subtitle">送金する残高の割合</string>
@@ -866,7 +866,7 @@
     <string name="pin_setup_continue">続く</string>
     <string name="pin_setup_back">戻る</string>
     <string name="pin_setup_enter_at_least">少なくとも %d 桁を入力してください</string>
-    <string name="pin_setup_more_needed">%1$d 桁 %2$s · さらに %3$d 必要です</string>
+    <string name="pin_setup_more_needed">%1$d 桁 %2$s、さらに %3$d 必要です</string>
     <string name="pin_setup_set_pin">暗証番号を設定する</string>
 
     
@@ -913,7 +913,7 @@
     <string name="insights_quick_charge">クイックチャージ</string>
     <string name="insights_items_count_one">1個のアイテム</string>
     <string name="insights_items_count_other">%1$d個のアイテム</string>
-    <string name="insights_items_lead_with_more">%1$s · %2$s 他%3$d件</string>
+    <string name="insights_items_lead_with_more">%1$s: %2$s 他%3$d件</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
     <string name="insights_empty_day">%1$sの売上はありません</string>
     <plurals name="insights_sales_count">

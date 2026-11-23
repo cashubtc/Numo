@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Autofill is off for the whole screen: a Stripe key is not a password to save or suggest. -->
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:importantForAutofill="noExcludeDescendants">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="64dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:topBarSettingsStyle="true"
+            app:topBarTitle="@string/stripe_card_setup_title" />
+
+        <LinearLayout
+            android:id="@+id/progress_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/settings_page_margin"
+            app:layout_constraintTop_toBottomOf="@id/top_bar">
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/step_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:importantForAccessibility="no"
+                android:max="3"
+                app:trackCornerRadius="2dp"
+                app:trackThickness="4dp" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/step_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/next_button"
+            app:layout_constraintTop_toBottomOf="@id/progress_header">
+
+            <ScrollView
+                android:id="@+id/key_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:fillViewport="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
+                    android:paddingTop="@dimen/space_l"
+                    android:paddingBottom="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stripe_card_key_body"
+                        android:textAppearance="@style/Text.SettingsBody" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_l"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <TextView
+                                android:layout_width="24dp"
+                                android:layout_height="wrap_content"
+                                android:importantForAccessibility="no"
+                                android:text="1"
+                                android:textAppearance="@style/Text.SettingsBody" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_key_step_1"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <TextView
+                                android:layout_width="24dp"
+                                android:layout_height="wrap_content"
+                                android:importantForAccessibility="no"
+                                android:text="2"
+                                android:textAppearance="@style/Text.SettingsBody" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_key_step_2"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <TextView
+                                android:layout_width="24dp"
+                                android:layout_height="wrap_content"
+                                android:importantForAccessibility="no"
+                                android:text="3"
+                                android:textAppearance="@style/Text.SettingsBody" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_key_step_3"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/open_stripe_button"
+                        style="@style/Widget.Button.Secondary.Outlined"
+                        android:textAppearance="@style/Text.Button"
+                        android:textSize="@dimen/text_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:text="@string/stripe_card_open_stripe"
+                        android:textColor="@color/color_text_primary"
+                        app:icon="@drawable/ic_open_external"
+                        app:iconGravity="textEnd"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/color_text_primary" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/stripe_key_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        app:errorEnabled="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_key_label"
+                        app:endIconContentDescription="@string/stripe_card_setup_paste"
+                        app:endIconDrawable="@drawable/ic_paste"
+                        app:endIconMode="custom"
+                        app:endIconTint="?attr/colorOnSurfaceVariant"
+                        app:errorIconDrawable="@null">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/stripe_key_input"
+                            android:imeOptions="actionGo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:importantForAutofill="no"
+                            android:inputType="text|textNoSuggestions"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/stripe_card_key_tip"
+                        android:textAppearance="@style/Text.SettingsBody" />
+
+                </LinearLayout>
+
+            </ScrollView>
+
+            <ScrollView
+                android:id="@+id/location_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:fillViewport="true"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
+                    android:paddingTop="@dimen/space_l"
+                    android:paddingBottom="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stripe_card_location_body"
+                        android:textAppearance="@style/Text.SettingsBody" />
+
+                    <LinearLayout
+                        android:id="@+id/location_loading"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:indeterminate="true"
+                            app:indicatorSize="20dp"
+                            app:trackThickness="2dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_m"
+                            android:text="@string/stripe_card_location_loading"
+                            android:textAppearance="@style/Text.SettingsBody" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/location_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:accessibilityLiveRegion="polite"
+                        android:textAppearance="@style/Text.SettingsBody"
+                        android:textColor="@color/color_text_primary"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/location_retry_button"
+                        style="@style/Widget.Button.Secondary.Outlined"
+                        android:textAppearance="@style/Text.Button"
+                        android:textSize="@dimen/text_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/stripe_card_location_retry"
+                        android:textColor="@color/color_text_primary"
+                        android:visibility="gone" />
+
+                    <RadioGroup
+                        android:id="@+id/location_list"
+                        style="@style/Widget.Numo.SettingsGroup"
+                        android:layout_marginTop="@dimen/space_l"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/add_location_button"
+                        style="@style/Widget.Numo.SettingsAddButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_l"
+                        android:text="@string/stripe_card_location_add"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/location_manual"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/location_id_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        app:errorEnabled="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_location_id_label"
+                        app:endIconContentDescription="@string/stripe_card_setup_paste"
+                        app:endIconDrawable="@drawable/ic_paste"
+                        app:endIconMode="custom"
+                        app:endIconTint="?attr/colorOnSurfaceVariant"
+                        app:errorIconDrawable="@null">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/location_id_input"
+                            android:imeOptions="actionGo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:importantForAutofill="no"
+                            android:inputType="text|textNoSuggestions"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/use_other_key_button"
+                            style="@style/Widget.Button.Secondary.Outlined"
+                        android:textAppearance="@style/Text.Button"
+                        android:textSize="@dimen/text_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_l"
+                            android:text="@string/stripe_card_location_use_other_key"
+                            android:textColor="@color/color_text_primary" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </ScrollView>
+
+            <ScrollView
+                android:id="@+id/add_location_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:fillViewport="true"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
+                    android:paddingTop="@dimen/space_l"
+                    android:paddingBottom="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stripe_card_add_location_body"
+                        android:textAppearance="@style/Text.SettingsBody" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/shop_name_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_add_location_name">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/shop_name_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:importantForAutofill="no"
+                            android:inputType="textCapWords"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/country_layout"
+                        style="@style/Widget.Numo.SettingsCountryDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_add_location_country">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/country_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:inputType="none"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/street_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_add_location_street">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/street_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:importantForAutofill="no"
+                            android:inputType="textPostalAddress|textCapWords"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/unit_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_add_location_unit">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/unit_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:importantForAutofill="no"
+                            android:inputType="textCapWords"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/city_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_add_location_city">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/city_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:importantForAutofill="no"
+                            android:inputType="textCapWords"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/state_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_add_location_state">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/state_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:importantForAutofill="no"
+                            android:inputType="textCapCharacters"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/postal_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="@string/stripe_card_add_location_postal">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/postal_input"
+                            android:imeOptions="actionDone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:importantForAutofill="no"
+                            android:inputType="textCapCharacters|textNoSuggestions"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/add_location_error"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:accessibilityLiveRegion="polite"
+                        android:textAppearance="@style/Text.SettingsBody"
+                        android:textColor="@color/color_error"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+            </ScrollView>
+
+        </FrameLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/next_button"
+            style="@style/Widget.Numo.Button.Dialog.Confirm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+            android:layout_marginBottom="@dimen/space_l"
+            android:minHeight="56dp"
+            android:text="@string/stripe_card_setup_next"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

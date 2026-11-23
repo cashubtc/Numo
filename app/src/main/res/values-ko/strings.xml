@@ -600,7 +600,7 @@
     <string name="saved_baskets_empty_icon">저장된 장바구니 없음</string>
     <string name="saved_baskets_empty_title">저장된 장바구니 없음</string>
     <string name="saved_baskets_empty_subtitle">나중에 사용할 수 있도록 바구니를 저장해 두세요.\n식탁이나 식당 테이블에 딱 맞습니다.</string>
-    <string name="saved_baskets_meta_format">%1$s • %2$s</string>
+    <string name="saved_baskets_meta_format">%1$s, %2$s</string>
     <string name="saved_baskets_action_rename">이름 바꾸기</string>
     <string name="saved_baskets_action_delete">삭제</string>
     <string name="saved_baskets_rename_title">바구니 이름 바꾸기</string>
@@ -693,7 +693,7 @@
     <string name="auto_withdraw_threshold_subtitle">잔액이 초과되면 트리거됩니다.</string>
     <string name="auto_withdraw_threshold_label">한계점</string>
     <string name="auto_withdraw_threshold_hint">잔액이 이 금액에 도달하면 출금이 시작됩니다.</string>
-    <string name="auto_withdraw_threshold_helper">최소: ₿1,000 • 최대: ₿1,000,000</string>
+    <string name="auto_withdraw_threshold_helper">최소: ₿1,000 – 최대: ₿1,000,000</string>
     
     <string name="auto_withdraw_percentage_title">인출금액</string>
     <string name="auto_withdraw_percentage_subtitle">보낼 잔액 비율</string>
@@ -866,7 +866,7 @@
     <string name="pin_setup_continue">계속하다</string>
     <string name="pin_setup_back">뒤쪽에</string>
     <string name="pin_setup_enter_at_least">%d자리 이상을 입력하세요.</string>
-    <string name="pin_setup_more_needed">%1$d자리%2$s · %3$d개 더 필요</string>
+    <string name="pin_setup_more_needed">%1$d자리%2$s, %3$d개 더 필요</string>
     <string name="pin_setup_set_pin">PIN 설정</string>
 
     
@@ -913,7 +913,7 @@
     <string name="insights_quick_charge">빠른 결제</string>
     <string name="insights_items_count_one">항목 1개</string>
     <string name="insights_items_count_other">항목 %1$d개</string>
-    <string name="insights_items_lead_with_more">%1$s · %2$s 외 %3$d개</string>
+    <string name="insights_items_lead_with_more">%1$s: %2$s 외 %3$d개</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
     <string name="insights_empty_day">%1$s의 매출이 없습니다</string>
     <plurals name="insights_sales_count">

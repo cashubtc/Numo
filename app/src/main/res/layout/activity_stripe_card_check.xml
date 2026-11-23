@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="64dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:topBarSettingsStyle="true"
+            app:topBarTitle="@string/stripe_card_check_title" />
+
+        <!-- Phone, Stripe, reader: where the check is, and which part needs fixing -->
+        <LinearLayout
+            android:id="@+id/check_steps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/settings_page_margin"
+            android:layout_marginTop="@dimen/space_s"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/top_bar">
+
+            <include
+                android:id="@+id/step_phone"
+                layout="@layout/item_card_check_step"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1" />
+
+            <include
+                android:id="@+id/step_stripe"
+                layout="@layout/item_card_check_step"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1" />
+
+            <include
+                android:id="@+id/step_reader"
+                layout="@layout/item_card_check_step"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/check_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toTopOf="@id/primary_button"
+            app:layout_constraintTop_toBottomOf="@id/check_steps">
+
+            <!-- Fixed top padding rather than centring: nothing moves when the text changes -->
+            <LinearLayout
+                android:id="@+id/check_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/settings_page_margin"
+                android:paddingTop="@dimen/space_5xl"
+                android:paddingBottom="@dimen/space_xl">
+
+                <FrameLayout
+                    android:layout_width="120dp"
+                    android:layout_height="120dp">
+
+                    <View
+                        android:id="@+id/orb_fill"
+                        android:layout_width="104dp"
+                        android:layout_height="104dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_check_orb" />
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/orb_ring"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:indeterminate="true"
+                        app:indicatorColor="@color/color_success_green"
+                        app:indicatorInset="0dp"
+                        app:indicatorSize="120dp"
+                        app:trackThickness="3dp" />
+
+                    <ImageView
+                        android:id="@+id/orb_icon"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_phone_outline"
+                        app:tint="@color/color_text_primary" />
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/summary_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xl"
+                    android:accessibilityHeading="true"
+                    android:accessibilityLiveRegion="polite"
+                    android:gravity="center"
+                    android:text="@string/stripe_card_check_summary_running"
+                    android:textAppearance="@style/Text.Heading1" />
+
+                <TextView
+                    android:id="@+id/summary_body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:gravity="center"
+                    android:textAppearance="@style/Text.SettingsBody" />
+
+                <!-- One dot per problem, shown only when there are several -->
+                <LinearLayout
+                    android:id="@+id/problem_dots"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_l"
+                    android:orientation="horizontal"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/primary_button"
+            style="@style/Widget.Numo.Button.Dialog.Confirm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+            android:enabled="false"
+            android:minHeight="56dp"
+            android:text="@string/stripe_card_check_summary_running"
+            app:layout_constraintBottom_toTopOf="@id/secondary_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Invisible rather than gone when unused, so the main button never moves -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/secondary_button"
+            style="@style/Widget.Numo.Button.Tertiary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/space_s"
+            android:minHeight="48dp"
+            android:text="@string/stripe_card_check_again"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="@dimen/text_button"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

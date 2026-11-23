@@ -486,7 +486,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="saved_baskets_empty_icon">Sem cestas salvas</string>
     <string name="saved_baskets_empty_title">Sem cestas salvas</string>
     <string name="saved_baskets_empty_subtitle">Salve uma cesta para mantê-la aberta para depois.\nIdeal para contas ou mesas de restaurante.</string>
-    <string name="saved_baskets_meta_format">%1$s • %2$s</string>
+    <string name="saved_baskets_meta_format">%1$s, %2$s</string>
     <string name="saved_baskets_action_rename">Renomear</string>
     <string name="saved_baskets_action_delete">Excluir</string>
     <string name="saved_baskets_rename_title">Renomear cesta</string>
@@ -556,7 +556,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="auto_withdraw_threshold_subtitle">Ativar quando o saldo ultrapassar</string>
     <string name="auto_withdraw_threshold_label">Limite</string>
     <string name="auto_withdraw_threshold_hint">Ativar saque quando o saldo atingir este valor</string>
-    <string name="auto_withdraw_threshold_helper">Mín: ₿1.000 • Máx: ₿1.000.000</string>
+    <string name="auto_withdraw_threshold_helper">Mín: ₿1.000 – Máx: ₿1.000.000</string>
     <string name="auto_withdraw_percentage_title">Valor do saque</string>
     <string name="auto_withdraw_percentage_subtitle">Porcentagem do saldo a enviar</string>
     <string name="auto_withdraw_percentage_label">Porcentagem do saque</string>
@@ -692,7 +692,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="pin_setup_continue">Continuar</string>
     <string name="pin_setup_back">Voltar</string>
     <string name="pin_setup_enter_at_least">Digite pelo menos %d dígitos</string>
-    <string name="pin_setup_more_needed">%1$d dígito%2$s · Faltam %3$d</string>
+    <string name="pin_setup_more_needed">%1$d dígito%2$s, Faltam %3$d</string>
     <string name="pin_setup_set_pin">Definir PIN</string>
     <string name="pin_entry_title">Insira o PIN</string>
     <string name="pin_entry_subtitle">Digite seu PIN para continuar</string>
@@ -752,7 +752,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="insights_quick_charge">Cobrança rápida</string>
     <string name="insights_items_count_one">1 item</string>
     <string name="insights_items_count_other">%1$d itens</string>
-    <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d mais</string>
+    <string name="insights_items_lead_with_more">%1$s: %2$s +%3$d mais</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
     <string name="insights_empty_day">Nenhuma venda em %1$s</string>
     <plurals name="insights_sales_count">

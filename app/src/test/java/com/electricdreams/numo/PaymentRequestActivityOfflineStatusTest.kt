@@ -47,7 +47,7 @@ class PaymentRequestActivityOfflineStatusTest {
     @Test
     fun `unified payment keeps its request while status follows disconnect and reconnect`() {
         ReflectionHelpers.callInstanceMethod<Void>(activity, "updatePaymentMethodStatus")
-        assertEquals("Lightning · Arkoor", status.text.toString())
+        assertEquals("Lightning, Arkoor", status.text.toString())
         val request = ReflectionHelpers.callInstanceMethod<String>(activity, "unifiedPaymentRequest")
 
         whenever(monitor.isOnlineNow()).thenReturn(false)
@@ -57,7 +57,7 @@ class PaymentRequestActivityOfflineStatusTest {
 
         whenever(monitor.isOnlineNow()).thenReturn(true)
         refreshStatus()
-        assertEquals("Lightning · Arkoor", status.text.toString())
+        assertEquals("Lightning, Arkoor", status.text.toString())
         assertEquals(request, ReflectionHelpers.callInstanceMethod<String>(activity, "unifiedPaymentRequest"))
     }
 

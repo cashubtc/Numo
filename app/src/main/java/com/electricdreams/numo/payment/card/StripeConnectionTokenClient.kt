@@ -1,9 +1,6 @@
 package com.electricdreams.numo.payment.card
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 import okhttp3.FormBody
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -24,6 +21,8 @@ class StripeConnectionTokenClient(
         message: String,
         val httpStatus: Int,
         val stripeCode: String?,
+        /** The request parameter Stripe blames, e.g. "location" for an unknown location. */
+        val param: String? = null,
     ) : IOException(message)
 
     /**
@@ -46,38 +45,17 @@ class StripeConnectionTokenClient(
             .post(body)
             .build()
 
-        httpClient.newCall(request).execute().use { response ->
-            val text = response.body?.string().orEmpty()
-            val json = parseObject(text)
-            if (!response.isSuccessful) {
-                val error = json?.getAsJsonObject("error")
-                val message = error?.get("message")?.takeIf { it.isJsonPrimitive }?.asString
-                    ?: "Stripe returned HTTP ${response.code}"
-                val code = error?.get("code")?.takeIf { it.isJsonPrimitive }?.asString
-                throw StripeApiException(message, response.code, code)
-            }
-            val secret = json?.get("secret")?.takeIf { it.isJsonPrimitive }?.asString
-            if (secret.isNullOrBlank()) {
-                throw IOException("Stripe response did not include a connection token")
-            }
-            return secret
+        val json = StripeHttp.execute(httpClient, request)
+        val secret = json.get("secret")?.takeIf { it.isJsonPrimitive }?.asString
+        if (secret.isNullOrBlank()) {
+            throw IOException("Stripe response did not include a connection token")
         }
-    }
-
-    private fun parseObject(text: String): JsonObject? = try {
-        JsonParser.parseString(text).takeIf { it.isJsonObject }?.asJsonObject
-    } catch (e: Exception) {
-        null
+        return secret
     }
 
     companion object {
         const val DEFAULT_BASE_URL = "https://api.stripe.com/"
 
-        private val defaultHttpClient: OkHttpClient by lazy {
-            OkHttpClient.Builder()
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(15, TimeUnit.SECONDS)
-                .build()
-        }
+        private val defaultHttpClient: OkHttpClient get() = StripeHttp.defaultClient
     }
 }

@@ -7,7 +7,7 @@
     <string name="basket_receipt_paid_label">Pago</string>
 
     <!-- Basket receipt hero VAT subtitle -->
-    <string name="basket_receipt_total_subtitle_with_vat">%1$s • incl. %2$s de imposto</string>
+    <string name="basket_receipt_total_subtitle_with_vat">%1$s, incl. %2$s de imposto</string>
     <string name="basket_receipt_total_subtitle_vat_only">incl. %1$s de imposto</string>
 
     <!-- Basket receipt items header -->

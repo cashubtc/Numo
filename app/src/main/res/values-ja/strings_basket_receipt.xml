@@ -10,7 +10,7 @@
     <string name="basket_receipt_items_header_single">1 個のアイテム</string>
     <string name="basket_receipt_tip_label_with_percentage">チップ (%1$d%%)</string>
     <string name="basket_receipt_equivalent_label">相当</string>
-    <string name="basket_receipt_total_subtitle_with_vat">%1$s • 税込 %2$s</string>
+    <string name="basket_receipt_total_subtitle_with_vat">%1$s、税込 %2$s</string>
     <string name="basket_receipt_vat_row_label">VAT (%1$d%%)</string>
     <string name="basket_receipt_subtotal_label">小計 (税抜)</string>
     <string name="basket_receipt_items_header_multiple">%1$d 個のアイテム</string>
