@@ -3,6 +3,7 @@ package com.electricdreams.numo.payment.card
 import com.electricdreams.numo.payment.card.CardSetupChecker.Check
 import com.electricdreams.numo.payment.card.CardSetupChecker.Failure
 import com.electricdreams.numo.payment.card.CardSetupChecker.Fix
+import com.electricdreams.numo.payment.card.CardSetupChecker.LocationStatus
 import com.electricdreams.numo.payment.card.CardSetupChecker.Outcome
 import com.electricdreams.numo.payment.card.CardSetupChecker.ReaderResult
 import com.electricdreams.numo.payment.card.StripeConnectionTokenClient.StripeApiException
@@ -22,6 +23,7 @@ class CardSetupCheckerTest {
         var locationPermission = true
         var config: StripeCardConfig? = StripeCardConfig("rk_test_abc123", "tml_shop")
         var tokenError: IOException? = null
+        var locationStatus = LocationStatus.FOUND
         var readerResult: ReaderResult = ReaderResult.Started
         var tokenRequests = 0
         var readerStarts = 0
@@ -35,6 +37,8 @@ class CardSetupCheckerTest {
             tokenRequests++
             tokenError?.let { throw it }
         }
+
+        override suspend fun locationStatus(config: StripeCardConfig) = locationStatus
 
         override suspend fun startReader(config: StripeCardConfig): ReaderResult {
             readerStarts++
@@ -131,6 +135,29 @@ class CardSetupCheckerTest {
             report.outcomes[Check.KEY_PERMISSION],
         )
         assertEquals(Outcome.Skipped, report.outcomes[Check.LOCATION_FOUND])
+    }
+
+    @Test
+    fun `a location Stripe no longer has fails the location check even though a token was issued`() = runTest {
+        environment.locationStatus = LocationStatus.MISSING
+
+        val report = checker.run(includeReader = true)
+
+        assertEquals(Outcome.Passed, report.outcomes[Check.KEY_ACCEPTED])
+        assertEquals(Outcome.Passed, report.outcomes[Check.KEY_PERMISSION])
+        assertEquals(
+            failed(Failure.LOCATION_NOT_FOUND, Fix.CHOOSE_LOCATION),
+            report.outcomes[Check.LOCATION_FOUND],
+        )
+        assertEquals(Outcome.Skipped, report.outcomes[Check.READER_STARTS])
+        assertEquals(0, environment.readerStarts)
+    }
+
+    @Test
+    fun `a location Stripe will not answer for still passes`() = runTest {
+        environment.locationStatus = LocationStatus.UNKNOWN
+
+        assertTrue(checker.run(includeReader = true).passed)
     }
 
     @Test

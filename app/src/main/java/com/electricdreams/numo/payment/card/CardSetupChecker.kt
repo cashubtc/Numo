@@ -83,6 +83,15 @@ class CardSetupChecker(private val environment: Environment) {
         data class Error(val message: String?) : ReaderResult
     }
 
+    /** What Stripe says about the stored location when asked for it directly. */
+    enum class LocationStatus {
+        FOUND,
+        MISSING,
+
+        /** Stripe would not say: the key may not read locations, or the request failed. */
+        UNKNOWN,
+    }
+
     /** Everything the checker needs from the phone and from Stripe; faked in tests. */
     interface Environment {
         fun isDeviceSupported(): Boolean
@@ -95,6 +104,12 @@ class CardSetupChecker(private val environment: Environment) {
 
         /** @throws IOException as [StripeConnectionTokenClient.createConnectionToken]. */
         suspend fun createConnectionToken(config: StripeCardConfig)
+
+        /**
+         * Looks the location up, because Stripe hands out a connection token for a location
+         * that does not exist. Never throws: anything short of a clear answer is UNKNOWN.
+         */
+        suspend fun locationStatus(config: StripeCardConfig): LocationStatus
 
         suspend fun startReader(config: StripeCardConfig): ReaderResult
     }
@@ -150,8 +165,8 @@ class CardSetupChecker(private val environment: Environment) {
     }
 
     /**
-     * One request to Stripe answers all three account checks: asking for a connection token
-     * fails differently for a bad key, a key without permission and an unknown location.
+     * Asking for a connection token fails differently for a bad key and a key without
+     * permission. It does not prove the location, so that is looked up as well.
      *
      * @return the stored config, or null when nothing is set up.
      */
@@ -169,7 +184,11 @@ class CardSetupChecker(private val environment: Environment) {
 
         val failure: Pair<Check, Outcome.Failed>? = try {
             environment.createConnectionToken(config)
-            null
+            if (environment.locationStatus(config) == LocationStatus.MISSING) {
+                Check.LOCATION_FOUND to Outcome.Failed(Failure.LOCATION_NOT_FOUND, Fix.CHOOSE_LOCATION)
+            } else {
+                null
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: StripeConnectionTokenClient.StripeApiException) {

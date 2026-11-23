@@ -7,7 +7,6 @@
     <string name="stripe_card_enable_subtitle">Adiciona uma aba Cartão no pagamento. A Stripe repassa o dinheiro para a sua própria conta Stripe.</string>
     <string name="stripe_card_section_account">Conta Stripe</string>
     <string name="stripe_card_invalid_key">Digite uma chave restrita que comece com rk_live_ ou rk_test_. Chaves secretas (sk_…) não são aceitas.</string>
-    <string name="stripe_card_invalid_location">Digite um ID de local do Terminal que comece com tml_</string>
     <string name="stripe_card_save_failed">Não foi possível guardar a chave com segurança neste aparelho</string>
     <string name="stripe_card_removed">Chave da Stripe removida</string>
     <string name="payment_request_tab_card">Cartão</string>

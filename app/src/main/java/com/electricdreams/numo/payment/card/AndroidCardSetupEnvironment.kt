@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -19,6 +20,7 @@ class AndroidCardSetupEnvironment(
     context: Context,
     private val settings: StripeCardSettings = StripeCardSettings.getInstance(context),
     private val tokenClient: StripeConnectionTokenClient = StripeConnectionTokenClient(),
+    private val locationsClient: StripeLocationsClient = StripeLocationsClient(),
 ) : CardSetupChecker.Environment {
 
     private val appContext = context.applicationContext
@@ -37,6 +39,21 @@ class AndroidCardSetupEnvironment(
     override suspend fun createConnectionToken(config: StripeCardConfig) {
         withContext(Dispatchers.IO) { tokenClient.createConnectionToken(config) }
     }
+
+    override suspend fun locationStatus(config: StripeCardConfig): CardSetupChecker.LocationStatus =
+        withContext(Dispatchers.IO) {
+            try {
+                locationsClient.getLocation(config.restrictedKey, config.locationId)
+                CardSetupChecker.LocationStatus.FOUND
+            } catch (e: StripeConnectionTokenClient.StripeApiException) {
+                // A key without the locations permission is refused before Stripe looks.
+                if (e.httpStatus == HTTP_NOT_FOUND) CardSetupChecker.LocationStatus.MISSING
+                else CardSetupChecker.LocationStatus.UNKNOWN
+            } catch (e: IOException) {
+                Log.w(TAG, "Could not look up the Stripe location", e)
+                CardSetupChecker.LocationStatus.UNKNOWN
+            }
+        }
 
     override suspend fun startReader(config: StripeCardConfig): CardSetupChecker.ReaderResult =
         withContext(Dispatchers.Main) {
@@ -70,6 +87,7 @@ class AndroidCardSetupEnvironment(
 
     companion object {
         private const val TAG = "CardSetupEnvironment"
+        private const val HTTP_NOT_FOUND = 404
         private val readerLock = Mutex()
     }
 }

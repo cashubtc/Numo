@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.settings
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
@@ -61,7 +62,9 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private enum class Step { KEY, LOCATION, ADD_LOCATION }
 
     private lateinit var binding: ActivityStripeCardSetupBinding
-    private lateinit var settings: StripeCardSettings
+
+    /** Replaceable so tests can store a key without the Android Keystore. */
+    internal lateinit var settings: StripeCardSettings
 
     /** Replaceable so tests can answer for Stripe. */
     internal var locationsClient = StripeLocationsClient()
@@ -70,9 +73,8 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private var step = Step.KEY
     private var isBusy = false
 
-    /** Locations of the account, once listed; null until then or when the key may not list them. */
+    /** Locations of the account, once listed; null until then. */
     private var locations: List<StripeLocation>? = null
-    private var isManualLocation = false
     private var selectedLocationId: String? = null
     private val countryCodesByName = linkedMapOf<String, String>()
 
@@ -138,6 +140,9 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private fun goBack() {
         if (isBusy) return
         when {
+            // Setup skips the empty picker on the way in, so it skips it on the way back too.
+            step == Step.ADD_LOCATION && mode == Mode.SETUP && locations.isNullOrEmpty() ->
+                showStep(Step.KEY)
             step == Step.ADD_LOCATION -> showStep(Step.LOCATION)
             step == Step.LOCATION && mode == Mode.SETUP -> showStep(Step.KEY)
             else -> finish()
@@ -165,7 +170,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private fun updateNextButton() {
         binding.nextButton.isEnabled = !isBusy && when (step) {
             Step.KEY -> true
-            Step.LOCATION -> isManualLocation || selectedLocationId != null && locations != null
+            Step.LOCATION -> selectedLocationId != null && locations != null
             Step.ADD_LOCATION -> true
         }
         binding.nextButton.setText(
@@ -234,7 +239,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
         val typed = binding.stripeKeyInput.text?.toString()?.trim().orEmpty()
         val key = typed.ifEmpty { settings.storedKey().orEmpty() }
         if (!StripeCardConfig.isValidRestrictedKey(key)) {
-            binding.stripeKeyLayout.error = getString(R.string.stripe_card_invalid_key)
+            showFieldError(binding.stripeKeyLayout, getString(R.string.stripe_card_invalid_key))
             return
         }
 
@@ -248,24 +253,39 @@ class StripeCardSetupActivity : AppCompatActivity() {
             val error = result.exceptionOrNull()
             when {
                 error == null -> acceptKey(key, result.getOrThrow())
-                // A key without the locations permission still works for taking payments.
-                error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN -> acceptKey(key, null)
+                // Such a key could take payments, but the location could then only be typed in
+                // by its ID, which Stripe gives no way to verify with the same key.
+                error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN -> showFieldError(
+                    binding.stripeKeyLayout,
+                    getString(R.string.stripe_card_key_no_locations),
+                )
                 else -> {
                     Log.w(TAG, "Stripe did not accept the key", error)
-                    binding.stripeKeyLayout.error = stripeErrorText(error)
+                    showFieldError(binding.stripeKeyLayout, stripeErrorText(error))
                 }
             }
         }
     }
 
-    private fun acceptKey(key: String, listed: List<StripeLocation>?) {
+    private fun acceptKey(key: String, listed: List<StripeLocation>) {
         if (!settings.saveKey(key)) {
             Toast.makeText(this, R.string.stripe_card_save_failed, Toast.LENGTH_LONG).show()
             return
         }
         locations = listed
-        isManualLocation = listed == null
-        if (mode == Mode.EDIT_KEY) done() else showStep(Step.LOCATION)
+        val only = listed.singleOrNull()
+        when {
+            mode == Mode.EDIT_KEY -> done()
+            // One location leaves nothing to choose. It shows on the status page afterwards,
+            // where it can be changed or another added.
+            only != null -> {
+                settings.saveLocation(only.id, only.displayName)
+                done()
+            }
+            // None yet: adding one is the only way on.
+            listed.isEmpty() -> showStep(Step.ADD_LOCATION)
+            else -> showStep(Step.LOCATION)
+        }
     }
 
     private fun stripeErrorText(error: Throwable): String = when {
@@ -298,9 +318,6 @@ class StripeCardSetupActivity : AppCompatActivity() {
                 finish()
             }
         }
-        binding.locationIdLayout.setEndIconOnClickListener { paste(binding.locationIdInput) }
-        binding.locationIdInput.doAfterTextChanged { binding.locationIdLayout.error = null }
-        binding.locationIdInput.setOnEditorActionListener(submitOnAction)
         binding.locationList.setOnCheckedChangeListener { group, checkedId ->
             selectedLocationId = group.findViewById<RadioButton>(checkedId)?.tag as? String
             updateNextButton()
@@ -308,11 +325,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
     }
 
     private fun enterLocationStep() {
-        when {
-            isManualLocation -> showManualLocation()
-            locations != null -> showLocations()
-            else -> loadLocations()
-        }
+        if (locations != null) showLocations() else loadLocations()
     }
 
     private fun loadLocations() {
@@ -332,10 +345,12 @@ class StripeCardSetupActivity : AppCompatActivity() {
                     locations = result.getOrThrow()
                     showLocations(animate = true)
                 }
-                error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN -> {
-                    isManualLocation = true
-                    showManualLocation(animate = true)
-                }
+                // Only a key stored before keys had to list locations gets here.
+                error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN -> showLocationState(
+                    animate = true,
+                    message = getString(R.string.stripe_card_location_no_permission),
+                    otherKey = true,
+                )
                 else -> {
                     Log.w(TAG, "Could not list Stripe locations", error)
                     showLocationState(animate = true, message = stripeErrorText(error), retry = true)
@@ -389,15 +404,6 @@ class StripeCardSetupActivity : AppCompatActivity() {
         return text
     }
 
-    private fun showManualLocation(animate: Boolean = false) {
-        binding.locationIdInput.setText(settings.storedLocationId())
-        showLocationState(
-            animate = animate,
-            message = getString(R.string.stripe_card_location_no_permission),
-            manual = true,
-        )
-    }
-
     private fun showLocationState(
         animate: Boolean = false,
         loading: Boolean = false,
@@ -405,7 +411,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
         retry: Boolean = false,
         list: Boolean = false,
         add: Boolean = false,
-        manual: Boolean = false,
+        otherKey: Boolean = false,
     ) {
         fun View.show(visible: Boolean) {
             visibility = if (visible) View.VISIBLE else View.GONE
@@ -419,22 +425,13 @@ class StripeCardSetupActivity : AppCompatActivity() {
         binding.locationRetryButton.show(retry)
         binding.locationList.show(list)
         binding.addLocationButton.show(add)
-        binding.locationManual.show(manual)
+        binding.useOtherKeyButton.show(otherKey)
         updateNextButton()
     }
 
     private fun submitLocation() {
-        if (isManualLocation) {
-            val id = binding.locationIdInput.text?.toString()?.trim().orEmpty()
-            if (!StripeCardConfig.isValidLocationId(id)) {
-                binding.locationIdLayout.error = getString(R.string.stripe_card_invalid_location)
-                return
-            }
-            settings.saveLocation(id, name = null)
-        } else {
-            val location = locations?.firstOrNull { it.id == selectedLocationId } ?: return
-            settings.saveLocation(location.id, location.displayName)
-        }
+        val location = locations?.firstOrNull { it.id == selectedLocationId } ?: return
+        settings.saveLocation(location.id, location.displayName)
         done()
     }
 
@@ -518,6 +515,17 @@ class StripeCardSetupActivity : AppCompatActivity() {
     }
 
     // endregion
+
+    /**
+     * Shows [message] under the field and scrolls it into view. With the keyboard up the new
+     * line lands below the visible part of the step, leaving only a red outline to go by.
+     */
+    private fun showFieldError(layout: TextInputLayout, message: String) {
+        layout.error = message
+        layout.post {
+            layout.requestRectangleOnScreen(Rect(0, 0, layout.width, layout.height), false)
+        }
+    }
 
     private fun paste(target: EditText) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

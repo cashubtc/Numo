@@ -18,18 +18,18 @@
             app:topBarSettingsStyle="true"
             app:topBarTitle="@string/stripe_card_settings_title" />
 
-        <!-- Stays put above the scrolling content for as long as a sandbox key is connected -->
+        <!-- Stays put above the scrolling content for as long as a sandbox key is connected.
+             Neutral on purpose: amber is kept for things that need fixing. -->
         <TextView
             android:id="@+id/test_mode_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/color_status_pending_bg"
+            android:background="@color/color_bg_surface"
             android:gravity="center"
             android:paddingHorizontal="@dimen/settings_page_margin"
             android:paddingVertical="@dimen/space_s"
             android:text="@string/stripe_card_test_mode_banner"
             android:textAppearance="@style/Text.SettingsCaption"
-            android:textColor="@color/color_warning"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/top_bar" />
 
@@ -70,12 +70,11 @@
                         android:layout_marginTop="@dimen/space_xs"
                         android:textAppearance="@style/Text.SettingsBody" />
 
-                    <!-- What needs fixing, one line per failed check -->
+                    <!-- What needs fixing, one card per failed check -->
                     <LinearLayout
                         android:id="@+id/attention_list"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_m"
                         android:orientation="vertical"
                         android:visibility="gone" />
 
@@ -396,6 +395,20 @@
             </LinearLayout>
 
         </ScrollView>
+
+        <!-- Drawn over the top edge of the content while the quick checks run, so nothing moves -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/check_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="invisible"
+            app:indicatorColor="@color/color_text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/test_mode_banner"
+            app:minHideDelay="400"
+            app:showDelay="300"
+            app:trackColor="@android:color/transparent"
+            app:trackThickness="2dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/get_started_button"
