@@ -45,4 +45,22 @@
     <string name="developer_settings_simulate_stripe_reader">Stripe-Kartenleser simulieren</string>
     <string name="card_payment_simulation_requires_test_key">Der simulierte Kartenleser benötigt einen Stripe-Sandbox-Schlüssel (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe benötigt für kontaktlose Kartenzahlungen einen Release-Build. Aktiviere für Sandbox-Tests den simulierten Kartenleser in den Entwicklereinstellungen.</string>
+    <string name="stripe_tutorial_title">Stripe-Einrichtungsanleitung</string>
+    <string name="stripe_tutorial_entry_title">Einrichtungsanleitung</string>
+    <string name="stripe_tutorial_entry_subtitle">Schritt-für-Schritt-Anleitung zum Verbinden deines Stripe-Kontos</string>
+    <string name="stripe_tutorial_progress">%1$d von %2$d</string>
+    <string name="stripe_tutorial_cancel">Abbrechen</string>
+    <string name="stripe_tutorial_back">Zurück</string>
+    <string name="stripe_tutorial_next">Weiter</string>
+    <string name="stripe_tutorial_done">Fertig</string>
+    <string name="stripe_tutorial_welcome_title">Karten mit Stripe akzeptieren</string>
+    <string name="stripe_tutorial_welcome_body">Du brauchst dein eigenes Stripe-Konto und ein Telefon mit Android 13 oder neuer und NFC. Kartenzahlungen gehen an dein Stripe-Konto, nicht an deine Cashu-Wallet.</string>
+    <string name="stripe_tutorial_key_title">Eingeschränkten API-Schlüssel erstellen</string>
+    <string name="stripe_tutorial_key_body">Gehe im Stripe-Dashboard zu Developers → API keys → Create restricted key. Gib ihm nur die Berechtigung \"Terminal Connection Tokens: Write\". Verwende einen rk_live_-Schlüssel für echte Zahlungen oder rk_test_ für Tests. Verwende niemals einen geheimen sk_-Schlüssel.</string>
+    <string name="stripe_tutorial_location_title">Terminal-Standort erstellen</string>
+    <string name="stripe_tutorial_location_body">Gehe im Stripe-Dashboard zu Terminal → Locations und erstelle einen Standort für dein Geschäft. Kopiere seine tml_…-ID. Verwende für jedes Telefon einen eigenen eingeschränkten Schlüssel, damit du ihn bei Verlust widerrufen kannst.</string>
+    <string name="stripe_tutorial_connect_title">Numo verbinden</string>
+    <string name="stripe_tutorial_connect_body">Öffne in Numo Einstellungen → Kartenzahlungen. Füge den eingeschränkten Schlüssel und die Standort-ID ein, tippe auf Verbindung testen und aktiviere Kartenzahlungen. Dein Schlüssel wird auf diesem Telefon verschlüsselt und nie wieder angezeigt.</string>
+    <string name="stripe_tutorial_payment_title">Erste Kartenzahlung annehmen</string>
+    <string name="stripe_tutorial_payment_body">Wähle beim Bezahlen Karte und folge den Anweisungen auf dem Bildschirm. Bitte den Kunden, seine Karte oder sein Telefon an dein Telefon zu halten. Für echte Karten ist ein Release-Build erforderlich; der simulierte Leser in den Entwicklereinstellungen ist nur für Tests mit einem rk_test_-Schlüssel gedacht.</string>
 </resources>

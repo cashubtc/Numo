@@ -48,4 +48,22 @@
     <string name="developer_settings_simulate_stripe_reader">Simulate Stripe card reader</string>
     <string name="card_payment_simulation_requires_test_key">The simulated reader requires a Stripe sandbox key (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe requires a release build for physical taps. For sandbox testing, enable the simulated reader in Developer settings.</string>
+    <string name="stripe_tutorial_title">Stripe setup tutorial</string>
+    <string name="stripe_tutorial_entry_title">Setup tutorial</string>
+    <string name="stripe_tutorial_entry_subtitle">Step-by-step guide to connecting your Stripe account</string>
+    <string name="stripe_tutorial_progress">%1$d of %2$d</string>
+    <string name="stripe_tutorial_cancel">Cancel</string>
+    <string name="stripe_tutorial_back">Back</string>
+    <string name="stripe_tutorial_next">Next</string>
+    <string name="stripe_tutorial_done">Done</string>
+    <string name="stripe_tutorial_welcome_title">Accept cards with Stripe</string>
+    <string name="stripe_tutorial_welcome_body">You\'ll need your own Stripe account and an Android 13+ phone with NFC. Card payments go to your Stripe account, not to your Cashu wallet.</string>
+    <string name="stripe_tutorial_key_title">Create a restricted API key</string>
+    <string name="stripe_tutorial_key_body">In Stripe Dashboard, go to Developers → API keys → Create restricted key. Give it only \"Terminal Connection Tokens: Write\". Use an rk_live_ key for real payments or rk_test_ for testing. Never use a secret sk_ key.</string>
+    <string name="stripe_tutorial_location_title">Create a Terminal Location</string>
+    <string name="stripe_tutorial_location_body">In Stripe Dashboard, go to Terminal → Locations and create a location for your shop. Copy its tml_… ID. Use a separate restricted key for each phone so you can revoke it if the phone is lost.</string>
+    <string name="stripe_tutorial_connect_title">Connect Numo</string>
+    <string name="stripe_tutorial_connect_body">Back in Numo, open Settings → Card payments. Paste the restricted key and Location ID, tap Test connection, then enable Accept card payments. Your key is encrypted on this phone and is never shown again.</string>
+    <string name="stripe_tutorial_payment_title">Take your first card payment</string>
+    <string name="stripe_tutorial_payment_body">At checkout, choose Card and follow the on-screen instructions. Ask the customer to tap their card or phone on your phone. Real cards require a release build; the simulated reader in Developer settings is only for testing with an rk_test_ key.</string>
 </resources>

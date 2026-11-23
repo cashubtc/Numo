@@ -81,6 +81,19 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    style="@style/Widget.Numo.SettingsGroup"
+                    android:layout_marginTop="@dimen/space_m">
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/stripe_tutorial_row"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_document"
+                        app:rowTitle="@string/stripe_tutorial_entry_title"
+                        app:rowSubtitle="@string/stripe_tutorial_entry_subtitle" />
+
+                </LinearLayout>
+
                 <TextView
                     style="@style/Widget.Numo.SettingsSectionTitle"
                     android:layout_marginTop="@dimen/settings_section_gap"

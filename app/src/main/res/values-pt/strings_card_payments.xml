@@ -45,4 +45,22 @@
     <string name="developer_settings_simulate_stripe_reader">Simular leitor de cartões da Stripe</string>
     <string name="card_payment_simulation_requires_test_key">O leitor simulado requer uma chave de teste da Stripe (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">A Stripe exige uma versão de produção para ler cartões físicos. Para testar no ambiente de testes, ative o leitor simulado nas configurações de desenvolvedor.</string>
+    <string name="stripe_tutorial_title">Tutorial de configuração do Stripe</string>
+    <string name="stripe_tutorial_entry_title">Tutorial de configuração</string>
+    <string name="stripe_tutorial_entry_subtitle">Guia passo a passo para conectar sua conta do Stripe</string>
+    <string name="stripe_tutorial_progress">%1$d de %2$d</string>
+    <string name="stripe_tutorial_cancel">Cancelar</string>
+    <string name="stripe_tutorial_back">Voltar</string>
+    <string name="stripe_tutorial_next">Avançar</string>
+    <string name="stripe_tutorial_done">Concluir</string>
+    <string name="stripe_tutorial_welcome_title">Aceite cartões com o Stripe</string>
+    <string name="stripe_tutorial_welcome_body">Você precisa de uma conta própria do Stripe e de um telefone com Android 13 ou superior e NFC. Os pagamentos com cartão vão para sua conta do Stripe, não para sua carteira Cashu.</string>
+    <string name="stripe_tutorial_key_title">Crie uma chave de API restrita</string>
+    <string name="stripe_tutorial_key_body">No Dashboard do Stripe, acesse Developers → API keys → Create restricted key. Conceda apenas a permissão \"Terminal Connection Tokens: Write\". Use uma chave rk_live_ para pagamentos reais ou rk_test_ para testes. Nunca use uma chave secreta sk_.</string>
+    <string name="stripe_tutorial_location_title">Crie um local do Terminal</string>
+    <string name="stripe_tutorial_location_body">No Dashboard do Stripe, acesse Terminal → Locations e crie um local para sua loja. Copie o ID tml_…. Use uma chave restrita diferente em cada telefone para poder revogá-la se o aparelho for perdido.</string>
+    <string name="stripe_tutorial_connect_title">Conecte o Numo</string>
+    <string name="stripe_tutorial_connect_body">No Numo, abra Configurações → Pagamentos com cartão. Cole a chave restrita e o ID do local, toque em Testar conexão e ative Aceitar pagamentos com cartão. Sua chave é criptografada neste telefone e nunca será exibida novamente.</string>
+    <string name="stripe_tutorial_payment_title">Receba seu primeiro pagamento com cartão</string>
+    <string name="stripe_tutorial_payment_body">No checkout, escolha Cartão e siga as instruções na tela. Peça ao cliente para aproximar o cartão ou telefone do seu telefone. Cartões reais exigem uma versão de produção; o leitor simulado nas configurações de desenvolvedor é apenas para testes com uma chave rk_test_.</string>
 </resources>
