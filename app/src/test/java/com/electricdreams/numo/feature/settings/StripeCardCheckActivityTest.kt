@@ -93,7 +93,7 @@ class StripeCardCheckActivityTest {
             assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.secondary_button).visibility)
             assertEquals(View.GONE, activity.findViewById<View>(R.id.problem_dots).visibility)
             assertEquals(
-                "Phone: needs fixing",
+                "Device: needs fixing",
                 activity.findViewById<View>(R.id.step_phone).contentDescription.toString(),
             )
             assertFalse(settings.isEnabled)

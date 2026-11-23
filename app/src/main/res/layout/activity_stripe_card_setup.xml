@@ -171,7 +171,9 @@
                         app:endIconDrawable="@drawable/ic_paste"
                         app:endIconMode="custom"
                         app:endIconTint="?attr/colorOnSurfaceVariant"
-                        app:errorIconDrawable="@null">
+                        app:errorIconDrawable="@null"
+                        app:placeholderTextAppearance="@style/Text.SettingsInput"
+                        app:placeholderTextColor="?attr/colorOnSurfaceVariant">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/stripe_key_input"
