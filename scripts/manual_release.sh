@@ -128,7 +128,7 @@ download_release_apk() {
 
 install_zsp() {
     : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
-    local version="0.3.4"
+    local version="0.4.17"
     local nak_version="0.22.3"
     local zsp="$RUNNER_TEMP/zsp"
     local nak="$RUNNER_TEMP/nak"
@@ -136,7 +136,7 @@ install_zsp() {
         "https://github.com/zapstore/zsp/releases/download/v${version}/zsp-${version}-linux-amd64" \
         --output "$zsp"
     printf '%s  %s\n' \
-        'f8240a54d08ad1d2c93f230b4e3af90f497a8be3b47bd06f3b52ac9995fb60d3' "$zsp" \
+        '3f241da6a5dc7a85fe851d3b42b77790b651bd36c7029382a701262bda832d20' "$zsp" \
         | sha256sum --check
     chmod +x "$zsp"
     curl --fail --location --retry 3 --silent --show-error \
@@ -159,7 +159,6 @@ publish_zapstore() {
     : "${GITHUB_SHA:?GITHUB_SHA is required}"
     : "${PRE_RELEASE:?PRE_RELEASE is required}"
     local apk="app/build/outputs/apk/release/numo-${RELEASE_VERSION}-arm64-v8a.apk"
-    local pkcs12="$RUNNER_TEMP/zapstore-release-key.p12"
     local zsp="$RUNNER_TEMP/zsp"
     local nak="$RUNNER_TEMP/nak"
     local channel="main"
@@ -174,26 +173,15 @@ publish_zapstore() {
         exit 1
     fi
 
-    if ! keytool -importkeystore -srckeystore "$KEYSTORE_PATH" -srcstoretype JKS \
-        -srcstorepass "$KEYSTORE_PASSWORD" -srckeypass "$KEY_PASSWORD" \
-        -srcalias "$KEY_ALIAS" -destkeystore "$pkcs12" -deststoretype PKCS12 \
-        -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" \
-        -destalias "$KEY_ALIAS" -noprompt; then
-        rm -f -- "$pkcs12"
-        keytool -importkeystore -srckeystore "$KEYSTORE_PATH" -srcstoretype PKCS12 \
-            -srcstorepass "$KEYSTORE_PASSWORD" -srckeypass "$KEY_PASSWORD" \
-            -srcalias "$KEY_ALIAS" -destkeystore "$pkcs12" -deststoretype PKCS12 \
-            -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" \
-            -destalias "$KEY_ALIAS" -noprompt
-    fi
-
-    "$zsp" identity --link-key "$pkcs12" --link-key-expiry 2y --offline --no-color \
-        | "$nak" event --github wss://relay.primal.net wss://relay.damus.io wss://relay.zapstore.dev
     if [ "$PRE_RELEASE" = true ]; then
         channel="beta"
     fi
-    "$zsp" publish --quiet --skip-preview --no-color --commit "$commit" \
-        --channel "$channel" release/zapstore.yaml
+    export KEYSTORE_KEY_PASSWORD="${KEYSTORE_KEY_PASSWORD:-$KEY_PASSWORD}"
+    "$zsp" publish --quiet --skip-preview --skip-certificate-linking --overwrite-release \
+        --no-color --commit "$commit" --channel "$channel" release/zapstore.yaml
+    "$zsp" identity --link-key "$KEYSTORE_PATH" --key-alias "$KEY_ALIAS" \
+        --link-key-expiry 2y --offline --no-color \
+        | "$nak" event --github wss://relay.zapstore.dev
 }
 
 if [ "$#" -ne 1 ]; then
