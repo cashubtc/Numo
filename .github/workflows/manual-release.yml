@@ -108,3 +108,16 @@ jobs:
             app/build/outputs/bundle/play/numo-${{ github.event.inputs.version }}.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install zsp
+        run: bash scripts/manual_release.sh install-zsp
+
+      - name: Publish to Zapstore
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SIGN_WITH: ${{ secrets.ZAPSTORE_NSEC }}
+          PRE_RELEASE: ${{ inputs.pre_release }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/manual_release.sh publish-zapstore

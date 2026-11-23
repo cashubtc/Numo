@@ -113,8 +113,66 @@ create_manifest() {
         --output app/build/outputs/apk/release/update.json
 }
 
+install_zsp() {
+    : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
+    local version="0.3.4"
+    local zsp="$RUNNER_TEMP/zsp"
+    curl --fail --location --retry 3 --silent --show-error \
+        "https://github.com/zapstore/zsp/releases/download/v${version}/zsp-${version}-linux-amd64" \
+        --output "$zsp"
+    printf '%s  %s\n' \
+        'f8240a54d08ad1d2c93f230b4e3af90f497a8be3b47bd06f3b52ac9995fb60d3' "$zsp" \
+        | sha256sum --check
+    chmod +x "$zsp"
+}
+
+publish_zapstore() {
+    : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
+    : "${RELEASE_VERSION:?RELEASE_VERSION is required}"
+    : "${KEYSTORE_PATH:?KEYSTORE_PATH is required}"
+    : "${KEYSTORE_PASSWORD:?KEYSTORE_PASSWORD is required}"
+    : "${KEY_ALIAS:?KEY_ALIAS is required}"
+    : "${KEY_PASSWORD:?KEY_PASSWORD is required}"
+    : "${SIGN_WITH:?SIGN_WITH is required}"
+    : "${GITHUB_SHA:?GITHUB_SHA is required}"
+    : "${PRE_RELEASE:?PRE_RELEASE is required}"
+    local apk="app/build/outputs/apk/release/numo-${RELEASE_VERSION}-universal.apk"
+    local pkcs12="$RUNNER_TEMP/zapstore-release-key.p12"
+    local zsp="$RUNNER_TEMP/zsp"
+    local channel="main"
+
+    if [ ! -f "$apk" ]; then
+        echo "Zapstore APK not found: $apk" >&2
+        exit 1
+    fi
+    if [ ! -x "$zsp" ]; then
+        echo "zsp is not installed at $zsp" >&2
+        exit 1
+    fi
+
+    if ! keytool -importkeystore -srckeystore "$KEYSTORE_PATH" -srcstoretype JKS \
+        -srcstorepass "$KEYSTORE_PASSWORD" -srckeypass "$KEY_PASSWORD" \
+        -srcalias "$KEY_ALIAS" -destkeystore "$pkcs12" -deststoretype PKCS12 \
+        -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" \
+        -destalias "$KEY_ALIAS" -noprompt; then
+        rm -f -- "$pkcs12"
+        keytool -importkeystore -srckeystore "$KEYSTORE_PATH" -srcstoretype PKCS12 \
+            -srcstorepass "$KEYSTORE_PASSWORD" -srckeypass "$KEY_PASSWORD" \
+            -srcalias "$KEY_ALIAS" -destkeystore "$pkcs12" -deststoretype PKCS12 \
+            -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" \
+            -destalias "$KEY_ALIAS" -noprompt
+    fi
+
+    "$zsp" identity --link-key "$pkcs12" --link-key-expiry 2y --no-color
+    if [ "$PRE_RELEASE" = true ]; then
+        channel="beta"
+    fi
+    "$zsp" publish --quiet --skip-preview --no-color --commit "$GITHUB_SHA" \
+        --channel "$channel" release/zapstore.yaml
+}
+
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <decode-keystore|configure-signing|enable-debug-symbols|build-apk|build-bundle|rename-artifacts|create-manifest>" >&2
+    echo "Usage: $0 <decode-keystore|configure-signing|enable-debug-symbols|build-apk|build-bundle|rename-artifacts|create-manifest|install-zsp|publish-zapstore>" >&2
     exit 1
 fi
 
@@ -126,6 +184,8 @@ case "$1" in
     build-bundle) build_release bundlePlay ;;
     rename-artifacts) rename_artifacts ;;
     create-manifest) create_manifest ;;
+    install-zsp) install_zsp ;;
+    publish-zapstore) publish_zapstore ;;
     *)
         echo "Unknown release command: $1" >&2
         exit 1

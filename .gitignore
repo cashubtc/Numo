@@ -11,7 +11,9 @@
 local.properties
 .aider*
 .vscode
-release
+release/*
+!release/zapstore.yaml
+!release/images/
 opencode.json
 .kotlin/
 
