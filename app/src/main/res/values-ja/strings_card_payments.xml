@@ -7,7 +7,6 @@
     <string name="stripe_card_enable_subtitle">会計画面に「カード」タブを追加します。売上は Stripe からお使いの Stripe アカウントに入金されます。</string>
     <string name="stripe_card_section_account">Stripe アカウント</string>
     <string name="stripe_card_invalid_key">rk_live_ または rk_test_ で始まる制限付きキーを入力してください。シークレットキー (sk_…) は使用できません。</string>
-    <string name="stripe_card_invalid_location">tml_ で始まる Terminal ロケーション ID を入力してください</string>
     <string name="stripe_card_save_failed">この端末にキーを安全に保存できませんでした</string>
     <string name="stripe_card_removed">Stripe キーを削除しました</string>
     <string name="payment_request_tab_card">カード</string>

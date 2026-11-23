@@ -1,22 +1,18 @@
 package com.electricdreams.numo.feature.settings
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.animation.PathInterpolator
 import android.widget.LinearLayout
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.lifecycleScope
@@ -64,15 +60,13 @@ class StripeCardCheckActivity : AppCompatActivity() {
 
     /** Set when the merchant leaves to fix something, so the check re-runs when they return. */
     private var rerunOnResume = false
-    private var locationDeniedOnce = false
     private var shownIcon = 0
 
-    private val locationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { grants ->
-        if (grants[Manifest.permission.ACCESS_FINE_LOCATION] != true) locationDeniedOnce = true
-        runCheck()
-    }
+    private val locationFix = LocationPermissionFix(
+        this,
+        onLeaveForSettings = { rerunOnResume = true },
+        onAnswered = { runCheck() },
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -169,7 +163,7 @@ class StripeCardCheckActivity : AppCompatActivity() {
         )
         showProblemDots(problemCount)
 
-        val fixLabel = fixLabel(problem.fix)
+        val fixLabel = CardCheckText.fixLabel(problem.fix)
         if (fixLabel == null) {
             // Nothing can be done on this phone, so the only way on is out.
             binding.primaryButton.setText(R.string.stripe_card_check_done)
@@ -327,40 +321,12 @@ class StripeCardCheckActivity : AppCompatActivity() {
 
     private fun color(@ColorRes id: Int): Int = ContextCompat.getColor(this, id)
 
-    /** Android stops showing the permission dialog after a refusal; then only app settings work. */
-    private fun fixLabel(fix: Fix): Int? =
-        if (fix == Fix.GRANT_LOCATION && mustUseAppSettingsForLocation()) {
-            R.string.stripe_card_fix_location_settings
-        } else {
-            CardCheckText.fixLabel(fix)
-        }
-
-    private fun mustUseAppSettingsForLocation(): Boolean = locationDeniedOnce &&
-        !ActivityCompat.shouldShowRequestPermissionRationale(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        )
-
     private fun applyFix(fix: Fix) {
         when (fix) {
             Fix.NONE -> Unit
             Fix.RETRY -> runCheck()
             Fix.OPEN_NFC_SETTINGS -> leaveToFix(Intent(Settings.ACTION_NFC_SETTINGS))
-            Fix.GRANT_LOCATION -> if (mustUseAppSettingsForLocation()) {
-                leaveToFix(
-                    Intent(
-                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.fromParts("package", packageName, null),
-                    )
-                )
-            } else {
-                locationPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                    )
-                )
-            }
+            Fix.GRANT_LOCATION -> locationFix.ask()
             Fix.REPLACE_KEY ->
                 leaveToFix(StripeCardSetupActivity.editKeyIntent(this, thenCheck = false))
             Fix.CHOOSE_LOCATION ->

@@ -285,55 +285,18 @@
                         android:text="@string/stripe_card_location_add"
                         android:visibility="gone" />
 
-                    <LinearLayout
-                        android:id="@+id/location_manual"
-                        android:layout_width="match_parent"
+                    <!-- Only for a key stored before keys had to list locations -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/use_other_key_button"
+                        style="@style/Widget.Button.Secondary.Outlined"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/location_id_layout"
-                        style="@style/Widget.Numo.SettingsTextInput"
-                        app:errorEnabled="true"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:hint="@string/stripe_card_location_id_label"
-                        app:endIconContentDescription="@string/stripe_card_setup_paste"
-                        app:endIconDrawable="@drawable/ic_paste"
-                        app:endIconMode="custom"
-                        app:endIconTint="?attr/colorOnSurfaceVariant"
-                        app:errorIconDrawable="@null">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/location_id_input"
-                            android:imeOptions="actionGo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:importantForAutofill="no"
-                            android:inputType="text|textNoSuggestions"
-                            android:maxLines="1"
-                            android:minHeight="56dp"
-                            android:textAppearance="@style/Text.SettingsInput"
-                            android:textColor="@color/color_text_primary"
-                            android:textColorHint="?attr/colorOnSurfaceVariant" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/use_other_key_button"
-                            style="@style/Widget.Button.Secondary.Outlined"
+                        android:layout_marginTop="@dimen/space_l"
+                        android:text="@string/stripe_card_location_use_other_key"
                         android:textAppearance="@style/Text.Button"
+                        android:textColor="@color/color_text_primary"
                         android:textSize="@dimen/text_button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_l"
-                            android:text="@string/stripe_card_location_use_other_key"
-                            android:textColor="@color/color_text_primary" />
-
-                    </LinearLayout>
+                        android:visibility="gone" />
 
                 </LinearLayout>
 

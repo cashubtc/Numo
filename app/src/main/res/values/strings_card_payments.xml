@@ -56,6 +56,7 @@
     <string name="stripe_card_key_replace_hint">Paste a new key to replace it.</string>
     <string name="stripe_card_key_tip">Use a separate key for each device, so you can cancel one if a device is lost.</string>
     <string name="stripe_card_invalid_key">That isn\'t a restricted key. It should start with rk_live_ or rk_test_. Secret keys (sk_…) are not accepted.</string>
+    <string name="stripe_card_key_no_locations">This key can\'t see your locations. In Stripe, give it Write access to Terminal Locations, then paste it again.</string>
     <string name="stripe_card_key_rejected">Stripe doesn\'t recognise this key. Check that you copied all of it.</string>
     <string name="stripe_card_stripe_unreachable">Couldn\'t reach Stripe. Check your internet connection and try again.</string>
     <string name="stripe_card_stripe_error">Stripe said: %1$s</string>
@@ -65,9 +66,7 @@
     <string name="stripe_card_location_empty">You have no locations in Stripe yet. Add one to continue.</string>
     <string name="stripe_card_location_add">Add a new location</string>
     <string name="stripe_card_location_retry">Try again</string>
-    <string name="stripe_card_location_no_permission">This key can\'t list your locations. Create a key that also has Write access to Terminal Locations, or enter a location ID from Stripe (Terminal, then Locations).</string>
-    <string name="stripe_card_location_id_label">Location ID (tml_…)</string>
-    <string name="stripe_card_invalid_location">A location ID starts with tml_</string>
+    <string name="stripe_card_location_no_permission">This key can\'t list your locations. Use a key that has Write access to Terminal Locations.</string>
     <string name="stripe_card_location_use_other_key">Use a different key</string>
     <string name="stripe_card_add_location_heading">Add a location</string>
     <string name="stripe_card_add_location_body">Stripe uses the address to apply the right card rules for your country.</string>
@@ -133,7 +132,6 @@
 
     <string name="stripe_card_fix_nfc">Open NFC settings</string>
     <string name="stripe_card_fix_location">Allow location</string>
-    <string name="stripe_card_fix_location_settings">Open app settings</string>
     <string name="stripe_card_fix_key">Replace key</string>
     <string name="stripe_card_fix_choose_location">Choose location</string>
     <string name="stripe_card_fix_developer">Open Developer settings</string>

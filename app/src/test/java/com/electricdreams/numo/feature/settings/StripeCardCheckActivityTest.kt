@@ -33,6 +33,8 @@ class StripeCardCheckActivityTest {
         override fun isNfcEnabled() = nfcEnabled
         override fun hasLocationPermission() = true
         override fun loadConfig() = StripeCardConfig("rk_test_abc123", "tml_shop")
+        override suspend fun locationStatus(config: StripeCardConfig) =
+            CardSetupChecker.LocationStatus.FOUND
         override suspend fun createConnectionToken(config: StripeCardConfig) {
             tokenError?.let { throw it }
         }
