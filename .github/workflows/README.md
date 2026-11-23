@@ -52,7 +52,7 @@ The workflow will create:
 - A Zapstore identity link for the APK signing certificate and a published Zapstore release
 
 The Zapstore publication uses `release/zapstore.yaml`, links the release signing certificate to
-the configured Nostr identity, and publishes the universal APK to the `main` channel (or `beta`
+the configured Nostr identity, and publishes the ARM64 APK to the `main` channel (or `beta`
 for pre-releases).
 
 ## Troubleshooting

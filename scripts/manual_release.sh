@@ -136,7 +136,7 @@ publish_zapstore() {
     : "${SIGN_WITH:?SIGN_WITH is required}"
     : "${GITHUB_SHA:?GITHUB_SHA is required}"
     : "${PRE_RELEASE:?PRE_RELEASE is required}"
-    local apk="app/build/outputs/apk/release/numo-${RELEASE_VERSION}-universal.apk"
+    local apk="app/build/outputs/apk/release/numo-${RELEASE_VERSION}-arm64-v8a.apk"
     local pkcs12="$RUNNER_TEMP/zapstore-release-key.p12"
     local zsp="$RUNNER_TEMP/zsp"
     local channel="main"

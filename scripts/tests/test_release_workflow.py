@@ -121,12 +121,12 @@ class ManualReleaseTest(unittest.TestCase):
         self.run_command("rename-artifacts")
         self.assertEqual(b"universal apk", (apk_dir / "numo-v1.10-universal.apk").read_bytes())
 
-    def test_zapstore_links_the_signing_key_and_publishes_the_universal_apk(self):
+    def test_zapstore_links_the_signing_key_and_publishes_the_arm64_apk(self):
         runner_temp = self.root / "runner temp"
         runner_temp.mkdir()
-        apk = self.root / "app/build/outputs/apk/release/numo-v1.10-universal.apk"
+        apk = self.root / "app/build/outputs/apk/release/numo-v1.10-arm64-v8a.apk"
         apk.parent.mkdir(parents=True)
-        apk.write_bytes(b"signed universal apk")
+        apk.write_bytes(b"signed arm64 apk")
         keytool_log = self.root / "keytool.jsonl"
         zsp_log = self.root / "zsp.jsonl"
         fake_bin = self.root / "bin"
