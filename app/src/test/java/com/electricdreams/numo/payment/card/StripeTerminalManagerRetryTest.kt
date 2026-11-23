@@ -53,6 +53,17 @@ class StripeTerminalManagerRetryTest {
     }
 
     @Test
+    fun `confirmation and status retrieval failures require review`() {
+        assertEquals(true, StripeTerminalManager.isUnresolvedFailure(true, false))
+        assertEquals(true, StripeTerminalManager.isUnresolvedFailure(false, true))
+    }
+
+    @Test
+    fun `collection failures before confirmation are definitive`() {
+        assertEquals(false, StripeTerminalManager.isUnresolvedFailure(false, false))
+    }
+
+    @Test
     fun `amount below Stripe's minimum is reported as a setup problem`() {
         assertEquals(
             FailureReason.AMOUNT_TOO_SMALL,

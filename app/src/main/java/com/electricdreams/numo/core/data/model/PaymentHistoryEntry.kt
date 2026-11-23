@@ -120,6 +120,10 @@ data class PaymentHistoryEntry(
     @SerializedName("cardPaymentClientSecret")
     val cardPaymentClientSecret: String? = null,
 
+    /** Uncertain card outcome that must be checked before another payment method is offered. */
+    @SerializedName("cardPaymentReviewRequired")
+    val cardPaymentReviewRequired: Boolean = false,
+
     /** Exact amount and currency confirmed by Stripe, for receipts and reconciliation. */
     @SerializedName("cardAmountMinorUnits")
     val cardAmountMinorUnits: Long? = null,

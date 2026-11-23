@@ -126,6 +126,9 @@ object StripeTerminalManager {
         else -> RetryStep.UNRESOLVED
     }
 
+    internal fun isUnresolvedFailure(confirmationStarted: Boolean, retrievalPending: Boolean): Boolean =
+        confirmationStarted || retrievalPending
+
     private const val TAG = "StripeTerminalManager"
 
     private val tokenClient = StripeConnectionTokenClient()
@@ -331,12 +334,15 @@ object StripeTerminalManager {
     ): PaymentIntent {
         val terminal = ensureInitialized(context)
         var intent: PaymentIntent? = null
+        var retrievalPending = previous != null
+        var confirmationStarted = false
         try {
             var current = if (previous == null) {
                 createPaymentIntent(terminal, amount, description, metadata)
             } else {
                 retrievePaymentIntent(terminal, previous.clientSecret)
             }
+            retrievalPending = false
             intent = current
             onPaymentIntent(current)
             val step = if (previous == null) RetryStep.COLLECT else retryStepFor(current.status)
@@ -355,6 +361,7 @@ object StripeTerminalManager {
             }
             intent = current
 
+            confirmationStarted = true
             isCharging = true
             val confirmed = try {
                 confirmPaymentIntent(terminal, current)
@@ -372,6 +379,7 @@ object StripeTerminalManager {
                 isCancellation = cancelled,
                 cause = e,
                 paymentIntent = e.paymentIntent ?: intent,
+                isUnresolved = isUnresolvedFailure(confirmationStarted, retrievalPending),
                 reason = failureReasonFor(e.apiError?.code, e.apiError?.param),
             )
         }

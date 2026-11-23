@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
@@ -56,6 +57,7 @@ class PaymentRequestActivityCardTest {
         whenever(tabs.getCurrentTab()).thenReturn(PaymentTab.CARD)
         mapOf(
             "tabManager" to tabs,
+            "unifiedTab" to LinearLayout(activity),
             "paymentAmount" to 12_345L,
             "statusText" to TextView(activity),
             "shareButton" to shareButton,
@@ -137,6 +139,28 @@ class PaymentRequestActivityCardTest {
 
         assertEquals("pi_resume", reference.paymentIntentId)
         assertEquals("pi_resume_secret_test", reference.clientSecret)
+    }
+
+    @Test
+    fun `uncertain card outcome disables bitcoin until its status is checked`() {
+        val paymentId = addPendingPayment()
+        val unifiedTab = ReflectionHelpers.getField<LinearLayout>(activity, "unifiedTab")
+
+        setReviewRequired(true)
+
+        assertFalse(unifiedTab.isEnabled)
+        assertTrue(
+            PaymentsHistoryActivity.getPaymentEntryById(activity, paymentId)
+                ?.cardPaymentReviewRequired == true,
+        )
+
+        setReviewRequired(false)
+
+        assertTrue(unifiedTab.isEnabled)
+        assertFalse(
+            PaymentsHistoryActivity.getPaymentEntryById(activity, paymentId)
+                ?.cardPaymentReviewRequired == true,
+        )
     }
 
     @Test
@@ -237,15 +261,23 @@ class PaymentRequestActivityCardTest {
         return paymentId
     }
 
+    private fun setReviewRequired(required: Boolean) {
+        ReflectionHelpers.callInstanceMethod<Any?>(
+            activity,
+            "setCardPaymentReviewRequired",
+            ReflectionHelpers.ClassParameter.from(Boolean::class.javaPrimitiveType, required),
+            ReflectionHelpers.ClassParameter.from(Boolean::class.javaPrimitiveType, true),
+        )
+    }
+
     private fun setCharging(charging: Boolean) {
         ReflectionHelpers.setStaticField(StripeTerminalManager::class.java, "isCharging", charging)
     }
 
-    private fun call(method: String, vararg args: String) {
-        ReflectionHelpers.callInstanceMethod<Any?>(
+    private fun call(method: String, vararg args: String): Any? =
+        ReflectionHelpers.callInstanceMethod(
             activity,
             method,
             *args.map { ReflectionHelpers.ClassParameter.from(String::class.java, it) }.toTypedArray(),
         )
-    }
 }

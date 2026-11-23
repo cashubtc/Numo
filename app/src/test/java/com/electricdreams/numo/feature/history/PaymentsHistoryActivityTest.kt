@@ -419,6 +419,37 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `pending card attempt without bitcoin resume data reopens checkout`() {
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null,
+        )
+        PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
+            context, paymentId, "pi_resume", "pi_resume_secret_test",
+        )
+        val activity = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup().get()
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter as PaymentsHistoryAdapter
+        val holder = adapter.createViewHolder(recyclerView, 1)
+            as PaymentsHistoryAdapter.TransactionViewHolder
+        adapter.bindViewHolder(holder, 1)
+
+        holder.mainContent.performClick()
+
+        val started = org.robolectric.Shadows.shadowOf(activity).nextStartedActivity
+        assertEquals(
+            com.electricdreams.numo.PaymentRequestActivity::class.java.name,
+            started?.component?.className,
+        )
+        assertEquals(
+            paymentId,
+            started?.getStringExtra(
+                com.electricdreams.numo.PaymentRequestActivity.EXTRA_RESUME_PAYMENT_ID,
+            ),
+        )
+    }
+
+    @Test
     fun `completed payment is tappable and shows details`() {
         val paymentId = PaymentsHistoryActivity.addPendingPayment(
             context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
@@ -563,6 +594,28 @@ class PaymentsHistoryActivityTest {
             .putString("history", com.google.gson.Gson().toJson(listOf(entry))).apply()
         val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
         assertTrue(PaymentsHistoryActivity.getPaymentHistory(context).single().isPending())
+        controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun `old card attempts stay pending until stripe status is checked`() {
+        val entry = PaymentHistoryEntry(
+            token = "", amount = 330L, enteredAmount = 330L,
+            date = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L),
+            rawStatus = PaymentHistoryEntry.STATUS_PENDING,
+            cardPaymentIntentId = "pi_resume",
+            cardPaymentClientSecret = "pi_resume_secret_test",
+            cardPaymentReviewRequired = true,
+        )
+        context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE).edit()
+            .putString("history", com.google.gson.Gson().toJson(listOf(entry))).apply()
+
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+
+        val restored = PaymentsHistoryActivity.getPaymentHistory(context).single()
+        assertTrue(restored.isPending())
+        assertTrue(restored.cardPaymentReviewRequired)
+        assertEquals("pi_resume_secret_test", restored.cardPaymentClientSecret)
         controller.pause().stop().destroy()
     }
 

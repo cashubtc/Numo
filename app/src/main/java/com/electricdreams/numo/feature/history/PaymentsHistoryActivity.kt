@@ -219,14 +219,18 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                         val offline = !com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)
                         // A stored Lightning invoice can be shown and paid offline; Numo confirms
                         // it on reconnect. Anything that needs a new invoice or the mint can't.
-                        val canResumeOffline = entry.lightningQuoteId != null &&
+                        val canResumeOffline = !entry.cardPaymentReviewRequired &&
+                            entry.lightningQuoteId != null &&
                             entry.lightningInvoice != null && entry.lightningMintUrl != null
                         when {
+                            entry.cardPaymentReviewRequired ->
+                                if (offline) OfflineExplainerActivity.start(this) else resumePendingPayment(entry)
                             entry.getSwapLightningQuoteId() != null ->
                                 if (offline) OfflineExplainerActivity.start(this) else checkAndFinalizeSwap(entry)
-                            // BTCPay pending entries have no lightning/nostr resume data —
-                            // resuming would create a new invoice, so just show details.
-                            entry.lightningQuoteId == null && entry.nostrNprofile == null -> showTransactionDetails(entry, row)
+                            // Entries without Lightning, Nostr, or a saved card attempt cannot
+                            // resume without creating a new invoice, so just show details.
+                            entry.lightningQuoteId == null && entry.nostrNprofile == null &&
+                                entry.cardPaymentClientSecret == null -> showTransactionDetails(entry, row)
                             offline && !canResumeOffline -> OfflineExplainerActivity.start(this)
                             else -> resumePendingPayment(entry)
                         }
@@ -587,6 +591,8 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
      * - BTCPay entries when BTCPay is disabled (they store the BTCPay invoice ID
      *   in [PaymentHistoryEntry.lightningQuoteId] but have no lightningMintUrl/nostrNprofile;
      *   without an active BTCPay connection these can never settle)
+     *
+     * Card attempts are exempt until their persisted PaymentIntent has been checked at Stripe.
      */
     private fun expireStaleBtcPayEntries() {
         val appContext = applicationContext
@@ -596,7 +602,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
         var modified = false
         history.forEachIndexed { index, entry ->
-            if (entry.isPending() && (
+            if (entry.isPending() && entry.cardPaymentClientSecret == null && (
                 // Ark addresses can still receive funds after quote expiry.
                 // Keep their pending entries resumable so late payments can be claimed.
                 (entry.date.time < cutoff && entry.arkoorQuoteId == null) ||
@@ -619,6 +625,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     paymentRequest = entry.paymentRequest,
                     cardPaymentIntentId = entry.cardPaymentIntentId,
                     cardPaymentClientSecret = entry.cardPaymentClientSecret,
+                    cardPaymentReviewRequired = entry.cardPaymentReviewRequired,
                     cardAmountMinorUnits = entry.cardAmountMinorUnits,
                     cardCurrency = entry.cardCurrency,
                     rawStatus = PaymentHistoryEntry.STATUS_EXPIRED,
@@ -759,6 +766,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                         existing.cardPaymentIntentId
                     },
                     cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = cardAmountMinorUnits ?: existing.cardAmountMinorUnits,
                     cardCurrency = cardCurrency ?: existing.cardCurrency,
                     rawStatus = PaymentHistoryEntry.STATUS_COMPLETED,
@@ -808,6 +816,23 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 .commit()
         }
 
+        @JvmStatic
+        fun updatePendingCardPaymentReview(
+            context: Context,
+            paymentId: String,
+            reviewRequired: Boolean,
+        ): Boolean {
+            val history = getPaymentHistory(context).toMutableList()
+            val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
+            if (index < 0) return false
+
+            history[index] = history[index].copy(cardPaymentReviewRequired = reviewRequired)
+            return context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putString(KEY_HISTORY, Gson().toJson(history))
+                .commit()
+        }
+
         /**
          * Update a pending payment with Lightning quote info (for resume capability).
          */
@@ -839,6 +864,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     paymentRequest = existing.paymentRequest,
                     cardPaymentIntentId = existing.cardPaymentIntentId,
                     cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = existing.cardAmountMinorUnits,
                     cardCurrency = existing.cardCurrency,
                     rawStatus = existing.status,
@@ -914,6 +940,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     paymentRequest = existing.paymentRequest,
                     cardPaymentIntentId = existing.cardPaymentIntentId,
                     cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = existing.cardAmountMinorUnits,
                     cardCurrency = existing.cardCurrency,
                     rawStatus = existing.status,
@@ -969,6 +996,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     paymentRequest = existing.paymentRequest,
                     cardPaymentIntentId = existing.cardPaymentIntentId,
                     cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = existing.cardAmountMinorUnits,
                     cardCurrency = existing.cardCurrency,
                     rawStatus = existing.status,
@@ -1018,6 +1046,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 paymentRequest = existing.paymentRequest,
                 cardPaymentIntentId = existing.cardPaymentIntentId,
                 cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                 cardAmountMinorUnits = existing.cardAmountMinorUnits,
                 cardCurrency = existing.cardCurrency,
                 rawStatus = PaymentHistoryEntry.STATUS_EXPIRED,
@@ -1062,6 +1091,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 paymentRequest = existing.paymentRequest,
                 cardPaymentIntentId = existing.cardPaymentIntentId,
                 cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                 cardAmountMinorUnits = existing.cardAmountMinorUnits,
                 cardCurrency = existing.cardCurrency,
                 rawStatus = PaymentHistoryEntry.STATUS_FAILED,
@@ -1135,6 +1165,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     paymentRequest = existing.paymentRequest,
                     cardPaymentIntentId = existing.cardPaymentIntentId,
                     cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = existing.cardAmountMinorUnits,
                     cardCurrency = existing.cardCurrency,
                     rawStatus = existing.status,

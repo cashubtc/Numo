@@ -139,6 +139,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var cardActionButton: MaterialButton
     private var cardAmount: CardAmountResolver.CardAmount? = null
     private var cardJob: Job? = null
+    private var cardPaymentReviewRequired = false
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -1635,6 +1636,10 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     /** Shows the Card tab when Stripe is configured, the device qualifies, and the unit is sats. */
     private fun setupCardPayments() {
+        val reviewRequired = pendingPaymentId?.let { paymentId ->
+            PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)?.cardPaymentReviewRequired
+        } == true
+        setCardPaymentReviewRequired(reviewRequired, persist = false)
         val available = paymentUnit.equals("sat", ignoreCase = true) &&
             StripeTerminalManager.isDeviceSupported(this) &&
             StripeCardSettings.getInstance(this).isReady()
@@ -1645,6 +1650,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         resolveCardAmount()
         tabManager.setCardTabAvailable(true)
+        if (reviewRequired) tabManager.selectTab(PaymentTabManager.PaymentTab.CARD)
     }
 
     /**
@@ -1720,6 +1726,22 @@ class PaymentRequestActivity : AppCompatActivity() {
         )
     }
 
+    private fun setCardPaymentReviewRequired(reviewRequired: Boolean, persist: Boolean = true) {
+        cardPaymentReviewRequired = reviewRequired
+        if (::unifiedTab.isInitialized) {
+            unifiedTab.isEnabled = !reviewRequired
+            unifiedTab.alpha = if (reviewRequired) 0.35f else 1f
+        }
+        if (!persist) return
+        val paymentId = pendingPaymentId ?: return
+        val saved = PaymentsHistoryActivity.updatePendingCardPaymentReview(
+            context = this,
+            paymentId = paymentId,
+            reviewRequired = reviewRequired,
+        )
+        if (!saved) Log.w(TAG, "Could not save card payment review state for $paymentId")
+    }
+
     private fun persistCardPaymentIntent(paymentIntent: PaymentIntent) {
         val paymentId = pendingPaymentId
         val clientSecret = paymentIntent.clientSecret
@@ -1788,11 +1810,13 @@ class PaymentRequestActivity : AppCompatActivity() {
                     minorUnits = paymentIntent.amount,
                     currency = paymentIntent.currency ?: amount.currency,
                 )
+                setCardPaymentReviewRequired(false)
                 onCardPaymentCharged(paymentIntent.id.orEmpty(), chargedAmount)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: StripeTerminalManager.CardPaymentException) {
                 Log.w(TAG, "Card payment did not complete: ${e.message}", e)
+                setCardPaymentReviewRequired(e.isUnresolved)
                 val currency = amount.currency.uppercase(java.util.Locale.US)
                 when (e.reason) {
                     // Setup problems: retrying would fail the same way, so offer no retry.
@@ -1810,8 +1834,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                     )
                     StripeTerminalManager.FailureReason.OTHER -> showCardIdle(
                         when {
-                            e.isCancellation -> getString(R.string.card_payment_status_cancelled)
                             e.isUnresolved -> getString(R.string.card_payment_status_unresolved)
+                            e.isCancellation -> getString(R.string.card_payment_status_cancelled)
                             else -> getString(R.string.card_payment_status_failed, e.message.orEmpty())
                         },
                         showRetry = true,
@@ -1819,6 +1843,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Card reader error", e)
+                setCardPaymentReviewRequired(savedCardPaymentReference() != null)
                 if (e is TerminalException && e.errorCode == TerminalErrorCode.TAP_TO_PAY_DEBUG_NOT_SUPPORTED) {
                     showCardIdle(getString(R.string.card_payment_debug_reader_unsupported), showRetry = false)
                 } else {
