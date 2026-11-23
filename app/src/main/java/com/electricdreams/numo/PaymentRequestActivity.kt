@@ -153,7 +153,6 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var arkoorJob: Job? = null
     private var isDualQuoteCheckout = false
     private var arkoorLoading = false
-    private var arkoorError: String? = null
     private var arkoorAddress: String? = null
     private var arkoorMintUrl: String? = null
     private var resumeArkoorQuoteId: String? = null
@@ -513,14 +512,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         // Check if the formatted amount is BTC (satoshis) or fiat
-        val isBtcAmount = formattedAmountString.startsWith("₿")
-
-        val hasBitcoinPrice = (bitcoinPriceWorker?.getCurrentPrice() ?: 0.0) > 0
-
-        if (!hasBitcoinPrice) {
-            convertedAmountDisplay.visibility = View.GONE
-            return
-        }
+        val isBtcAmount = formattedAmountString.endsWith(Currency.BTC.symbol) ||
+            formattedAmountString.startsWith("₿")
 
         if (isBtcAmount) {
             // Main amount is BTC, show fiat conversion
@@ -534,8 +527,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                 convertedAmountDisplay.visibility = View.GONE
             }
         } else {
-            // Main amount is fiat, show BTC conversion
-            // paymentAmount is always in satoshis, so we can use it directly
+            // Main amount is fiat, show the sats the payer is charged. paymentAmount is
+            // already in satoshis, so this needs no exchange rate.
             if (paymentAmount > 0) {
                 val formattedBtc = Amount(paymentAmount, Currency.BTC).toString()
                 convertedAmountDisplay.text = formattedBtc
@@ -864,12 +857,6 @@ class PaymentRequestActivity : AppCompatActivity() {
             this, preferredMint, allowedMints, lifecycleScope,
             quoteSockets = sockets, paymentUnit = activeUnit,
         )
-        largeAmountDisplay.text = if (activeUnit == "sat") {
-            Amount(paymentAmount, Currency.BTC).toString()
-        } else {
-            formattedAmountString
-        }
-        convertedAmountDisplay.visibility = View.GONE
         tabManager.selectTab(PaymentTabManager.PaymentTab.UNIFIED)
         startLightningMintFlow()
         startArkoorPaymentFlow()
@@ -978,8 +965,9 @@ class PaymentRequestActivity : AppCompatActivity() {
                 Log.d(TAG, "Selected mint does not offer Arkoor in sats")
                 onArkoorUnavailable()
             } catch (error: Exception) {
+                // The other payment methods still work, so drop Arkoor without alarming anyone.
                 Log.e(TAG, "Arkoor checkout failed", error)
-                onArkoorUnavailable(getString(R.string.payment_request_arkoor_failed, error.message))
+                onArkoorUnavailable()
             }
         }
     }
@@ -1084,11 +1072,10 @@ class PaymentRequestActivity : AppCompatActivity() {
             .start()
     }
 
-    private fun onArkoorUnavailable(message: String? = null) {
+    private fun onArkoorUnavailable() {
         if (hasTerminalOutcome) return
         arkoorLoading = false
         arkoorAddress = null
-        arkoorError = message
         updateUnifiedQrCode()
     }
 
@@ -1242,7 +1229,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             showWaitingStatus()
         } else if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED &&
             unifiedPaymentRequest() != null) {
-            statusText.text = listOfNotNull(paymentMethodsLabel(), arkoorError).joinToString("\n")
+            statusText.text = paymentMethodsLabel()
         } else {
             showWaitingStatus()
         }

@@ -55,7 +55,7 @@ class PaymentRequestActivityArkoorStatusTest {
 
     @Test
     fun `unavailable arkoor silently releases the lightning QR`() {
-        unavailable(null)
+        unavailable()
         assertEquals(0, ShadowToast.shownToastCount())
         assertFalse(ReflectionHelpers.getField(activity, "arkoorLoading"))
         assertNotNull(ReflectionHelpers.callInstanceMethod<String>(activity, "unifiedPaymentRequest"))
@@ -63,22 +63,41 @@ class PaymentRequestActivityArkoorStatusTest {
     }
 
     @Test
-    fun `real arkoor failure remains inline after payment methods refresh`() {
-        val message = activity.getString(R.string.payment_request_arkoor_failed, "offline")
-        unavailable(message)
+    fun `failed arkoor leaves only the working payment methods in the status`() {
+        unavailable()
         val tabs = mock<PaymentTabManager>()
         whenever(tabs.getCurrentTab()).thenReturn(PaymentTabManager.PaymentTab.UNIFIED)
         ReflectionHelpers.setField(activity, "tabManager", tabs)
         repeat(2) {
             ReflectionHelpers.callInstanceMethod<Void>(activity, "updatePaymentMethodStatus")
-            assertEquals("Lightning\n$message", status.text.toString())
+            assertEquals("Lightning", status.text.toString())
         }
         assertEquals(0, ShadowToast.shownToastCount())
     }
 
-    private fun unavailable(message: String?) {
+    @Test
+    fun `fiat charge keeps the entered amount and shows sats beneath it`() {
+        val converted = convertedAmountFor("$1.23")
+        assertEquals(View.VISIBLE, converted.visibility)
+        assertEquals("1,000 sat", converted.text.toString())
+    }
+
+    @Test
+    fun `sat charge without an exchange rate shows no duplicate amount`() {
+        assertEquals(View.GONE, convertedAmountFor("1,000 sat").visibility)
+    }
+
+    private fun convertedAmountFor(formattedAmount: String): TextView {
+        val converted = TextView(activity)
+        ReflectionHelpers.setField(activity, "convertedAmountDisplay", converted)
         PaymentRequestActivity::class.java.getDeclaredMethod(
-            "onArkoorUnavailable", String::class.java,
-        ).apply { isAccessible = true }.invoke(activity, message)
+            "updateConvertedAmount", String::class.java,
+        ).apply { isAccessible = true }.invoke(activity, formattedAmount)
+        return converted
+    }
+
+    private fun unavailable() {
+        PaymentRequestActivity::class.java.getDeclaredMethod("onArkoorUnavailable")
+            .apply { isAccessible = true }.invoke(activity)
     }
 }

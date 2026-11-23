@@ -1115,6 +1115,5 @@
     <string name="payment_request_arkoor_address">Ark-Adresse</string>
     <string name="payment_request_arkoor_waiting">Sende den angezeigten Betrag an diese Ark-Adresse</string>
     <string name="payment_request_arkoor_retrying">Verbindung zur Mint wird wiederhergestellt…</string>
-    <string name="payment_request_arkoor_failed">Arkoor-Zahlung fehlgeschlagen: %1$s</string>
     <string name="payment_request_arkoor_requires_mint">Wähle eine Arkoor-Mint und verwende Sats als Basiseinheit.</string>
 </resources>
