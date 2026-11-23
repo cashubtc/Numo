@@ -43,7 +43,7 @@ class ReceiptPrinter(private val context: Context) {
      */
     data class ReceiptData(
         val basket: CheckoutBasket?, // null for transactions without basket
-        val paymentType: String?, // "cashu" or "lightning"
+        val paymentType: String?, // "cashu", "lightning", "arkoor", or "card"
         val paymentDate: Date,
         val transactionId: String?,
         val mintUrl: String?,
@@ -58,6 +58,9 @@ class ReceiptPrinter(private val context: Context) {
         // Tip information
         val tipAmountSats: Long = 0,
         val tipPercentage: Int = 0,
+        // Exact Stripe charge, which may not equal a later conversion of totalSatoshis
+        val cardAmountMinorUnits: Long? = null,
+        val cardCurrency: String? = null,
     )
 
     /**
@@ -91,6 +94,23 @@ class ReceiptPrinter(private val context: Context) {
         return fiatTotal + satsInFiat
     }
 
+    private fun formatCardPaidAmount(data: ReceiptData): String? {
+        if (data.paymentType != "card") return null
+        val minorUnits = data.cardAmountMinorUnits ?: return null
+        val code = data.cardCurrency ?: return null
+        return try {
+            val currency = java.util.Currency.getInstance(code.uppercase(Locale.US))
+            val digits = currency.defaultFractionDigits.coerceAtLeast(0)
+            java.text.NumberFormat.getCurrencyInstance().apply {
+                this.currency = currency
+                minimumFractionDigits = digits
+                maximumFractionDigits = digits
+            }.format(java.math.BigDecimal.valueOf(minorUnits).movePointLeft(digits))
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
+
     /**
      * Generate a plain-text receipt suitable for thermal printers.
      */
@@ -120,6 +140,7 @@ class ReceiptPrinter(private val context: Context) {
 
         val showSatsAsPrimary = shouldShowSatsAsPrimary(data)
         val totalSats = data.basket?.totalSatoshis ?: data.totalSatoshis
+        val paidAmount = formatCardPaidAmount(data) ?: formatSats(totalSats)
 
         // ═══════════════════════════════════════════
         // HEADER
@@ -279,7 +300,7 @@ class ReceiptPrinter(private val context: Context) {
                 "Tip:"
             }
             sb.appendLine(leftRight(tipLabel, formatSats(data.tipAmountSats)))
-            sb.appendLine(leftRight("TOTAL PAID:", formatSats(totalSats)))
+            sb.appendLine(leftRight("TOTAL PAID:", paidAmount))
             sb.appendLine()
         }
 
@@ -310,11 +331,10 @@ class ReceiptPrinter(private val context: Context) {
         val paymentMethod = when (data.paymentType) {
             "lightning" -> "Lightning Network"
             "cashu" -> "Cashu (ecash)"
+            "card" -> "Card (Stripe)"
             else -> "Bitcoin"
         }
         sb.appendLine(leftRight("Payment:", paymentMethod))
-        
-        val paidAmount = formatSats(totalSats)
         sb.appendLine(leftRight("Paid:", paidAmount))
         sb.appendLine(leftRight("Status:", "✓ PAID"))
 
@@ -366,6 +386,7 @@ class ReceiptPrinter(private val context: Context) {
         val showSatsAsPrimary = shouldShowSatsAsPrimary(data)
         val totalSats = basket?.totalSatoshis ?: data.totalSatoshis
         val totalFiat = getTotalFiatIncludingSatsConversion(data)
+        val paidAmount = formatCardPaidAmount(data) ?: formatSats(totalSats)
         
         // Build items HTML
         val itemsHtml = if (basket != null && basket.items.isNotEmpty()) {
@@ -489,7 +510,7 @@ class ReceiptPrinter(private val context: Context) {
             </div>
             <div class="row total-row">
                 <span>TOTAL PAID:</span>
-                <span>${formatSats(totalSats)}</span>
+                <span>$paidAmount</span>
             </div>
             """
         } else ""
@@ -634,12 +655,13 @@ class ReceiptPrinter(private val context: Context) {
         <span>${when (data.paymentType) {
             "lightning" -> "Lightning"
             "cashu" -> "Cashu"
+            "card" -> "Card (Stripe)"
             else -> "Bitcoin"
         }}</span>
     </div>
     <div class="row">
         <span>Paid:</span>
-        <span>${formatSats(totalSats)}</span>
+        <span>$paidAmount</span>
     </div>
     <div class="row">
         <span>Status:</span>

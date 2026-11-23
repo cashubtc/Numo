@@ -617,6 +617,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     bitcoinPrice = entry.bitcoinPrice,
                     mintUrl = entry.mintUrl,
                     paymentRequest = entry.paymentRequest,
+                    cardPaymentIntentId = entry.cardPaymentIntentId,
+                    cardPaymentClientSecret = entry.cardPaymentClientSecret,
+                    cardAmountMinorUnits = entry.cardAmountMinorUnits,
+                    cardCurrency = entry.cardCurrency,
                     rawStatus = PaymentHistoryEntry.STATUS_EXPIRED,
                     paymentType = entry.paymentType,
                     lightningInvoice = entry.lightningInvoice,
@@ -729,6 +733,8 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             lightningMintUrl: String? = null,
             btcPayInvoiceId: String? = null,
             paymentRequest: String? = null,
+            cardAmountMinorUnits: Long? = null,
+            cardCurrency: String? = null,
         ) {
             val history = getPaymentHistory(context).toMutableList()
             // Only complete entries that are still pending — never overwrite expired/cancelled status
@@ -747,6 +753,14 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = mintUrl ?: existing.mintUrl,
                     paymentRequest = paymentRequest ?: existing.paymentRequest,
+                    cardPaymentIntentId = if (paymentType == PaymentHistoryEntry.TYPE_CARD) {
+                        paymentRequest ?: existing.cardPaymentIntentId
+                    } else {
+                        existing.cardPaymentIntentId
+                    },
+                    cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardAmountMinorUnits = cardAmountMinorUnits ?: existing.cardAmountMinorUnits,
+                    cardCurrency = cardCurrency ?: existing.cardCurrency,
                     rawStatus = PaymentHistoryEntry.STATUS_COMPLETED,
                     paymentType = paymentType,
                     lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
@@ -770,6 +784,28 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
             }
+        }
+
+        /** Saves the Stripe attempt synchronously before the SDK can collect or confirm a card. */
+        @JvmStatic
+        fun updatePendingWithCardPaymentAttempt(
+            context: Context,
+            paymentId: String,
+            paymentIntentId: String?,
+            clientSecret: String,
+        ): Boolean {
+            val history = getPaymentHistory(context).toMutableList()
+            val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
+            if (index < 0) return false
+
+            history[index] = history[index].copy(
+                cardPaymentIntentId = paymentIntentId,
+                cardPaymentClientSecret = clientSecret,
+            )
+            return context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putString(KEY_HISTORY, Gson().toJson(history))
+                .commit()
         }
 
         /**
@@ -801,6 +837,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
+                    cardPaymentIntentId = existing.cardPaymentIntentId,
+                    cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardAmountMinorUnits = existing.cardAmountMinorUnits,
+                    cardCurrency = existing.cardCurrency,
                     rawStatus = existing.status,
                     paymentType = paymentType ?: existing.paymentType,
                     lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
@@ -872,6 +912,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
+                    cardPaymentIntentId = existing.cardPaymentIntentId,
+                    cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardAmountMinorUnits = existing.cardAmountMinorUnits,
+                    cardCurrency = existing.cardCurrency,
                     rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,
@@ -923,6 +967,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
+                    cardPaymentIntentId = existing.cardPaymentIntentId,
+                    cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardAmountMinorUnits = existing.cardAmountMinorUnits,
+                    cardCurrency = existing.cardCurrency,
                     rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,
@@ -968,6 +1016,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 bitcoinPrice = existing.bitcoinPrice,
                 mintUrl = existing.mintUrl,
                 paymentRequest = existing.paymentRequest,
+                cardPaymentIntentId = existing.cardPaymentIntentId,
+                cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                cardAmountMinorUnits = existing.cardAmountMinorUnits,
+                cardCurrency = existing.cardCurrency,
                 rawStatus = PaymentHistoryEntry.STATUS_EXPIRED,
                 paymentType = existing.paymentType,
                 lightningInvoice = existing.lightningInvoice,
@@ -1008,6 +1060,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 bitcoinPrice = existing.bitcoinPrice,
                 mintUrl = existing.mintUrl,
                 paymentRequest = existing.paymentRequest,
+                cardPaymentIntentId = existing.cardPaymentIntentId,
+                cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                cardAmountMinorUnits = existing.cardAmountMinorUnits,
+                cardCurrency = existing.cardCurrency,
                 rawStatus = PaymentHistoryEntry.STATUS_FAILED,
                 paymentType = existing.paymentType,
                 lightningInvoice = existing.lightningInvoice,
@@ -1077,6 +1133,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
+                    cardPaymentIntentId = existing.cardPaymentIntentId,
+                    cardPaymentClientSecret = existing.cardPaymentClientSecret,
+                    cardAmountMinorUnits = existing.cardAmountMinorUnits,
+                    cardCurrency = existing.cardCurrency,
                     rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,

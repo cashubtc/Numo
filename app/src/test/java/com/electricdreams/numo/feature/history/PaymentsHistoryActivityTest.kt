@@ -88,6 +88,43 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `card attempt and exact charge survive history updates and completion`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context, 1_000L, "sat", 1_000L, 50_000.0, null, "1,000 sat",
+        )
+
+        assertTrue(
+            PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
+                context, id, "pi_recover", "pi_recover_secret_test",
+            )
+        )
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context, id, "lnbc1unused", "ln-quote", "https://mint.example",
+        )
+        PaymentsHistoryActivity.updatePendingWithNostrInfo(context, id, "nprofile", "secret")
+
+        val restored = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+        assertEquals("pi_recover", restored?.cardPaymentIntentId)
+        assertEquals("pi_recover_secret_test", restored?.cardPaymentClientSecret)
+
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context,
+            paymentId = id,
+            token = "",
+            paymentType = PaymentHistoryEntry.TYPE_CARD,
+            mintUrl = null,
+            paymentRequest = "pi_recover",
+            cardAmountMinorUnits = 1_250,
+            cardCurrency = "usd",
+        )
+
+        val completed = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+        assertEquals("pi_recover", completed?.getPaymentReference())
+        assertEquals(1_250L, completed?.cardAmountMinorUnits)
+        assertEquals("usd", completed?.cardCurrency)
+    }
+
+    @Test
     fun `legacy arkoor request migrates into independent quote fields`() {
         val id = PaymentsHistoryActivity.addPendingPayment(
             context, 1_000L, "sat", 1_000L, null, null, "1,000 sats",

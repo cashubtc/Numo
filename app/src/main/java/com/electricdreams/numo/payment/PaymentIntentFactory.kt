@@ -106,6 +106,13 @@ object PaymentIntentFactory {
             putExtra(TransactionDetailActivity.EXTRA_BASKET_ID, entry.basketId)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_AMOUNT, entry.tipAmountSats)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, entry.tipPercentage)
+            entry.cardAmountMinorUnits?.let {
+                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_CARD_AMOUNT_MINOR_UNITS, it)
+            }
+            putExtra(
+                TransactionDetailActivity.EXTRA_TRANSACTION_CARD_CURRENCY,
+                entry.cardCurrency,
+            )
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ID, entry.id)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LABEL, entry.label)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_STATUS, entry.status)

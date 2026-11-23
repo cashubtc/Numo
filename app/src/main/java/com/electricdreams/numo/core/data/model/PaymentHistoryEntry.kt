@@ -47,7 +47,7 @@ data class PaymentHistoryEntry(
     @SerializedName("status")
     private val rawStatus: String? = "completed",
 
-    /** Payment type: "cashu", "lightning", "arkoor", or null for pending/unknown */
+    /** Payment type: "cashu", "lightning", "arkoor", "card", or null for pending/unknown */
     @SerializedName("paymentType")
     val paymentType: String? = null,
 
@@ -112,6 +112,20 @@ data class PaymentHistoryEntry(
     /** BTCPay Server invoice ID - for resuming BTCPay pending payments */
     @SerializedName("btcPayInvoiceId")
     val btcPayInvoiceId: String? = null,
+
+    /** Stripe attempt to retrieve before retrying, including after process recreation. */
+    @SerializedName("cardPaymentIntentId")
+    val cardPaymentIntentId: String? = null,
+
+    @SerializedName("cardPaymentClientSecret")
+    val cardPaymentClientSecret: String? = null,
+
+    /** Exact amount and currency confirmed by Stripe, for receipts and reconciliation. */
+    @SerializedName("cardAmountMinorUnits")
+    val cardAmountMinorUnits: Long? = null,
+
+    @SerializedName("cardCurrency")
+    val cardCurrency: String? = null,
 
     /** User-assigned label for this transaction */
     @SerializedName("label")
@@ -197,7 +211,7 @@ data class PaymentHistoryEntry(
     /** The request for the method that actually paid, for details and CSV export. */
     fun getPaymentReference(): String? = when (paymentType) {
         TYPE_ARKOOR -> arkoorAddress ?: lightningInvoice
-        TYPE_CASHU -> paymentRequest ?: lightningInvoice
+        TYPE_CASHU, TYPE_CARD -> paymentRequest ?: lightningInvoice
         else -> lightningInvoice
     }
 

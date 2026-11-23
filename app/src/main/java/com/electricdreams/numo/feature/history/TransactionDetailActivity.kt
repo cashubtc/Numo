@@ -83,6 +83,12 @@ class TransactionDetailActivity : AppCompatActivity() {
         paymentId = intent.getStringExtra(EXTRA_TRANSACTION_ID)
         currentLabel = intent.getStringExtra(EXTRA_TRANSACTION_LABEL)
         status = intent.getStringExtra(EXTRA_TRANSACTION_STATUS) ?: PaymentHistoryEntry.STATUS_COMPLETED
+        val cardAmountMinorUnits = if (intent.hasExtra(EXTRA_TRANSACTION_CARD_AMOUNT_MINOR_UNITS)) {
+            intent.getLongExtra(EXTRA_TRANSACTION_CARD_AMOUNT_MINOR_UNITS, 0L)
+        } else {
+            null
+        }
+        val cardCurrency = intent.getStringExtra(EXTRA_TRANSACTION_CARD_CURRENCY)
 
         // Load saved basket if basketId is available
         basketId?.let { id ->
@@ -102,6 +108,8 @@ class TransactionDetailActivity : AppCompatActivity() {
             paymentRequest = paymentRequest,
             tipAmountSats = tipAmountSats,
             tipPercentage = tipPercentage,
+            cardAmountMinorUnits = cardAmountMinorUnits,
+            cardCurrency = cardCurrency,
         )
 
         setupViews()
@@ -344,18 +352,29 @@ class TransactionDetailActivity : AppCompatActivity() {
         val copyInvoiceBtn: ImageButton = findViewById(R.id.btn_copy_invoice)
 
         val isCashu = paymentType == PaymentHistoryEntry.TYPE_CASHU
+        val isCard = paymentType == PaymentHistoryEntry.TYPE_CARD
 
         val invoice = lightningInvoice
         if (!invoice.isNullOrEmpty()) {
-            invoiceLabel.text = if (paymentType == PaymentHistoryEntry.TYPE_ARKOOR) {
-                getString(R.string.payment_request_arkoor_address)
-            } else if (isCashu) {
-                getString(R.string.transaction_detail_cashu_request_label)
-            } else {
-                getString(R.string.transaction_detail_invoice_label)
+            invoiceLabel.text = when {
+                paymentType == PaymentHistoryEntry.TYPE_ARKOOR ->
+                    getString(R.string.payment_request_arkoor_address)
+                isCashu -> getString(R.string.transaction_detail_cashu_request_label)
+                isCard -> getString(R.string.transaction_detail_transaction_id_label)
+                else -> getString(R.string.transaction_detail_invoice_label)
             }
             invoiceValue.text = formatTruncatedId(invoice)
-            copyInvoiceBtn.setOnClickListener { copyLightningInvoice() }
+            copyInvoiceBtn.setOnClickListener {
+                if (isCard) {
+                    copyToClipboard(
+                        "Stripe PaymentIntent",
+                        invoice,
+                        R.string.transaction_detail_toast_id_copied,
+                    )
+                } else {
+                    copyLightningInvoice()
+                }
+            }
             invoiceRow.visibility = View.VISIBLE
         } else if (entry.token.isNotEmpty()) {
             invoiceLabel.text = if (isCashu) {
@@ -616,7 +635,11 @@ class TransactionDetailActivity : AppCompatActivity() {
         val basket = CheckoutBasket.fromJson(basketJsonToUse)
         val receiptPrinter = com.electricdreams.numo.core.util.ReceiptPrinter(this)
         
-        val txId = entry.token.takeIf { it.isNotEmpty() } ?: lightningInvoice
+        val txId = if (paymentType == PaymentHistoryEntry.TYPE_CARD) {
+            entry.paymentRequest
+        } else {
+            entry.token.takeIf { it.isNotEmpty() } ?: lightningInvoice
+        }
         val enteredCurrency = entry.getEntryUnit() ?: com.electricdreams.numo.core.util.CurrencyManager.getInstance(this).getCurrentCurrency()
 
         val receiptData = com.electricdreams.numo.core.util.ReceiptPrinter.ReceiptData(
@@ -630,7 +653,9 @@ class TransactionDetailActivity : AppCompatActivity() {
             enteredAmount = entry.enteredAmount,
             enteredCurrency = enteredCurrency,
             tipAmountSats = entry.tipAmountSats,
-            tipPercentage = entry.tipPercentage
+            tipPercentage = entry.tipPercentage,
+            cardAmountMinorUnits = entry.cardAmountMinorUnits,
+            cardCurrency = entry.cardCurrency,
         )
         receiptPrinter.printReceipt(receiptData)
     }
@@ -752,6 +777,8 @@ class TransactionDetailActivity : AppCompatActivity() {
         const val EXTRA_BASKET_ID = "basket_id"
         const val EXTRA_TRANSACTION_TIP_AMOUNT = "transaction_tip_amount"
         const val EXTRA_TRANSACTION_TIP_PERCENTAGE = "transaction_tip_percentage"
+        const val EXTRA_TRANSACTION_CARD_AMOUNT_MINOR_UNITS = "transaction_card_amount_minor_units"
+        const val EXTRA_TRANSACTION_CARD_CURRENCY = "transaction_card_currency"
         const val EXTRA_TRANSACTION_ID = "transaction_id"
         const val EXTRA_TRANSACTION_LABEL = "transaction_label"
         const val EXTRA_TRANSACTION_STATUS = "transaction_status"
