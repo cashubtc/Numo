@@ -620,7 +620,7 @@
         <activity android:name="com.electricdreams.numo.feature.settings.StripeCardTutorialActivity"
             android:exported="false"
             android:label="@string/stripe_tutorial_title"
-            android:theme="@style/Theme.Numo.Settings"
+            android:theme="@style/Theme.Numo"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.StripeCardSettingsActivity">

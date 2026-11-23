@@ -23,29 +23,20 @@ class StripeCardTutorialActivity : AppCompatActivity() {
 
     private val slides = listOf(
         Slide(
-            R.drawable.ic_card,
-            R.string.stripe_tutorial_welcome_title,
-            R.string.stripe_tutorial_welcome_body,
-        ),
-        Slide(
-            R.drawable.ic_key,
+            R.drawable.img_stripe_create_key,
             R.string.stripe_tutorial_key_title,
             R.string.stripe_tutorial_key_body,
+            imageHeightDp = 240,
         ),
         Slide(
-            R.drawable.ic_bank,
+            R.drawable.img_stripe_create_location,
             R.string.stripe_tutorial_location_title,
             R.string.stripe_tutorial_location_body,
         ),
         Slide(
-            R.drawable.ic_link,
+            R.drawable.img_numo_card_settings,
             R.string.stripe_tutorial_connect_title,
             R.string.stripe_tutorial_connect_body,
-        ),
-        Slide(
-            R.drawable.ic_contactless,
-            R.string.stripe_tutorial_payment_title,
-            R.string.stripe_tutorial_payment_body,
         ),
     )
 
@@ -55,7 +46,7 @@ class StripeCardTutorialActivity : AppCompatActivity() {
         setContentView(binding.root)
         applySettingsWindowInsets(this, binding.root)
 
-        binding.topBar.onNavClick { onBackPressedDispatcher.onBackPressed() }
+        binding.topBarBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         binding.tutorialPager.adapter = SlideAdapter()
         binding.tutorialPager.registerOnPageChangeCallback(
             object : ViewPager2.OnPageChangeCallback() {
@@ -93,9 +84,10 @@ class StripeCardTutorialActivity : AppCompatActivity() {
     }
 
     private data class Slide(
-        @DrawableRes val iconRes: Int,
+        @DrawableRes val imageRes: Int,
         @StringRes val titleRes: Int,
         @StringRes val bodyRes: Int,
+        val imageHeightDp: Int = 400,
     )
 
     private inner class SlideAdapter : RecyclerView.Adapter<SlideViewHolder>() {
@@ -107,7 +99,9 @@ class StripeCardTutorialActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: SlideViewHolder, position: Int) {
             val slide = slides[position]
-            holder.icon.setImageResource(slide.iconRes)
+            holder.image.setImageResource(slide.imageRes)
+            (holder.image.parent as View).layoutParams.height =
+                (slide.imageHeightDp * holder.image.resources.displayMetrics.density).toInt()
             holder.title.setText(slide.titleRes)
             holder.body.setText(slide.bodyRes)
             ViewCompat.setAccessibilityHeading(holder.title, true)
@@ -117,7 +111,7 @@ class StripeCardTutorialActivity : AppCompatActivity() {
     }
 
     private class SlideViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val icon: ImageView = view.findViewById(R.id.tutorial_slide_icon)
+        val image: ImageView = view.findViewById(R.id.tutorial_slide_image)
         val title: TextView = view.findViewById(R.id.tutorial_slide_title)
         val body: TextView = view.findViewById(R.id.tutorial_slide_body)
     }

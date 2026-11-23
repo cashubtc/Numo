@@ -10,7 +10,6 @@
     <string name="stripe_card_restricted_key_label">Clave API restringida (rk_…)</string>
     <string name="stripe_card_restricted_key_saved_hint">Guardada. Introduce una clave nueva para reemplazarla.</string>
     <string name="stripe_card_location_label">ID de ubicación de Terminal (tml_…)</string>
-    <string name="stripe_card_setup_help">En tu Dashboard de Stripe:\n1. Developers → API keys → Create restricted key. Dale solo el permiso \"Terminal Connection Tokens: Write\".\n2. Terminal → Locations → crea una ubicación para esta tienda y copia su ID.\nUsa una clave distinta en cada teléfono para poder revocarla si pierdes un dispositivo.</string>
     <string name="stripe_card_section_test">Prueba</string>
     <string name="stripe_card_test_title">Probar conexión</string>
     <string name="stripe_card_test_subtitle">Comprueba la clave y la ubicación con Stripe</string>
@@ -45,22 +44,18 @@
     <string name="developer_settings_simulate_stripe_reader">Simular el lector de tarjetas de Stripe</string>
     <string name="card_payment_simulation_requires_test_key">El lector simulado requiere una clave de prueba de Stripe (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe requiere una versión de producción para leer tarjetas físicas. Para hacer pruebas, activa el lector simulado en los ajustes de desarrollador.</string>
-    <string name="stripe_tutorial_title">Tutorial de configuración de Stripe</string>
+    <string name="stripe_tutorial_title">Configuración de Stripe</string>
     <string name="stripe_tutorial_entry_title">Tutorial de configuración</string>
-    <string name="stripe_tutorial_entry_subtitle">Guía paso a paso para conectar tu cuenta de Stripe</string>
+    <string name="stripe_tutorial_entry_subtitle">Tres pasos para conectar tu cuenta de Stripe</string>
     <string name="stripe_tutorial_progress">%1$d de %2$d</string>
     <string name="stripe_tutorial_cancel">Cancelar</string>
     <string name="stripe_tutorial_back">Atrás</string>
     <string name="stripe_tutorial_next">Siguiente</string>
     <string name="stripe_tutorial_done">Listo</string>
-    <string name="stripe_tutorial_welcome_title">Acepta tarjetas con Stripe</string>
-    <string name="stripe_tutorial_welcome_body">Necesitas tu propia cuenta de Stripe y un teléfono con Android 13 o superior y NFC. Los pagos con tarjeta van a tu cuenta de Stripe, no a tu monedero Cashu.</string>
-    <string name="stripe_tutorial_key_title">Crea una clave API restringida</string>
-    <string name="stripe_tutorial_key_body">En el Dashboard de Stripe, ve a Developers → API keys → Create restricted key. Dale solo el permiso \"Terminal Connection Tokens: Write\". Usa una clave rk_live_ para pagos reales o rk_test_ para pruebas. Nunca uses una clave secreta sk_.</string>
-    <string name="stripe_tutorial_location_title">Crea una ubicación de Terminal</string>
-    <string name="stripe_tutorial_location_body">En el Dashboard de Stripe, ve a Terminal → Locations y crea una ubicación para tu tienda. Copia su ID tml_…. Usa una clave restringida distinta para cada teléfono para poder revocarla si lo pierdes.</string>
+    <string name="stripe_tutorial_key_title">Crea una clave restringida</string>
+    <string name="stripe_tutorial_key_body">Developers → API keys → Create restricted key.\nActiva Terminal Connection Tokens: Write. Usa una clave distinta para cada teléfono.</string>
+    <string name="stripe_tutorial_location_title">Añade tu ubicación</string>
+    <string name="stripe_tutorial_location_body">Terminal → Locations → Create location.\nIntroduce la dirección de tu tienda y copia su ID tml_….</string>
     <string name="stripe_tutorial_connect_title">Conecta Numo</string>
-    <string name="stripe_tutorial_connect_body">Vuelve a Numo y abre Configuración → Pagos con tarjeta. Pega la clave restringida y el ID de ubicación, toca Probar conexión y activa Aceptar pagos con tarjeta. Tu clave se cifra en este teléfono y no vuelve a mostrarse.</string>
-    <string name="stripe_tutorial_payment_title">Cobra tu primer pago con tarjeta</string>
-    <string name="stripe_tutorial_payment_body">Al cobrar, elige Tarjeta y sigue las instrucciones en pantalla. Pide al cliente que acerque su tarjeta o teléfono al tuyo. Las tarjetas reales requieren una versión de producción; el lector simulado de los ajustes de desarrollador es solo para pruebas con una clave rk_test_.</string>
+    <string name="stripe_tutorial_connect_body">Pega la clave y el ID de ubicación.\nPrueba la conexión y activa los pagos con tarjeta.</string>
 </resources>

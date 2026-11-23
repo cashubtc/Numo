@@ -40,21 +40,21 @@ class StripeCardTutorialActivityTest {
                 val back = activity.findViewById<Button>(R.id.tutorial_back_button)
                 val next = activity.findViewById<Button>(R.id.tutorial_next_button)
                 val progress = activity.findViewById<TextView>(R.id.tutorial_progress)
-                assertEquals(5, pager.adapter?.itemCount)
+                assertEquals(3, pager.adapter?.itemCount)
                 assertEquals(0, pager.currentItem)
-                assertEquals("1 of 5", progress.text.toString())
+                assertEquals("1 of 3", progress.text.toString())
 
                 next.performClick()
                 next.performClick()
                 shadowOf(Looper.getMainLooper()).idle()
                 assertEquals(2, pager.currentItem)
-                assertEquals("3 of 5", progress.text.toString())
+                assertEquals("3 of 3", progress.text.toString())
 
                 back.performClick()
                 shadowOf(Looper.getMainLooper()).idle()
                 assertEquals(1, pager.currentItem)
 
-                pager.currentItem = 4
+                pager.currentItem = 2
                 shadowOf(Looper.getMainLooper()).idle()
                 assertEquals(activity.getString(R.string.stripe_tutorial_done), next.text.toString())
                 next.performClick()
