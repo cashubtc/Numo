@@ -26,7 +26,7 @@ class StripeCardTutorialActivity : AppCompatActivity() {
             R.drawable.img_stripe_create_key,
             R.string.stripe_tutorial_key_title,
             R.string.stripe_tutorial_key_body,
-            imageHeightDp = 240,
+            imageHeightDp = 400,
         ),
         Slide(
             R.drawable.img_stripe_create_location,
