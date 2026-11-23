@@ -11,6 +11,7 @@ import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentTabManager
 import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
+import com.electricdreams.numo.payment.card.CardAmountResolver
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.google.android.material.button.MaterialButton
@@ -90,6 +91,11 @@ class PaymentRequestActivityCardTest {
             formattedAmount = "$12.50",
         )
         ReflectionHelpers.setField(activity, "pendingPaymentId", paymentId)
+        ReflectionHelpers.setField(
+            activity,
+            "cardAmount",
+            CardAmountResolver.CardAmount(minorUnits = 1_250, currency = "usd"),
+        )
 
         call("handleCardPaymentSuccess", "pi_123")
         // A late duplicate outcome must not record the payment twice.
@@ -101,6 +107,8 @@ class PaymentRequestActivityCardTest {
         assertTrue(entry.isCompleted())
         assertEquals(PaymentHistoryEntry.TYPE_CARD, entry.paymentType)
         assertEquals("pi_123", entry.paymentRequest)
+        assertEquals(1_250L, entry.cardAmountMinorUnits)
+        assertEquals("usd", entry.cardCurrency)
         assertEquals(Activity.RESULT_OK, shadowOf(activity).resultCode)
     }
 
@@ -111,6 +119,24 @@ class PaymentRequestActivityCardTest {
 
         verify(tabs).setCardTabAvailable(false)
         verify(tabs, never()).setCardTabAvailable(true)
+    }
+
+    @Test
+    fun `pending card attempt is restored for a safe retry`() {
+        val paymentId = addPendingPayment()
+        assertTrue(
+            PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
+                context = activity,
+                paymentId = paymentId,
+                paymentIntentId = "pi_resume",
+                clientSecret = "pi_resume_secret_test",
+            )
+        )
+
+        val reference = call("savedCardPaymentReference") as StripeTerminalManager.CardPaymentReference
+
+        assertEquals("pi_resume", reference.paymentIntentId)
+        assertEquals("pi_resume_secret_test", reference.clientSecret)
     }
 
     @Test

@@ -885,7 +885,7 @@
     <string name="pin_reset_recovery_phrase">회복 문구</string>
     <string name="pin_reset_paste_clipboard">클립보드에서 붙여넣기</string>
     <string name="pin_reset_button">PIN 재설정</string>
-    <string name="payment_request_tab_unified">통합</string>
+    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">%1$d 토요일 결제</string>
     <string name="payment_request_lightning_description">%1$d sats의 Numo POS 결제</string>
     <string name="onboarding_status_generating_seed">시드 구문 생성 중…</string>

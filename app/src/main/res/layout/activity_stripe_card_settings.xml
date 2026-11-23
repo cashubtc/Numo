@@ -81,6 +81,19 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    style="@style/Widget.Numo.SettingsGroup"
+                    android:layout_marginTop="@dimen/space_m">
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/stripe_tutorial_row"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_document"
+                        app:rowTitle="@string/stripe_tutorial_entry_title"
+                        app:rowSubtitle="@string/stripe_tutorial_entry_subtitle" />
+
+                </LinearLayout>
+
                 <TextView
                     style="@style/Widget.Numo.SettingsSectionTitle"
                     android:layout_marginTop="@dimen/settings_section_gap"
@@ -146,14 +159,6 @@
                             android:textColorHint="?attr/colorOnSurfaceVariant" />
 
                     </com.google.android.material.textfield.TextInputLayout>
-
-                    <TextView
-                        android:id="@+id/stripe_setup_help"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_m"
-                        android:text="@string/stripe_card_setup_help"
-                        android:textAppearance="@style/Text.SettingsCaption" />
 
                 </LinearLayout>
 

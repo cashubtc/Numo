@@ -11,7 +11,6 @@
     <string name="stripe_card_restricted_key_label">Restricted API key (rk_…)</string>
     <string name="stripe_card_restricted_key_saved_hint">Saved. Enter a new key to replace it.</string>
     <string name="stripe_card_location_label">Terminal Location ID (tml_…)</string>
-    <string name="stripe_card_setup_help">In your Stripe Dashboard:\n1. Developers → API keys → Create restricted key. Give it only \"Terminal Connection Tokens: Write\".\n2. Terminal → Locations → create a location for this shop and copy its ID.\nUse a separate key for each phone so you can revoke one if a device is lost.</string>
     <string name="stripe_card_section_test">Test</string>
     <string name="stripe_card_test_title">Test connection</string>
     <string name="stripe_card_test_subtitle">Checks the key and location with Stripe</string>
@@ -48,4 +47,18 @@
     <string name="developer_settings_simulate_stripe_reader">Simulate Stripe card reader</string>
     <string name="card_payment_simulation_requires_test_key">The simulated reader requires a Stripe sandbox key (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe requires a release build for physical taps. For sandbox testing, enable the simulated reader in Developer settings.</string>
+    <string name="stripe_tutorial_title">Stripe setup</string>
+    <string name="stripe_tutorial_entry_title">Setup tutorial</string>
+    <string name="stripe_tutorial_entry_subtitle">Three steps to connect your Stripe account</string>
+    <string name="stripe_tutorial_progress">%1$d of %2$d</string>
+    <string name="stripe_tutorial_cancel">Cancel</string>
+    <string name="stripe_tutorial_back">Back</string>
+    <string name="stripe_tutorial_next">Next</string>
+    <string name="stripe_tutorial_done">Done</string>
+    <string name="stripe_tutorial_key_title">Create a restricted key</string>
+    <string name="stripe_tutorial_key_body">Developers → API keys → Create restricted key.\nSet Terminal Connection Tokens to Write. Use a separate key for each phone.</string>
+    <string name="stripe_tutorial_location_title">Add your location</string>
+    <string name="stripe_tutorial_location_body">Terminal → Locations → Create location.\nEnter your shop\'s address and copy its tml_… ID.</string>
+    <string name="stripe_tutorial_connect_title">Connect Numo</string>
+    <string name="stripe_tutorial_connect_body">Paste the key and location ID.\nTest connection, then enable card payments.</string>
 </resources>

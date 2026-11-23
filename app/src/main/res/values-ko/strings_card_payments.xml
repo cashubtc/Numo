@@ -10,7 +10,6 @@
     <string name="stripe_card_restricted_key_label">제한된 API 키 (rk_…)</string>
     <string name="stripe_card_restricted_key_saved_hint">저장됨. 바꾸려면 새 키를 입력하세요.</string>
     <string name="stripe_card_location_label">Terminal 위치 ID (tml_…)</string>
-    <string name="stripe_card_setup_help">Stripe 대시보드에서:\n1. Developers → API keys → Create restricted key. \"Terminal Connection Tokens: Write\" 권한만 부여하세요.\n2. Terminal → Locations → 이 매장의 위치를 만들고 ID를 복사하세요.\n기기를 분실했을 때 취소할 수 있도록 휴대폰마다 다른 키를 사용하세요.</string>
     <string name="stripe_card_section_test">테스트</string>
     <string name="stripe_card_test_title">연결 테스트</string>
     <string name="stripe_card_test_subtitle">Stripe에서 키와 위치를 확인합니다</string>
@@ -45,4 +44,18 @@
     <string name="developer_settings_simulate_stripe_reader">Stripe 카드 리더 시뮬레이션</string>
     <string name="card_payment_simulation_requires_test_key">시뮬레이션에는 Stripe 샌드박스 키(rk_test_…)가 필요합니다.</string>
     <string name="card_payment_debug_reader_unsupported">실제 카드를 읽으려면 릴리스 빌드가 필요합니다. 샌드박스에서 테스트하려면 개발자 설정에서 카드 리더 시뮬레이션을 켜세요.</string>
+    <string name="stripe_tutorial_title">Stripe 설정</string>
+    <string name="stripe_tutorial_entry_title">설정 튜토리얼</string>
+    <string name="stripe_tutorial_entry_subtitle">Stripe 계정 연결을 위한 3단계 안내</string>
+    <string name="stripe_tutorial_progress">%1$d / %2$d</string>
+    <string name="stripe_tutorial_cancel">취소</string>
+    <string name="stripe_tutorial_back">뒤로</string>
+    <string name="stripe_tutorial_next">다음</string>
+    <string name="stripe_tutorial_done">완료</string>
+    <string name="stripe_tutorial_key_title">제한된 키 만들기</string>
+    <string name="stripe_tutorial_key_body">Developers → API keys → Create restricted key.\nTerminal Connection Tokens를 Write로 설정하고 기기마다 다른 키를 사용하세요.</string>
+    <string name="stripe_tutorial_location_title">매장 위치 추가</string>
+    <string name="stripe_tutorial_location_body">Terminal → Locations → Create location.\n매장 주소를 입력하고 tml_… ID를 복사하세요.</string>
+    <string name="stripe_tutorial_connect_title">Numo 연결하기</string>
+    <string name="stripe_tutorial_connect_body">키와 위치 ID를 입력하세요.\n연결을 테스트한 후 카드 결제를 활성화하세요.</string>
 </resources>

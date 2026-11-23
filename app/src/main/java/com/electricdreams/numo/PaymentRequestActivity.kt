@@ -140,9 +140,6 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var cardAmount: CardAmountResolver.CardAmount? = null
     private var cardJob: Job? = null
 
-    /** PaymentIntent of the last unfinished card attempt; a retry reuses it instead of charging anew. */
-    private var cardPaymentIntent: PaymentIntent? = null
-
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
@@ -1713,6 +1710,34 @@ class PaymentRequestActivity : AppCompatActivity() {
         cardJob = null
     }
 
+    private fun savedCardPaymentReference(): StripeTerminalManager.CardPaymentReference? {
+        val paymentId = pendingPaymentId ?: return null
+        val entry = PaymentsHistoryActivity.getPaymentEntryById(this, paymentId) ?: return null
+        val clientSecret = entry.cardPaymentClientSecret ?: return null
+        return StripeTerminalManager.CardPaymentReference(
+            paymentIntentId = entry.cardPaymentIntentId,
+            clientSecret = clientSecret,
+        )
+    }
+
+    private fun persistCardPaymentIntent(paymentIntent: PaymentIntent) {
+        val paymentId = pendingPaymentId
+        val clientSecret = paymentIntent.clientSecret
+        val saved = paymentId != null && clientSecret != null &&
+            PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
+                context = this,
+                paymentId = paymentId,
+                paymentIntentId = paymentIntent.id,
+                clientSecret = clientSecret,
+            )
+        if (!saved) {
+            throw StripeTerminalManager.CardPaymentException(
+                "Could not save the card payment attempt for recovery",
+                isCancellation = false,
+            )
+        }
+    }
+
     private fun startCardPayment() {
         if (hasTerminalOutcome || cardJob?.isActive == true) return
         if (tabManager.getCurrentTab() != PaymentTabManager.PaymentTab.CARD) return
@@ -1756,15 +1781,18 @@ class PaymentRequestActivity : AppCompatActivity() {
                         pendingPaymentId?.let { put("numo_payment_id", it) }
                         put("numo_amount_sats", paymentAmount.toString())
                     },
-                    previous = cardPaymentIntent,
+                    previous = savedCardPaymentReference(),
+                    onPaymentIntent = ::persistCardPaymentIntent,
                 )
-                cardPaymentIntent = null
-                onCardPaymentCharged(paymentIntent.id.orEmpty())
+                val chargedAmount = CardAmountResolver.CardAmount(
+                    minorUnits = paymentIntent.amount,
+                    currency = paymentIntent.currency ?: amount.currency,
+                )
+                onCardPaymentCharged(paymentIntent.id.orEmpty(), chargedAmount)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: StripeTerminalManager.CardPaymentException) {
                 Log.w(TAG, "Card payment did not complete: ${e.message}", e)
-                e.paymentIntent?.let { cardPaymentIntent = it }
                 val currency = amount.currency.uppercase(java.util.Locale.US)
                 when (e.reason) {
                     // Setup problems: retrying would fail the same way, so offer no retry.
@@ -1818,10 +1846,17 @@ class PaymentRequestActivity : AppCompatActivity() {
      * already closed or paid another way, the charge is still recorded or reported.
      */
     private fun onCardPaymentCharged(paymentIntentId: String) {
+        onCardPaymentCharged(paymentIntentId, cardAmount)
+    }
+
+    private fun onCardPaymentCharged(
+        paymentIntentId: String,
+        chargedAmount: CardAmountResolver.CardAmount?,
+    ) {
         if (hasTerminalOutcome || isDestroyed) {
-            recordLateCardPayment(paymentIntentId)
+            recordLateCardPayment(paymentIntentId, chargedAmount)
         } else {
-            handleCardPaymentSuccess(paymentIntentId)
+            handleCardPaymentSuccess(paymentIntentId, chargedAmount)
         }
     }
 
@@ -1830,7 +1865,10 @@ class PaymentRequestActivity : AppCompatActivity() {
      * pending it is completed as a card payment; if it was already paid, the merchant is told
      * to refund the extra charge.
      */
-    private fun recordLateCardPayment(paymentIntentId: String) {
+    private fun recordLateCardPayment(
+        paymentIntentId: String,
+        chargedAmount: CardAmountResolver.CardAmount?,
+    ) {
         val context = applicationContext
         val paymentId = pendingPaymentId
         val stillPending = paymentId != null &&
@@ -1844,6 +1882,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                 paymentType = PaymentHistoryEntry.TYPE_CARD,
                 mintUrl = null,
                 paymentRequest = paymentIntentId,
+                cardAmountMinorUnits = chargedAmount?.minorUnits,
+                cardCurrency = chargedAmount?.currency,
             )
             dispatchPaymentReceivedWebhook()
             markBasketAsPaid()
@@ -1856,6 +1896,13 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     /** Records a captured card payment. Stripe holds the funds; nothing enters the Cashu wallet. */
     private fun handleCardPaymentSuccess(paymentIntentId: String) {
+        handleCardPaymentSuccess(paymentIntentId, cardAmount)
+    }
+
+    private fun handleCardPaymentSuccess(
+        paymentIntentId: String,
+        chargedAmount: CardAmountResolver.CardAmount?,
+    ) {
         if (!beginTerminalOutcome("card_success")) return
 
         Log.d(TAG, "Card payment succeeded: $paymentIntentId")
@@ -1872,6 +1919,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                 paymentType = PaymentHistoryEntry.TYPE_CARD,
                 mintUrl = null,
                 paymentRequest = paymentIntentId,
+                cardAmountMinorUnits = chargedAmount?.minorUnits,
+                cardCurrency = chargedAmount?.currency,
             )
         }
 

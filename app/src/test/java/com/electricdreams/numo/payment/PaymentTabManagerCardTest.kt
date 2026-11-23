@@ -24,6 +24,8 @@ class PaymentTabManagerCardTest {
     private lateinit var context: Context
     private lateinit var container: LinearLayout
     private lateinit var unifiedTab: LinearLayout
+    private lateinit var cashuTab: LinearLayout
+    private lateinit var lightningTab: LinearLayout
     private lateinit var cardTab: LinearLayout
     private lateinit var cardContainer: View
     private lateinit var manager: PaymentTabManager
@@ -37,8 +39,8 @@ class PaymentTabManagerCardTest {
         )
         container = LinearLayout(context)
         unifiedTab = tab()
-        val cashuTab = tab()
-        val lightningTab = tab()
+        cashuTab = tab()
+        lightningTab = tab()
         cardTab = tab().apply { visibility = View.GONE }
         cardContainer = FrameLayout(context)
 
@@ -68,6 +70,7 @@ class PaymentTabManagerCardTest {
             cardTabIcon = ImageView(context),
             cardContainer = cardContainer,
         )
+        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.LIGHTNING)
         manager.setup(object : PaymentTabManager.TabSelectionListener {
             override fun onTabSelected(tab: PaymentTab) {
                 selected += tab
@@ -78,8 +81,24 @@ class PaymentTabManagerCardTest {
     private fun tab() = LinearLayout(context).also { container.addView(it) }
 
     @Test
-    fun `card tab is placed last`() {
-        assertEquals(container.childCount - 1, container.indexOfChild(cardTab))
+    fun `checkout only contains Bitcoin and Card with Bitcoin selected by default`() {
+        assertEquals(2, container.childCount)
+        assertEquals(0, container.indexOfChild(unifiedTab))
+        assertEquals(1, container.indexOfChild(cardTab))
+        assertEquals(View.GONE, cashuTab.visibility)
+        assertEquals(View.GONE, lightningTab.visibility)
+        assertEquals(PaymentTab.UNIFIED, manager.getCurrentTab())
+        assertEquals(PaymentTab.UNIFIED, selected.last())
+        assertEquals("Bitcoin", context.getString(R.string.payment_request_tab_unified))
+    }
+
+    @Test
+    fun `legacy Cashu and Lightning selections resolve to unified Bitcoin`() {
+        manager.selectTab(PaymentTab.CASHU)
+        assertEquals(PaymentTab.UNIFIED, manager.getCurrentTab())
+
+        manager.selectTab(PaymentTab.LIGHTNING)
+        assertEquals(PaymentTab.UNIFIED, manager.getCurrentTab())
     }
 
     @Test
@@ -94,7 +113,7 @@ class PaymentTabManagerCardTest {
     }
 
     @Test
-    fun `hiding the card tab while selected falls back to the default method`() {
+    fun `hiding the card tab while selected falls back to Bitcoin`() {
         manager.setCardTabAvailable(true)
         cardTab.performClick()
 

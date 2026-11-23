@@ -1,5 +1,6 @@
 package com.electricdreams.numo.feature.settings
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -69,6 +70,9 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         binding.stripeLocationInput.doAfterTextChanged { onFieldEdited() }
         binding.testConnectionRow.setOnClickListener { testConnection() }
         binding.removeKeyRow.setOnClickListener { confirmRemoveKey() }
+        binding.stripeTutorialRow.setOnClickListener {
+            startActivity(Intent(this, StripeCardTutorialActivity::class.java))
+        }
     }
 
     override fun onPause() {

@@ -10,7 +10,6 @@
     <string name="stripe_card_restricted_key_label">Chave de API restrita (rk_…)</string>
     <string name="stripe_card_restricted_key_saved_hint">Salva. Digite uma nova chave para substituí-la.</string>
     <string name="stripe_card_location_label">ID do local do Terminal (tml_…)</string>
-    <string name="stripe_card_setup_help">No Dashboard da Stripe:\n1. Developers → API keys → Create restricted key. Conceda apenas \"Terminal Connection Tokens: Write\".\n2. Terminal → Locations → crie um local para esta loja e copie o ID.\nUse uma chave diferente em cada telefone para poder revogá-la se um aparelho for perdido.</string>
     <string name="stripe_card_section_test">Teste</string>
     <string name="stripe_card_test_title">Testar Conexão</string>
     <string name="stripe_card_test_subtitle">Verifica a chave e o local com a Stripe</string>
@@ -45,4 +44,18 @@
     <string name="developer_settings_simulate_stripe_reader">Simular leitor de cartões da Stripe</string>
     <string name="card_payment_simulation_requires_test_key">O leitor simulado requer uma chave de teste da Stripe (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">A Stripe exige uma versão de produção para ler cartões físicos. Para testar no ambiente de testes, ative o leitor simulado nas configurações de desenvolvedor.</string>
+    <string name="stripe_tutorial_title">Configuração do Stripe</string>
+    <string name="stripe_tutorial_entry_title">Tutorial de configuração</string>
+    <string name="stripe_tutorial_entry_subtitle">Três passos para conectar sua conta do Stripe</string>
+    <string name="stripe_tutorial_progress">%1$d de %2$d</string>
+    <string name="stripe_tutorial_cancel">Cancelar</string>
+    <string name="stripe_tutorial_back">Voltar</string>
+    <string name="stripe_tutorial_next">Avançar</string>
+    <string name="stripe_tutorial_done">Concluir</string>
+    <string name="stripe_tutorial_key_title">Crie uma chave restrita</string>
+    <string name="stripe_tutorial_key_body">Developers → API keys → Create restricted key.\nAtive Terminal Connection Tokens: Write. Use uma chave diferente em cada telefone.</string>
+    <string name="stripe_tutorial_location_title">Adicione seu local</string>
+    <string name="stripe_tutorial_location_body">Terminal → Locations → Create location.\nInsira o endereço da sua loja e copie o ID tml_….</string>
+    <string name="stripe_tutorial_connect_title">Conecte o Numo</string>
+    <string name="stripe_tutorial_connect_body">Cole a chave e o ID do local.\nTeste a conexão e ative os pagamentos com cartão.</string>
 </resources>

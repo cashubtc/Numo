@@ -86,6 +86,36 @@ class TransactionDetailActivityTest {
     }
 
     @Test
+    fun `a card payment shows its Stripe intent and exact charge metadata`() {
+        val sale = sale(enteredCents = 1_250, sats = 14_570, basket = null).copy(
+            paymentType = PaymentHistoryEntry.TYPE_CARD,
+            paymentRequest = "pi_card_detail",
+            lightningInvoice = "lnbc1unused",
+            cardAmountMinorUnits = 1_250,
+            cardCurrency = "usd",
+        )
+        val intent = PaymentIntentFactory.createTransactionDetailIntent(context, sale)
+        assertEquals(
+            1_250L,
+            intent.getLongExtra(TransactionDetailActivity.EXTRA_TRANSACTION_CARD_AMOUNT_MINOR_UNITS, 0),
+        )
+
+        ActivityScenario.launch<TransactionDetailActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                assertEquals(
+                    activity.getString(R.string.transaction_detail_transaction_id_label),
+                    activity.findViewById<TextView>(R.id.detail_invoice_label).text.toString(),
+                )
+                assertEquals(
+                    "pi_card_detail",
+                    activity.findViewById<TextView>(R.id.detail_invoice_value).text.toString(),
+                )
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.row_invoice).visibility)
+            }
+        }
+    }
+
+    @Test
     fun `an expired payment says so and offers no receipt`() {
         val expired = sale(
             enteredCents = 1_225, sats = 14_570, basket = null,
