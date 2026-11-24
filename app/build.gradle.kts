@@ -39,6 +39,17 @@ android {
             initWith(getByName("release"))
             matchingFallbacks += "release"
         }
+        // For testing Tap to Pay with real cards: Stripe only uses the phone's NFC reader in
+        // an app that is not debuggable. Signed with the debug key and installed next to Numo
+        // as "Numo Live", so it never replaces another build on a test phone.
+        create("liveCards") {
+            initWith(getByName("release"))
+            isDebuggable = false
+            applicationIdSuffix = ".livecards"
+            versionNameSuffix = "-livecards"
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+        }
     }
 
     // Keep existing debug/release commands for direct APK distribution. The Play build
@@ -51,6 +62,8 @@ android {
             kotlin.srcDir("src/direct/java")
             manifest.srcFile("src/direct/AndroidManifest.xml")
         }
+        // Like the Play build: no APK installer or direct updater.
+        getByName("liveCards").kotlin.srcDir("src/play/java")
         getByName("testDebug").kotlin.srcDir("src/testDirect/java")
         getByName("testRelease").kotlin.srcDir("src/testDirect/java")
         getByName("testDebug").resources.srcDir("src/testDirect/resources")
@@ -186,6 +199,7 @@ dependencies {
     implementation("com.stripe:stripeterminal-core:6.0.0")
     implementation("com.stripe:stripeterminal-taptopay:6.0.0")
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
+    "liveCardsImplementation"("com.google.android.play:app-update-ktx:2.1.0")
 }
 
 tasks.withType<Test>().configureEach {
