@@ -24,7 +24,8 @@
     <string name="stripe_card_remove_subtitle">Borra la clave de este teléfono y desactiva los pagos con tarjeta</string>
     <string name="stripe_card_removed">Clave de Stripe eliminada</string>
     <string name="payment_request_tab_card">Tarjeta</string>
-    <string name="payment_request_instruction_card">Acerca la tarjeta a este teléfono</string>
+    <string name="payment_request_instruction_card">Pago con tarjeta</string>
+    <string name="card_payment_status_ready">Toca Cobrar para iniciar el pago con tarjeta</string>
     <string name="card_payment_status_preparing">Preparando el lector de tarjetas…</string>
     <string name="card_payment_status_waiting">Esperando la tarjeta…</string>
     <string name="card_payment_status_cancelled">Pago con tarjeta cancelado</string>

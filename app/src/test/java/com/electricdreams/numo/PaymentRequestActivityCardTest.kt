@@ -188,17 +188,43 @@ class PaymentRequestActivityCardTest {
     }
 
     @Test
-    fun `card tab hides sharing and leaving it stops collection and restores sharing`() {
-        whenever(tabs.getCurrentTab()).thenReturn(PaymentTab.UNIFIED)
+    fun `card tab waits for explicit initialization and leaving it restores sharing`() {
+        ReflectionHelpers.setField(
+            activity,
+            "cardAmount",
+            CardAmountResolver.CardAmount(minorUnits = 1_250, currency = "usd"),
+        )
+
         call("enterCardMode")
+
+        assertEquals(activity.getString(R.string.card_payment_status_ready), cardStatus.text.toString())
+        assertEquals(View.VISIBLE, cardAction.visibility)
+        assertEquals(View.GONE, cardProgress.visibility)
+        assertEquals(null, ReflectionHelpers.getField<Job?>(activity, "cardJob"))
         assertEquals(View.INVISIBLE, shareButton.visibility)
 
         val collection = Job()
         ReflectionHelpers.setField(activity, "cardJob", collection)
+        whenever(tabs.getCurrentTab()).thenReturn(PaymentTab.UNIFIED)
         call("exitCardMode")
 
         assertTrue(collection.isCancelled)
         assertEquals(View.VISIBLE, shareButton.visibility)
+    }
+
+    @Test
+    fun `uncertain card outcome starts reconciliation when card tab opens`() {
+        ReflectionHelpers.setField(
+            activity,
+            "cardAmount",
+            CardAmountResolver.CardAmount(minorUnits = 1_250, currency = "usd"),
+        )
+        setReviewRequired(true)
+
+        call("enterCardMode")
+
+        assertEquals(activity.getString(R.string.card_payment_status_not_configured), cardStatus.text.toString())
+        assertEquals(View.GONE, cardAction.visibility)
     }
 
     @Test

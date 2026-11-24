@@ -24,7 +24,8 @@
     <string name="stripe_card_remove_subtitle">このスマートフォンからキーを削除し、カード決済をオフにします</string>
     <string name="stripe_card_removed">Stripe キーを削除しました</string>
     <string name="payment_request_tab_card">カード</string>
-    <string name="payment_request_instruction_card">このスマートフォンにカードをタッチ</string>
+    <string name="payment_request_instruction_card">カード決済</string>
+    <string name="card_payment_status_ready">請求ボタンをタップしてカード決済を開始してください</string>
     <string name="card_payment_status_preparing">カードリーダーを準備中…</string>
     <string name="card_payment_status_waiting">カードを待っています…</string>
     <string name="card_payment_status_cancelled">カード決済がキャンセルされました</string>

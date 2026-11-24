@@ -277,7 +277,7 @@
                 android:layout_marginTop="@dimen/space_l"
                 android:accessibilityLiveRegion="polite"
                 android:gravity="center"
-                android:text="@string/card_payment_status_preparing"
+                android:text="@string/card_payment_status_ready"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="16sp" />
 
@@ -286,7 +286,8 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_marginTop="@dimen/space_m"
-                android:indeterminate="true" />
+                android:indeterminate="true"
+                android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/card_action_button"

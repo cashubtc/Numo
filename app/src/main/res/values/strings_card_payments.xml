@@ -27,7 +27,8 @@
 
     <!-- Checkout: Card tab -->
     <string name="payment_request_tab_card">Card</string>
-    <string name="payment_request_instruction_card">Tap card on this phone</string>
+    <string name="payment_request_instruction_card">Card payment</string>
+    <string name="card_payment_status_ready">Tap Charge to initialize card payment</string>
     <string name="card_payment_status_preparing">Preparing card reader…</string>
     <string name="card_payment_status_waiting">Waiting for card…</string>
     <string name="card_payment_status_cancelled">Card payment cancelled</string>

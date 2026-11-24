@@ -147,7 +147,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (grants[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
             startCardPayment()
         } else {
-            showCardIdle(getString(R.string.card_payment_status_location_required), showRetry = true)
+            showCardIdle(getString(R.string.card_payment_status_location_required), showAction = true)
         }
     }
 
@@ -1691,7 +1691,12 @@ class PaymentRequestActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.instruction_text)?.setText(R.string.payment_request_instruction_card)
         // There is no payment request to share for a card payment.
         shareButton.visibility = View.INVISIBLE
-        startCardPayment()
+        if (cardPaymentReviewRequired) {
+            startCardPayment()
+        } else {
+            resolveCardAmount()
+            showCardIdle(getString(R.string.card_payment_status_ready), showAction = true)
+        }
     }
 
     private fun exitCardMode() {
@@ -1768,12 +1773,12 @@ class PaymentRequestActivity : AppCompatActivity() {
             val currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
             showCardIdle(
                 getString(R.string.card_payment_status_amount_unavailable, currencyCode),
-                showRetry = true,
+                showAction = true,
             )
             return
         }
         val config = StripeCardSettings.getInstance(this).loadConfig() ?: run {
-            showCardIdle(getString(R.string.card_payment_status_not_configured), showRetry = false)
+            showCardIdle(getString(R.string.card_payment_status_not_configured), showAction = false)
             return
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
@@ -1822,15 +1827,15 @@ class PaymentRequestActivity : AppCompatActivity() {
                     // Setup problems: retrying would fail the same way, so offer no retry.
                     StripeTerminalManager.FailureReason.AMOUNT_TOO_SMALL -> showCardIdle(
                         getString(R.string.card_payment_status_amount_too_small, formatCardAmount(amount)),
-                        showRetry = false,
+                        showAction = false,
                     )
                     StripeTerminalManager.FailureReason.CURRENCY_NOT_SUPPORTED -> showCardIdle(
                         getString(R.string.card_payment_status_currency_not_supported, currency),
-                        showRetry = false,
+                        showAction = false,
                     )
                     StripeTerminalManager.FailureReason.SIMULATION_REQUIRES_TEST_KEY -> showCardIdle(
                         getString(R.string.card_payment_simulation_requires_test_key),
-                        showRetry = false,
+                        showAction = false,
                     )
                     StripeTerminalManager.FailureReason.OTHER -> showCardIdle(
                         when {
@@ -1838,17 +1843,17 @@ class PaymentRequestActivity : AppCompatActivity() {
                             e.isCancellation -> getString(R.string.card_payment_status_cancelled)
                             else -> getString(R.string.card_payment_status_failed, e.message.orEmpty())
                         },
-                        showRetry = true,
+                        showAction = true,
                     )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Card reader error", e)
                 setCardPaymentReviewRequired(savedCardPaymentReference() != null)
                 if (e is TerminalException && e.errorCode == TerminalErrorCode.TAP_TO_PAY_DEBUG_NOT_SUPPORTED) {
-                    showCardIdle(getString(R.string.card_payment_debug_reader_unsupported), showRetry = false)
+                    showCardIdle(getString(R.string.card_payment_debug_reader_unsupported), showAction = false)
                 } else {
                     val reason = (e as? TerminalException)?.errorMessage ?: e.message ?: e.javaClass.simpleName
-                    showCardIdle(getString(R.string.card_payment_status_failed, reason), showRetry = true)
+                    showCardIdle(getString(R.string.card_payment_status_failed, reason), showAction = true)
                 }
             }
         }
@@ -1860,10 +1865,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         cardActionButton.visibility = View.GONE
     }
 
-    private fun showCardIdle(message: String, showRetry: Boolean) {
+    private fun showCardIdle(message: String, showAction: Boolean) {
         cardStatusText.text = message
         cardProgress.visibility = View.GONE
-        cardActionButton.visibility = if (showRetry && !hasTerminalOutcome) View.VISIBLE else View.GONE
+        cardActionButton.visibility = if (showAction && !hasTerminalOutcome) View.VISIBLE else View.GONE
     }
 
     /**
