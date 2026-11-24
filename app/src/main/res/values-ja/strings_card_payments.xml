@@ -4,7 +4,6 @@
     <string name="settings_stripe_card_subtitle">Stripe Tap to Pay でカードを受け付ける</string>
     <string name="settings_stripe_card_unsupported">NFC 搭載の Android 13 以降が必要です</string>
     <string name="stripe_card_enable_title">カード決済を受け付ける</string>
-    <string name="stripe_card_enable_subtitle">会計画面に「カード」タブを追加します。売上は Stripe からお使いの Stripe アカウントに入金されます。</string>
     <string name="stripe_card_section_account">Stripe アカウント</string>
     <string name="stripe_card_invalid_key">rk_live_ または rk_test_ で始まる制限付きキーを入力してください。シークレットキー (sk_…) は使用できません。</string>
     <string name="stripe_card_save_failed">この端末にキーを安全に保存できませんでした</string>

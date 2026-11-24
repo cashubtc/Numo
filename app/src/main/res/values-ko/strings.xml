@@ -285,9 +285,9 @@
     <string name="nfc_dialog_content_description_cashu">카슈</string>
     <string name="nfc_dialog_subtitle_or_scan_qr">또는 QR 코드를 스캔하세요</string>
     <string name="nfc_dialog_waiting_message">NFC를 기다리는 중...</string>
-    <string name="nfc_enable_title">NFC 활성화</string>
-    <string name="nfc_enable_message">탭하여 결제하려면 NFC가 필요합니다. 설정에서 활성화해 주세요.</string>
-    <string name="nfc_enable_button">설정</string>
+    <string name="nfc_off_strip_title">NFC가 꺼져 있음</string>
+    <string name="nfc_off_strip_subtitle">탭 결제에는 NFC가 필요합니다</string>
+    <string name="nfc_off_strip_action">NFC 설정 열기</string>
     <string name="common_cancel">취소</string>
 
     

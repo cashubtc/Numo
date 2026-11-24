@@ -123,6 +123,7 @@ class StripeCardCheckActivity : AppCompatActivity() {
     }
 
     private fun onFinished(report: CardSetupChecker.Report) {
+        settings.lastCheckedAt = System.currentTimeMillis()
         binding.primaryButton.isEnabled = true
         when {
             report.passed -> showPassed()

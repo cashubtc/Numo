@@ -235,9 +235,9 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="nfc_dialog_content_description_cashu">Cashu</string>
     <string name="nfc_dialog_subtitle_or_scan_qr">o escanea el código QR</string>
     <string name="nfc_dialog_waiting_message">Esperando NFC...</string>
-    <string name="nfc_enable_title">Activar NFC</string>
-    <string name="nfc_enable_message">Se necesita NFC para el pago por acercamiento. Actívalo en los ajustes.</string>
-    <string name="nfc_enable_button">Ajustes</string>
+    <string name="nfc_off_strip_title">NFC desactivado</string>
+    <string name="nfc_off_strip_subtitle">Los pagos por acercamiento necesitan NFC</string>
+    <string name="nfc_off_strip_action">Abrir ajustes de NFC</string>
     <string name="common_cancel">Cancelar</string>
     <string name="dialog_title_enter_pin">Introduce el PIN</string>
     <string name="dialog_pin_hint">PIN</string>

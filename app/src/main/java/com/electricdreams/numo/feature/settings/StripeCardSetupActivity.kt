@@ -279,7 +279,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
             // One location leaves nothing to choose. It shows on the status page afterwards,
             // where it can be changed or another added.
             only != null -> {
-                settings.saveLocation(only.id, only.displayName)
+                settings.saveLocation(only.id, only.displayName, only.place)
                 done()
             }
             // None yet: adding one is the only way on.
@@ -431,7 +431,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
     private fun submitLocation() {
         val location = locations?.firstOrNull { it.id == selectedLocationId } ?: return
-        settings.saveLocation(location.id, location.displayName)
+        settings.saveLocation(location.id, location.displayName, location.place)
         done()
     }
 
@@ -499,7 +499,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
             setBusy(false)
             result.onSuccess { location ->
                 locations = locations.orEmpty() + location
-                settings.saveLocation(location.id, location.displayName)
+                settings.saveLocation(location.id, location.displayName, location.place)
                 done()
             }.onFailure { error ->
                 Log.w(TAG, "Could not create the Stripe location", error)
@@ -549,7 +549,14 @@ class StripeCardSetupActivity : AppCompatActivity() {
         private const val TAG = "StripeCardSetup"
         private const val EXTRA_MODE = "mode"
         private const val EXTRA_THEN_CHECK = "then_check"
-        private const val STRIPE_API_KEYS_URL = "https://dashboard.stripe.com/apikeys"
+        /**
+         * Stripe's form for a new restricted key, with the name and the two permissions Numo
+         * needs filled in, so the merchant only has to create it and copy it.
+         */
+        private const val STRIPE_API_KEYS_URL = "https://dashboard.stripe.com/apikeys/create" +
+            "?name=Numo" +
+            "&permissions%5B%5D=rak_terminal_connection_token_write" +
+            "&permissions%5B%5D=rak_terminal_location_write"
         private const val HTTP_UNAUTHORIZED = 401
         private const val HTTP_FORBIDDEN = 403
         private const val STEP_ANIMATION_MS = 240L

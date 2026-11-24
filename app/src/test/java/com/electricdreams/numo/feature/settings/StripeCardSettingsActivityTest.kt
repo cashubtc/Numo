@@ -30,14 +30,10 @@ class StripeCardSettingsActivityTest {
     fun `a phone without NFC is told it cannot take cards and is not offered setup`() {
         ActivityScenario.launch(StripeCardSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                assertEquals(
-                    View.GONE,
-                    activity.findViewById<View>(R.id.test_mode_banner).visibility,
-                )
-                assertEquals(
-                    "This device can't take cards",
-                    activity.findViewById<TextView>(R.id.status_headline).text.toString(),
-                )
+                val card = activity.onlyCard()
+                assertEquals("This device can't take cards", card.title())
+                assertEquals(View.GONE, card.findViewById<View>(R.id.attention_fix_button).visibility)
+                assertEquals(View.GONE, activity.findViewById<View>(R.id.account_header).visibility)
                 assertEquals(View.GONE, activity.findViewById<View>(R.id.intro_container).visibility)
                 assertEquals(
                     View.GONE,
@@ -81,14 +77,28 @@ class StripeCardSettingsActivityTest {
         hasPassedCheck = true
     }
 
+    private fun StripeCardSettingsActivity.onlyCard(): View {
+        val cards = findViewById<ViewGroup>(R.id.attention_list)
+        assertEquals(1, cards.childCount)
+        return cards.getChildAt(0)
+    }
+
+    private fun View.title() = findViewById<TextView>(R.id.attention_title).text.toString()
+
+    private fun StripeCardSettingsActivity.trailing(row: Int) =
+        findViewById<View>(row).findViewById<TextView>(R.id.row_trailing_text).text.toString()
+
+    private fun StripeCardSettingsActivity.status() = trailing(R.id.status_row)
+
     private fun showWith(
         environment: FakeEnvironment,
         online: Boolean = true,
+        enabled: Boolean = false,
         assertions: (StripeCardSettingsActivity) -> Unit,
     ) {
         ActivityScenario.launch(StripeCardSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                activity.settings = connectedSettings()
+                activity.settings = connectedSettings().also { it.isEnabled = enabled }
                 activity.checkerFactory = { CardSetupChecker(environment) }
                 activity.isOnline = { online }
                 activity.refresh()
@@ -102,7 +112,6 @@ class StripeCardSettingsActivityTest {
     fun `a missing location permission shows one card that names it and offers the fix`() {
         showWith(FakeEnvironment(locationGranted = false)) { activity ->
             val cards = activity.findViewById<ViewGroup>(R.id.attention_list)
-            assertEquals(View.VISIBLE, cards.visibility)
             assertEquals(1, cards.childCount)
             val card = cards.getChildAt(0)
             assertEquals(
@@ -117,23 +126,46 @@ class StripeCardSettingsActivityTest {
                 "Allow location",
                 card.findViewById<TextView>(R.id.attention_fix_button).text.toString(),
             )
-            assertEquals(View.GONE, activity.findViewById<View>(R.id.status_headline).visibility)
-            assertEquals(View.GONE, activity.findViewById<View>(R.id.fix_button).visibility)
+            assertEquals("Needs fixing", activity.status())
         }
     }
 
     @Test
     fun `two problems show two cards`() {
-        showWith(FakeEnvironment(nfcEnabled = false, locationGranted = false)) { activity ->
+        showWith(
+            FakeEnvironment(nfcEnabled = false, locationGranted = false, stripeReachable = false),
+            online = false,
+        ) { activity ->
             assertEquals(2, activity.findViewById<ViewGroup>(R.id.attention_list).childCount)
         }
     }
 
     @Test
-    fun `a passing check shows the headline again and no cards`() {
+    fun `NFC off while online is left to the strip`() {
+        showWith(FakeEnvironment(nfcEnabled = false, locationGranted = false)) { activity ->
+            assertEquals("Numo can't use location", activity.onlyCard().title())
+        }
+    }
+
+    @Test
+    fun `a passing check shows the shop, a plain status and no card`() {
         showWith(FakeEnvironment()) { activity ->
-            assertEquals(View.GONE, activity.findViewById<View>(R.id.attention_list).visibility)
-            assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.status_headline).visibility)
+            assertEquals(0, activity.findViewById<ViewGroup>(R.id.attention_list).childCount)
+            assertEquals("Paused", activity.status())
+            assertEquals("Shop", activity.findViewById<TextView>(R.id.account_title).text.toString())
+            assertEquals(
+                "Stripe test mode",
+                activity.findViewById<TextView>(R.id.account_subtitle).text.toString(),
+            )
+            assertEquals("Never", activity.trailing(R.id.check_row))
+            assertEquals("Shop", activity.trailing(R.id.location_row))
+        }
+    }
+
+    @Test
+    fun `card payments switched on read as ready`() {
+        showWith(FakeEnvironment(), enabled = true) { activity ->
+            assertEquals("Ready", activity.status())
         }
     }
 
@@ -150,14 +182,10 @@ class StripeCardSettingsActivityTest {
     }
 
     @Test
-    fun `offline leaves the explaining to the Offline strip and shows no card`() {
+    fun `offline leaves the explaining to the Offline strip and keeps the last known status`() {
         showWith(FakeEnvironment(stripeReachable = false), online = false) { activity ->
-            assertEquals(View.GONE, activity.findViewById<View>(R.id.attention_list).visibility)
-            assertEquals(
-                "Card payments are paused",
-                activity.findViewById<TextView>(R.id.status_headline).text.toString(),
-            )
-            assertEquals(View.GONE, activity.findViewById<View>(R.id.fix_button).visibility)
+            assertEquals(0, activity.findViewById<ViewGroup>(R.id.attention_list).childCount)
+            assertEquals("Paused", activity.status())
         }
     }
 

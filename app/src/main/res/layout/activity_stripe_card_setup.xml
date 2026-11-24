@@ -64,100 +64,16 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/stripe_card_key_body"
-                        android:textAppearance="@style/Text.SettingsBody" />
+                        android:accessibilityHeading="true"
+                        android:text="@string/stripe_card_key_title"
+                        android:textAppearance="@style/Text.Heading1" />
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_l"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingVertical="@dimen/space_s">
-
-                            <TextView
-                                android:layout_width="24dp"
-                                android:layout_height="wrap_content"
-                                android:importantForAccessibility="no"
-                                android:text="1"
-                                android:textAppearance="@style/Text.SettingsBody" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/stripe_card_key_step_1"
-                                android:textAppearance="@style/Text.SettingsBody"
-                                android:textColor="@color/color_text_primary" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingVertical="@dimen/space_s">
-
-                            <TextView
-                                android:layout_width="24dp"
-                                android:layout_height="wrap_content"
-                                android:importantForAccessibility="no"
-                                android:text="2"
-                                android:textAppearance="@style/Text.SettingsBody" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/stripe_card_key_step_2"
-                                android:textAppearance="@style/Text.SettingsBody"
-                                android:textColor="@color/color_text_primary" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingVertical="@dimen/space_s">
-
-                            <TextView
-                                android:layout_width="24dp"
-                                android:layout_height="wrap_content"
-                                android:importantForAccessibility="no"
-                                android:text="3"
-                                android:textAppearance="@style/Text.SettingsBody" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/stripe_card_key_step_3"
-                                android:textAppearance="@style/Text.SettingsBody"
-                                android:textColor="@color/color_text_primary" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/open_stripe_button"
-                        style="@style/Widget.Button.Secondary.Outlined"
-                        android:textAppearance="@style/Text.Button"
-                        android:textSize="@dimen/text_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_s"
-                        android:text="@string/stripe_card_open_stripe"
-                        android:textColor="@color/color_text_primary"
-                        app:icon="@drawable/ic_open_external"
-                        app:iconGravity="textEnd"
-                        app:iconSize="18dp"
-                        app:iconTint="@color/color_text_primary" />
+                        android:text="@string/stripe_card_key_body"
+                        android:textAppearance="@style/Text.SettingsBody" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/stripe_key_layout"
@@ -165,7 +81,7 @@
                         app:errorEnabled="true"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/space_xl"
                         android:hint="@string/stripe_card_key_label"
                         app:endIconContentDescription="@string/stripe_card_setup_paste"
                         app:endIconDrawable="@drawable/ic_paste"
@@ -191,12 +107,35 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Opens Stripe's create-key form with the name and both permissions filled in -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/open_stripe_button"
+                        style="@style/Widget.Button.Secondary.Outlined"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/stripe_card_open_stripe"
+                        android:textAppearance="@style/Text.Button"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="@dimen/text_button"
+                        app:icon="@drawable/ic_open_external"
+                        app:iconGravity="textEnd"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/color_text_primary" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/stripe_card_key_create_hint"
+                        android:textAppearance="@style/Text.SettingsCaption" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
                         android:text="@string/stripe_card_key_tip"
-                        android:textAppearance="@style/Text.SettingsBody" />
+                        android:textAppearance="@style/Text.SettingsCaption" />
 
                 </LinearLayout>
 

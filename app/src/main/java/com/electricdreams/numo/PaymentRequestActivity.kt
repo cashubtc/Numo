@@ -1110,12 +1110,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
         val offline = mode == OfflineStripView.Mode.OFFLINE
-        val color = ContextCompat.getColor(
-            this,
-            if (offline) R.color.color_warning else R.color.color_success_green
-        )
-        text.setText(if (offline) R.string.offline_strip_title else R.string.offline_strip_back_online_title)
-        text.setTextColor(color)
+        text.setText(mode.title)
+        text.setTextColor(ContextCompat.getColor(this, mode.color))
         pill.isClickable = offline
         pill.isFocusable = offline
         if (pill.visibility != View.VISIBLE) {

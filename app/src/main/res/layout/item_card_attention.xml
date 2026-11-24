@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One thing that stops card payments, with the button that fixes it -->
+<!-- One thing on the status page that needs the merchant, with the button that deals with it -->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -19,6 +19,7 @@
         android:paddingBottom="@dimen/space_s">
 
         <ImageView
+            android:id="@+id/attention_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:importantForAccessibility="no"

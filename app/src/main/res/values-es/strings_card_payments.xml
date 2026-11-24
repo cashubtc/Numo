@@ -4,7 +4,6 @@
     <string name="settings_stripe_card_subtitle">Acepta tarjetas con Stripe Tap to Pay</string>
     <string name="settings_stripe_card_unsupported">Requiere Android 13 o superior con NFC</string>
     <string name="stripe_card_enable_title">Aceptar pagos con tarjeta</string>
-    <string name="stripe_card_enable_subtitle">Añade una pestaña Tarjeta al cobrar. Stripe abona el dinero en tu propia cuenta de Stripe.</string>
     <string name="stripe_card_section_account">Cuenta de Stripe</string>
     <string name="stripe_card_invalid_key">Introduce una clave restringida que empiece por rk_live_ o rk_test_. No se aceptan claves secretas (sk_…).</string>
     <string name="stripe_card_save_failed">No se pudo guardar la clave de forma segura en este dispositivo</string>

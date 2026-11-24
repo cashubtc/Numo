@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
@@ -147,6 +148,10 @@ class SettingsRowView @JvmOverloads constructor(
         } else {
             trailingTextView.visibility = View.VISIBLE
         }
+    }
+
+    fun setTrailingTextColor(@ColorInt color: Int) {
+        trailingTextView.setTextColor(color)
     }
 
     fun setTrailingIcon(@DrawableRes res: Int?) {
