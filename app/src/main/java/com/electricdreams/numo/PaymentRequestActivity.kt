@@ -1635,13 +1635,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         return cardAmount
     }
 
+    /** The amount is already shown above, so the button only names the action. */
     private fun updateCardButtonLabel() {
-        val amount = cardAmount
-        cardPayButton.text = when {
-            cardNeedsStatusCheck -> getString(R.string.card_payment_action_check)
-            amount != null -> getString(R.string.card_payment_button_amount, formatCardAmount(amount))
-            else -> getString(R.string.card_payment_button)
-        }
+        cardPayButton.text = getString(
+            if (cardNeedsStatusCheck) R.string.card_payment_action_check else R.string.card_payment_button
+        )
     }
 
     private fun formatCardAmount(amount: CardAmountResolver.CardAmount): String = try {

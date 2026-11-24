@@ -19,8 +19,7 @@
     <string name="card_payment_status_amount_unavailable">카드 결제 금액을 계산할 수 없습니다: %1$s 기준 비트코인 가격을 아직 불러오지 못했습니다</string>
     <string name="card_payment_status_location_required">Stripe 카드 결제에는 위치 권한이 필요합니다</string>
     <string name="card_payment_status_not_configured">카드 결제가 설정되지 않았습니다</string>
-    <string name="card_payment_button">카드</string>
-    <string name="card_payment_button_amount">카드 · %1$s</string>
+    <string name="card_payment_button">카드로 결제</string>
     <string name="card_payment_action_check">카드 결제 확인</string>
     <string name="transaction_detail_payment_type_card_value">카드 (Stripe)</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe 카드 리더 시뮬레이션</string>

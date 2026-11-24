@@ -151,8 +151,7 @@
     <string name="card_payment_status_amount_unavailable">Card amount unavailable: the bitcoin price in %1$s is not loaded yet</string>
     <string name="card_payment_status_location_required">Location permission is required by Stripe for card payments</string>
     <string name="card_payment_status_not_configured">Card payments are not set up</string>
-    <string name="card_payment_button">Card</string>
-    <string name="card_payment_button_amount">Card · %1$s</string>
+    <string name="card_payment_button">Pay with card</string>
     <string name="card_payment_action_check">Check card payment</string>
     <string name="transaction_detail_payment_type_card_value">Card (Stripe)</string>
     <string name="developer_settings_simulate_stripe_reader">Simulate Stripe card reader</string>

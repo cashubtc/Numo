@@ -129,6 +129,15 @@ class PaymentRequestActivityCardTest {
     }
 
     @Test
+    fun `card button names the action and leaves the amount to the total above`() {
+        ReflectionHelpers.setField(activity, "cardAmount", CardAmountResolver.CardAmount(1200, "usd"))
+
+        ReflectionHelpers.callInstanceMethod<Any?>(activity, "updateCardButtonLabel")
+
+        assertEquals("Pay with card", cardButton.text.toString())
+    }
+
+    @Test
     fun `card attempt that ends without a charge explains why and offers the card again`() {
         call("showCardBusy")
         assertFalse(cardButton.isEnabled)

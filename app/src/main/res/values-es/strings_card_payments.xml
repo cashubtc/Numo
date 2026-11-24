@@ -19,8 +19,7 @@
     <string name="card_payment_status_amount_unavailable">Importe con tarjeta no disponible: el precio de bitcoin en %1$s aún no se ha cargado</string>
     <string name="card_payment_status_location_required">Stripe requiere el permiso de ubicación para los pagos con tarjeta</string>
     <string name="card_payment_status_not_configured">Los pagos con tarjeta no están configurados</string>
-    <string name="card_payment_button">Tarjeta</string>
-    <string name="card_payment_button_amount">Tarjeta · %1$s</string>
+    <string name="card_payment_button">Pagar con tarjeta</string>
     <string name="card_payment_action_check">Comprobar pago con tarjeta</string>
     <string name="transaction_detail_payment_type_card_value">Tarjeta (Stripe)</string>
     <string name="developer_settings_simulate_stripe_reader">Simular el lector de tarjetas de Stripe</string>

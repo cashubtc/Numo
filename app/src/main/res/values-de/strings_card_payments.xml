@@ -19,8 +19,7 @@
     <string name="card_payment_status_amount_unavailable">Kartenbetrag nicht verfügbar: Der Bitcoin-Kurs in %1$s ist noch nicht geladen</string>
     <string name="card_payment_status_location_required">Stripe benötigt für Kartenzahlungen die Standortberechtigung</string>
     <string name="card_payment_status_not_configured">Kartenzahlungen sind nicht eingerichtet</string>
-    <string name="card_payment_button">Karte</string>
-    <string name="card_payment_button_amount">Karte · %1$s</string>
+    <string name="card_payment_button">Mit Karte bezahlen</string>
     <string name="card_payment_action_check">Kartenzahlung prüfen</string>
     <string name="transaction_detail_payment_type_card_value">Karte (Stripe)</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe-Kartenleser simulieren</string>
