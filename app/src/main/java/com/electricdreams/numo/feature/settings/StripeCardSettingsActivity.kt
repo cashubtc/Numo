@@ -2,17 +2,21 @@ package com.electricdreams.numo.feature.settings
 
 import android.animation.ValueAnimator
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.provider.Settings
+import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.Toast
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.core.view.updatePadding
+import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.lifecycleScope
 import kotlin.math.PI
 import kotlin.math.cos
@@ -126,7 +130,6 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         binding.getStartedButton.setOnClickListener {
             startActivity(StripeCardSetupActivity.setupIntent(this))
         }
-        binding.fixButton.setOnClickListener { openCheck(enableOnPass = false) }
         binding.checkRow.setOnClickListener { openCheck(enableOnPass = false) }
         binding.keyRow.setOnClickListener {
             startActivity(StripeCardSetupActivity.editKeyIntent(this, thenCheck = true))
@@ -159,7 +162,8 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         checkJob?.cancel()
         binding.checkProgress.hide()
         setSwitch(settings.isEnabled)
-        binding.keyRow.setSubtitle(settings.maskedKey())
+        binding.keyRow.setTrailingText(settings.maskedKey())
+        showLastChecked()
         showLocation()
         loadMissingLocationName()
 
@@ -186,10 +190,33 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         }
     }
 
+    /** The shop leads the page, and its row repeats the name so it reads as changeable. */
     private fun showLocation() {
-        binding.locationRow.setSubtitle(
-            settings.storedLocationName()
-                ?: settings.storedLocationId().ifEmpty { getString(R.string.stripe_card_location_row_missing) }
+        val name = settings.storedLocationName()
+        binding.accountTitle.text = name ?: getString(R.string.stripe_card_account_fallback_title)
+        val mode = getString(
+            if (settings.isTestMode() == true) R.string.stripe_card_account_test_mode
+            else R.string.stripe_card_account_live_mode
+        )
+        binding.accountSubtitle.text =
+            listOfNotNull(settings.storedLocationPlace(), mode).joinToString(" · ")
+        binding.locationRow.setTrailingText(
+            name ?: settings.storedLocationId()
+                .ifEmpty { getString(R.string.stripe_card_location_row_missing) }
+        )
+    }
+
+    /** When the full check last ran, in the system's own words ("5 min. ago", "Yesterday"). */
+    private fun showLastChecked() {
+        binding.checkRow.setTrailingText(
+            settings.lastCheckedAt?.let {
+                DateUtils.getRelativeTimeSpanString(
+                    it,
+                    System.currentTimeMillis(),
+                    DateUtils.MINUTE_IN_MILLIS,
+                    DateUtils.FORMAT_ABBREV_RELATIVE,
+                )
+            } ?: getString(R.string.stripe_card_last_checked_never)
         )
     }
 
@@ -208,7 +235,7 @@ class StripeCardSettingsActivity : AppCompatActivity() {
             // The client falls back to the ID when Stripe has no name; that is not worth storing.
             val name = location?.displayName?.takeIf { it != location.id } ?: return@launch
             if (settings.storedLocationId() != location.id) return@launch
-            settings.saveLocationName(name)
+            settings.saveLocationName(name, location.place)
             showLocation()
         }
     }
@@ -221,13 +248,18 @@ class StripeCardSettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * What the quick check found that the merchant should see. Without internet, "Couldn't reach
-     * Stripe" is left out: the app's Offline strip already says so on every screen.
+     * What the quick check found that the merchant should see here. The app's strip across the
+     * top of every screen already says "Offline" or "NFC is off", so those get no card of their
+     * own. Without internet the strip only says Offline, and NFC keeps its card.
      */
     private fun failuresToShow(report: CardSetupChecker.Report): List<CardSetupChecker.Outcome.Failed> {
         val offline = !isOnline()
         return report.failures.filterNot {
-            offline && it.failure == CardSetupChecker.Failure.STRIPE_UNREACHABLE
+            when (it.failure) {
+                CardSetupChecker.Failure.STRIPE_UNREACHABLE -> offline
+                CardSetupChecker.Failure.NFC_OFF -> !offline
+                else -> false
+            }
         }
     }
 
@@ -239,72 +271,97 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         animateConnectDots(run = state == State.NOT_SET_UP)
         // The connect screen carries its own headline, so the status block would only repeat it.
         binding.statusCard.visibility = if (state == State.NOT_SET_UP) View.GONE else View.VISIBLE
+        binding.accountHeader.visibility = binding.configuredContainer.visibility
 
-        when (state) {
-            State.UNSUPPORTED -> setStatus(
-                R.string.stripe_card_headline_unsupported, R.string.stripe_card_body_unsupported,
-            )
-            State.NOT_SET_UP -> Unit
-            State.CHECKING -> {
-                // Show the last known state while the quick checks run: nothing flashes or resizes
-                // unless the answer actually changed.
-                show(knownState())
-                return
-            }
-            State.READY -> setStatus(
-                R.string.stripe_card_headline_ready, R.string.stripe_card_body_ready,
-            )
-            State.PAUSED -> setStatus(
-                R.string.stripe_card_headline_paused, R.string.stripe_card_body_paused,
-            )
-            State.UNCHECKED -> setStatus(
-                R.string.stripe_card_headline_unchecked, R.string.stripe_card_body_unchecked,
-            )
-            State.ATTENTION -> setStatus(
-                R.string.stripe_card_headline_attention, R.string.stripe_card_body_attention,
-            )
+        if (state == State.CHECKING) {
+            // Show the last known state while the quick checks run: nothing flashes or resizes
+            // unless the answer actually changed.
+            show(knownState())
+            return
         }
 
-        binding.testModeBanner.visibility =
-            if (configured && settings.isTestMode() == true) View.VISIBLE else View.GONE
-
-        showFailures(failures)
-        // A green tick beside "Check setup" would contradict the cards above it.
-        val failing = state == State.ATTENTION
-        binding.checkRow.setIcon(if (failing) R.drawable.ic_warning else R.drawable.ic_checkmark_circle)
-        // m3_primary is the tint Widget.Numo.SettingsRow gives every row icon.
-        binding.checkRow.setIconTint(
-            ContextCompat.getColorStateList(
-                this,
-                if (failing) R.color.color_warning else R.color.m3_primary,
+        binding.attentionList.removeAllViews()
+        when (state) {
+            State.UNSUPPORTED -> addCard(
+                R.drawable.ic_warning, R.color.color_warning,
+                getString(R.string.stripe_card_headline_unsupported),
+                getString(R.string.stripe_card_body_unsupported),
             )
-        )
-        // Each problem card says what is wrong and fixes it, so the headline has nothing to add.
-        val cardsSayIt = state == State.ATTENTION && failures.isNotEmpty()
-        binding.statusHeadline.visibility = if (cardsSayIt) View.GONE else View.VISIBLE
-        binding.statusBody.visibility = binding.statusHeadline.visibility
-        val needsCheck = (state == State.ATTENTION && !cardsSayIt) || state == State.UNCHECKED
-        binding.fixButton.visibility = if (needsCheck) View.VISIBLE else View.GONE
-        binding.fixButton.setText(
-            if (state == State.UNCHECKED) R.string.stripe_card_check_row_title
-            else R.string.stripe_card_see_fixes
-        )
+            // All is well: the Status row says so, and a card would only repeat it.
+            State.READY, State.PAUSED -> Unit
+            State.UNCHECKED -> addCard(
+                R.drawable.ic_info, R.color.color_text_secondary,
+                getString(R.string.stripe_card_headline_unchecked),
+                getString(R.string.stripe_card_body_unchecked),
+                R.string.stripe_card_check_row_title,
+            ) { openCheck(enableOnPass = false) }
+            State.ATTENTION -> showFailures(failures)
+            State.NOT_SET_UP, State.CHECKING -> Unit
+        }
+        showStatus(state)
+    }
+
+    private fun showStatus(state: State) {
+        val (text, color) = when (state) {
+            State.READY -> R.string.stripe_card_status_ready to R.color.color_success_green
+            State.PAUSED -> R.string.stripe_card_status_paused to R.color.color_text_secondary
+            State.ATTENTION -> R.string.stripe_card_status_attention to R.color.color_warning
+            else -> R.string.stripe_card_status_unchecked to R.color.color_text_secondary
+        }
+        binding.statusRow.setTrailingText(getString(text))
+        binding.statusRow.setTrailingTextColor(ContextCompat.getColor(this, color))
     }
 
     /** One card per failed check: what is wrong, why it matters, and the button that fixes it. */
     private fun showFailures(failures: List<CardSetupChecker.Outcome.Failed>) {
-        binding.attentionList.removeAllViews()
-        binding.attentionList.visibility = if (failures.isEmpty()) View.GONE else View.VISIBLE
         failures.forEach { failure ->
-            val card = ItemCardAttentionBinding.inflate(layoutInflater, binding.attentionList, true)
-            card.attentionTitle.setText(CardCheckText.failureTitle(failure.failure))
-            card.attentionBody.text = CardCheckText.problemBody(this, failure)
-            val label = CardCheckText.fixLabel(failure.fix)
-            card.attentionFixButton.visibility = if (label == null) View.GONE else View.VISIBLE
-            if (label != null) {
-                card.attentionFixButton.setText(label)
-                card.attentionFixButton.setOnClickListener { applyFix(failure.fix) }
-            }
+            addCard(
+                R.drawable.ic_warning, R.color.color_warning,
+                getString(CardCheckText.failureTitle(failure.failure)),
+                CardCheckText.problemBody(this, failure),
+                CardCheckText.fixLabel(failure.fix),
+            ) { applyFix(failure.fix) }
+        }
+        // The check failed without naming a problem; the full check will.
+        if (failures.isEmpty()) {
+            addCard(
+                R.drawable.ic_warning, R.color.color_warning,
+                getString(R.string.stripe_card_headline_attention),
+                getString(R.string.stripe_card_body_attention),
+                R.string.stripe_card_see_fixes,
+            ) { openCheck(enableOnPass = false) }
+        }
+    }
+
+    /** Adds a card to the status slot. [action] is its button, or null for a card that only informs. */
+    private fun addCard(
+        @DrawableRes icon: Int,
+        @ColorRes tint: Int,
+        title: String,
+        body: String,
+        @StringRes action: Int? = null,
+        onAction: () -> Unit = {},
+    ) {
+        val card = ItemCardAttentionBinding.inflate(layoutInflater, binding.attentionList, true)
+        card.attentionIcon.setImageResource(icon)
+        ImageViewCompat.setImageTintList(card.attentionIcon, ContextCompat.getColorStateList(this, tint))
+        card.attentionTitle.text = title
+        card.attentionBody.text = body
+        card.attentionFixButton.visibility = if (action == null) View.GONE else View.VISIBLE
+        // Without the button under it, the text needs the room the button's own padding gave.
+        card.attentionBody.updatePadding(
+            bottom = if (action == null) resources.getDimensionPixelSize(R.dimen.space_m) else 0
+        )
+        if (action != null) {
+            card.attentionFixButton.setText(action)
+            // Amber is for problems; a card that only suggests the next step uses the text colour.
+            card.attentionFixButton.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    if (tint == R.color.color_warning) R.color.color_warning else R.color.color_text_primary,
+                )
+            )
+            card.attentionFixButton.setOnClickListener { onAction() }
         }
     }
 
@@ -330,11 +387,6 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.w(TAG, "Could not open ${intent.action ?: intent.component}", e)
         }
-    }
-
-    private fun setStatus(@StringRes headline: Int, @StringRes body: Int) {
-        binding.statusHeadline.setText(headline)
-        binding.statusBody.setText(body)
     }
 
     private fun setSwitch(checked: Boolean) {

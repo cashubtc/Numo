@@ -103,21 +103,36 @@ class StripeCardSettings(
         return true
     }
 
-    /** Stores the chosen location; [name] is null when only the ID is known. */
-    fun saveLocation(locationId: String, name: String?) {
+    /**
+     * Stores the chosen location; [name] is null when only the ID is known.
+     *
+     * @param place where the shop is, e.g. "Washington, US", shown under its name.
+     */
+    fun saveLocation(locationId: String, name: String?, place: String? = null) {
         if (locationId.trim() != storedLocationId()) requireNewCheck()
         prefs.commitStrings(
             mapOf(
                 KEY_LOCATION_ID to locationId.trim(),
                 KEY_LOCATION_NAME to name?.trim()?.takeIf { it.isNotEmpty() },
+                KEY_LOCATION_PLACE to place?.trim()?.takeIf { it.isNotEmpty() },
             )
         )
     }
 
-    /** Remembers the name Stripe has for the stored location, once it has been looked up. */
-    fun saveLocationName(name: String) {
+    /** Remembers what Stripe has for the stored location, once it has been looked up. */
+    fun saveLocationName(name: String, place: String? = null) {
         name.trim().takeIf { it.isNotEmpty() }?.let { prefs.putString(KEY_LOCATION_NAME, it) }
+        place?.trim()?.takeIf { it.isNotEmpty() }?.let { prefs.putString(KEY_LOCATION_PLACE, it) }
     }
+
+    /** City and country of the stored location, when Stripe has them. */
+    fun storedLocationPlace(): String? =
+        prefs.getString(KEY_LOCATION_PLACE)?.takeIf { it.isNotBlank() }
+
+    /** When the full setup check last finished, pass or fail, in epoch milliseconds. */
+    var lastCheckedAt: Long?
+        get() = prefs.getString(KEY_LAST_CHECKED_AT)?.toLongOrNull()
+        set(value) = prefs.putString(KEY_LAST_CHECKED_AT, value?.toString())
 
     /** @return false when the key could not be encrypted, in which case nothing is stored. */
     fun saveConfig(config: StripeCardConfig): Boolean {
@@ -141,6 +156,8 @@ class StripeCardSettings(
         prefs.remove(KEY_RESTRICTED_KEY)
         prefs.remove(KEY_LOCATION_ID)
         prefs.remove(KEY_LOCATION_NAME)
+        prefs.remove(KEY_LOCATION_PLACE)
+        prefs.remove(KEY_LAST_CHECKED_AT)
         prefs.putBoolean(KEY_ENABLED, false)
         prefs.putBoolean(KEY_CHECK_PASSED, false)
     }
@@ -153,6 +170,8 @@ class StripeCardSettings(
         private const val KEY_RESTRICTED_KEY = "stripe_card_restricted_key"
         private const val KEY_LOCATION_ID = "stripe_card_location_id"
         private const val KEY_LOCATION_NAME = "stripe_card_location_name"
+        private const val KEY_LOCATION_PLACE = "stripe_card_location_place"
+        private const val KEY_LAST_CHECKED_AT = "stripe_card_last_checked_at"
         private const val KEY_CHECK_PASSED = "stripe_card_check_passed"
         private const val MASK_VISIBLE_SUFFIX = 4
 

@@ -6,11 +6,6 @@
     <string name="settings_stripe_card_unsupported">Requires Android 13 or newer with NFC</string>
 
     <!-- Card payments: status page -->
-    <string name="stripe_card_test_mode_banner">Test mode: no real money moves</string>
-    <string name="stripe_card_headline_ready">This device is ready to take cards</string>
-    <string name="stripe_card_body_ready">Checkout shows a Card tab. Customers tap a card, phone or watch on this device.</string>
-    <string name="stripe_card_headline_paused">Card payments are paused</string>
-    <string name="stripe_card_body_paused">The Card tab is hidden at checkout. Turn card payments back on whenever you like.</string>
     <string name="stripe_card_headline_attention">Something needs fixing</string>
     <string name="stripe_card_body_attention">Card payments may fail until this is fixed.</string>
     <string name="stripe_card_headline_unchecked">Finish the setup check</string>
@@ -24,14 +19,22 @@
     <string name="stripe_card_intro_key">You need a Stripe account. Setup takes about 5 minutes, and you can disconnect at any time.</string>
     <string name="stripe_card_get_started">Connect Stripe</string>
     <string name="stripe_card_enable_title">Accept card payments</string>
-    <string name="stripe_card_enable_subtitle">Shows the Card tab at checkout</string>
+    <string name="stripe_card_section_payments">Payments</string>
+    <string name="stripe_card_status_row_title">Status</string>
+    <string name="stripe_card_status_ready">Ready</string>
+    <string name="stripe_card_status_paused">Paused</string>
+    <string name="stripe_card_status_unchecked">Not checked yet</string>
+    <string name="stripe_card_status_attention">Needs fixing</string>
+    <string name="stripe_card_last_checked_row_title">Last checked</string>
+    <string name="stripe_card_last_checked_never">Never</string>
+    <string name="stripe_card_account_fallback_title">Stripe</string>
+    <string name="stripe_card_account_test_mode">Stripe test mode</string>
+    <string name="stripe_card_account_live_mode">Connected to Stripe</string>
     <string name="stripe_card_section_account">Stripe account</string>
     <string name="stripe_card_key_row_title">Restricted key</string>
     <string name="stripe_card_location_row_title">Location</string>
     <string name="stripe_card_location_row_missing">Not chosen</string>
-    <string name="stripe_card_section_check">Setup</string>
     <string name="stripe_card_check_row_title">Check setup</string>
-    <string name="stripe_card_check_row_subtitle">Tests this device, your Stripe account and the card reader</string>
     <string name="stripe_card_see_fixes">See what to fix</string>
     <string name="stripe_card_disconnect_title">Disconnect Stripe</string>
     <string name="stripe_card_disconnect_message">This removes the restricted key from this device and turns card payments off. Your Stripe account is not changed.</string>
@@ -47,11 +50,10 @@
     <string name="stripe_card_setup_clipboard_empty">Nothing to paste</string>
     <string name="stripe_card_setup_no_browser">No web browser found</string>
     <string name="stripe_card_key_heading">Connect Stripe</string>
-    <string name="stripe_card_key_body">Numo needs a restricted key from your Stripe account. It can only start the card reader and manage your locations; it cannot move money.</string>
-    <string name="stripe_card_key_step_1">In Stripe, open Developers, then API keys.</string>
-    <string name="stripe_card_key_step_2">Create a restricted key. Give it Write access to Terminal Connection Tokens and Terminal Locations, and nothing else.</string>
-    <string name="stripe_card_key_step_3">Copy the key and paste it below.</string>
-    <string name="stripe_card_open_stripe">Open Stripe</string>
+    <string name="stripe_card_key_title">Paste a restricted key</string>
+    <string name="stripe_card_key_body">It lets Numo start the card reader and list your locations. It can\'t move money.</string>
+    <string name="stripe_card_open_stripe">Create the key in Stripe</string>
+    <string name="stripe_card_key_create_hint">Stripe opens with the two permissions Numo needs already selected. Create the key, copy it and come back.</string>
     <string name="stripe_card_key_label">Restricted key</string>
     <string name="stripe_card_key_replace_hint">Paste a new key to replace it.</string>
     <string name="stripe_card_key_tip">Use a separate key for each device, so you can cancel one if a device is lost.</string>

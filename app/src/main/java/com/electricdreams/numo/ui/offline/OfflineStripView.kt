@@ -7,6 +7,8 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
@@ -16,7 +18,8 @@ import com.electricdreams.numo.databinding.ViewOfflineStripBinding
 import kotlin.math.ceil
 
 /**
- * The dark "Offline ⓘ" layer that sits behind the status bar and above the app.
+ * The dark "Offline ⓘ" layer that sits behind the status bar and above the app. It also says
+ * when NFC is switched off, which stops tap payments the same way no internet stops new charges.
  *
  * Below the strip it draws two concave fillets, so whatever screen is underneath reads as a card
  * with rounded top corners without that screen having to clip itself.
@@ -24,7 +27,34 @@ import kotlin.math.ceil
 @SuppressLint("ViewConstructor")
 class OfflineStripView(context: Context) : FrameLayout(context) {
 
-    enum class Mode { OFFLINE, BACK_ONLINE }
+    enum class Mode(
+        @StringRes val title: Int,
+        @StringRes val subtitle: Int,
+        @ColorRes val color: Int,
+        /** What tapping the strip does, read out by TalkBack; null when it leads nowhere. */
+        @StringRes val action: Int?,
+    ) {
+        OFFLINE(
+            R.string.offline_strip_title,
+            R.string.offline_strip_subtitle,
+            R.color.color_warning,
+            R.string.offline_strip_action_details,
+        ),
+
+        /** Purely informational: shown briefly once the connection returns. */
+        BACK_ONLINE(
+            R.string.offline_strip_back_online_title,
+            R.string.offline_strip_back_online_subtitle,
+            R.color.color_success_green,
+            null,
+        ),
+        NFC_OFF(
+            R.string.nfc_off_strip_title,
+            R.string.nfc_off_strip_subtitle,
+            R.color.color_warning,
+            R.string.nfc_off_strip_action,
+        ),
+    }
 
     private val binding = ViewOfflineStripBinding.inflate(LayoutInflater.from(context), this)
     private val cornerRadius = resources.getDimension(R.dimen.offline_strip_corner_radius)
@@ -109,18 +139,9 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
     }
 
     private fun applyMode(mode: Mode) {
-        val offline = mode == Mode.OFFLINE
-        val color = ContextCompat.getColor(
-            context,
-            if (offline) R.color.color_warning else R.color.color_success_green
-        )
-        binding.stripTitle.setText(
-            if (offline) R.string.offline_strip_title else R.string.offline_strip_back_online_title
-        )
-        binding.stripSubtitle.setText(
-            if (offline) R.string.offline_strip_subtitle
-            else R.string.offline_strip_back_online_subtitle
-        )
+        val color = ContextCompat.getColor(context, mode.color)
+        binding.stripTitle.setText(mode.title)
+        binding.stripSubtitle.setText(mode.subtitle)
         binding.stripTitle.setTextColor(color)
         binding.stripSubtitle.setTextColor(color)
         // TalkBack announces a pane when it appears and when its title changes
@@ -133,13 +154,12 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
             )
         )
 
-        // Only the offline state leads anywhere; "Back online" is purely informational.
-        binding.stripContent.isClickable = offline
-        binding.stripContent.isFocusable = offline
+        binding.stripContent.isClickable = mode.action != null
+        binding.stripContent.isFocusable = mode.action != null
         ViewCompat.replaceAccessibilityAction(
             binding.stripContent,
             AccessibilityActionCompat.ACTION_CLICK,
-            if (offline) context.getString(R.string.offline_strip_action_details) else null,
+            mode.action?.let(context::getString),
             null
         )
     }

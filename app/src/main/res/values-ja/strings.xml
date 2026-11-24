@@ -285,9 +285,9 @@
     <string name="nfc_dialog_content_description_cashu">カシュ</string>
     <string name="nfc_dialog_subtitle_or_scan_qr">またはQRコードをスキャンしてください</string>
     <string name="nfc_dialog_waiting_message">NFCを待っています...</string>
-    <string name="nfc_enable_title">NFCを有効にする</string>
-    <string name="nfc_enable_message">タップして支払うにはNFCが必要です。設定で有効にしてください。</string>
-    <string name="nfc_enable_button">設定</string>
+    <string name="nfc_off_strip_title">NFCがオフです</string>
+    <string name="nfc_off_strip_subtitle">タッチ決済にはNFCが必要です</string>
+    <string name="nfc_off_strip_action">NFC設定を開く</string>
     <string name="common_cancel">キャンセル</string>
 
     
