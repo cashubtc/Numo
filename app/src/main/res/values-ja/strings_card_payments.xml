@@ -24,8 +24,7 @@
     <string name="card_payment_status_amount_unavailable">カード決済額を計算できません: %1$s のビットコイン価格をまだ読み込んでいません</string>
     <string name="card_payment_status_location_required">Stripe のカード決済には位置情報の権限が必要です</string>
     <string name="card_payment_status_not_configured">カード決済が設定されていません</string>
-    <string name="card_payment_button">カード</string>
-    <string name="card_payment_button_amount">カード · %1$s</string>
+    <string name="card_payment_button">カードで支払う</string>
     <string name="card_payment_action_check">カード決済を確認</string>
     <string name="transaction_detail_payment_type_card_value">カード (Stripe)</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe カードリーダーをシミュレート</string>
