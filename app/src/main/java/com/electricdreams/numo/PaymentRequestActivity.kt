@@ -29,6 +29,7 @@ import com.electricdreams.numo.ui.offline.OfflineStripView
 import android.Manifest
 import android.content.pm.PackageManager
 import android.widget.ImageView
+import android.view.animation.PathInterpolator
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -241,6 +242,14 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var nfcAnimationStartedAtMs: Long = 0
     private var animationAmountBaseTranslationY: Float = 0f
     private var animationLabelBaseTranslationY: Float = 0f
+    private var resultTextAnimator: AnimatorSet? = null
+
+    /** The amount under "Total" on the waiting screen; absent until the layout is bound. */
+    private var animationTotalContainer: View? = null
+    private var animationTotalAmountText: TextView? = null
+
+    /** Material's emphasized-decelerate curve, for everything that enters the result screen. */
+    private val resultEnterInterpolator = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
     private var nfcAnimationTimeoutRunnable: Runnable? = null
     private val nfcTimeoutHandler = Handler(Looper.getMainLooper())
 
@@ -312,6 +321,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationActionsContainer = findViewById(R.id.animation_actions_container)
         animationViewDetailsButton = findViewById(R.id.animation_view_details_button)
         animationCloseButton = findViewById(R.id.animation_close_button)
+        animationTotalContainer = findViewById(R.id.animation_total_container)
+        animationTotalAmountText = findViewById(R.id.animation_total_amount)
         animationAmountBaseTranslationY = animationResultAmountText.translationY
         animationLabelBaseTranslationY = animationResultLabelText.translationY
 
@@ -1805,6 +1816,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         resetResultTextViews()
         resetResultActionButtons()
         showNfcHint(getString(R.string.card_payment_status_confirming))
+        showWaitingTotal()
 
         nfcAnimationView.reset()
         nfcAnimationView.startReading()
@@ -2376,6 +2388,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Show "Keep phone close" hint during NFC communication, beneath the disc
         showNfcHint(getString(R.string.nfc_payment_hint_keep_close))
+        showWaitingTotal()
         
         nfcAnimationView.reset()
         nfcAnimationView.startReading()
@@ -2451,10 +2464,27 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (nfcAnimationContainer.height == 0) return
         var offset = dpToPx(NFC_RESULT_GAP_DP).toFloat()
         if (showAmount) {
+            fitResultAmountToWidth()
             animationAmountBaseTranslationY = overlayTranslationFor(animationResultAmountText, offset)
-            offset += animationResultAmountText.measuredHeight
+            offset += animationResultAmountText.measuredHeight + dpToPx(RESULT_CAPTION_GAP_DP)
         }
         animationLabelBaseTranslationY = overlayTranslationFor(animationResultLabelText, offset)
+    }
+
+    /** Steps the amount down from its full size until it fits on one line. */
+    private fun fitResultAmountToWidth() {
+        val margins = animationResultAmountText.layoutParams as? MarginLayoutParams
+        val available = nfcAnimationContainer.width -
+            (margins?.marginStart ?: 0) - (margins?.marginEnd ?: 0)
+        var sizeSp = RESULT_AMOUNT_MAX_TEXT_SP
+        animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+        val amount = animationResultAmountText.text.toString()
+        while (sizeSp > RESULT_AMOUNT_MIN_TEXT_SP &&
+            animationResultAmountText.paint.measureText(amount) > available
+        ) {
+            sizeSp -= RESULT_AMOUNT_TEXT_STEP_SP
+            animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+        }
     }
 
     /**
@@ -2513,19 +2543,19 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationResultLabelText.animate().cancel()
 
         currentOverlayActionMode = OverlayActionMode.SUCCESS
-        animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 56f)
-        
-        // The waiting hint leaves at once; the result title fades in above the disc, in white,
-        // once the colour has flooded in (see animateResultTextIn).
+        // The waiting hint leaves at once; the amount and its caption fade in under the disc, in
+        // white, while the colour floods in (see animateResultTextIn).
         animationResultLabelText.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
         animationResultLabelText.letterSpacing = 0f
         animationResultLabelText.alpha = 0f
         animationResultLabelText.setTextColor(android.graphics.Color.WHITE)
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, RESULT_CAPTION_TEXT_SP)
         animationResultLabelText.maxLines = 1
         animationResultAmountText.text = amountText
         animationResultLabelText.text = getString(R.string.transaction_detail_type_payment_received)
         nfcAnimationView.showSuccess(amountText)
+        hideWaitingTotal(animated = true)
+        showResultTextWithTransition(showAmount = true)
 
         // Play success sound and vibration
         playNfcSuccessFeedback(playSound)
@@ -2552,16 +2582,18 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         currentOverlayActionMode = OverlayActionMode.ERROR
         
-        // As for success: hide the waiting hint, then the title fades in above the disc in white.
+        // As for success: hide the waiting hint, then the title fades in under the disc in white.
         animationResultLabelText.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
         animationResultLabelText.letterSpacing = 0f
         animationResultLabelText.alpha = 0f
         animationResultLabelText.setTextColor(android.graphics.Color.WHITE)
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, RESULT_HEADLINE_TEXT_SP)
         animationResultLabelText.maxLines = 2
         animationResultAmountText.text = ""
         animationResultLabelText.text = getString(R.string.payment_failure_title)
         nfcAnimationView.showError(message)
+        hideWaitingTotal(animated = true)
+        showResultTextWithTransition(showAmount = false)
     }
 
     private fun onNfcAnimationResultDisplayed(success: Boolean) {
@@ -2573,8 +2605,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "success_rendered_ms=$elapsedMs")
 
         val mode = if (success) OverlayActionMode.SUCCESS else OverlayActionMode.ERROR
-        placeResultTextBelowDisc(showAmount = success)
-        animateResultTextIn(showAmount = success)
         showResultActionsAnimated(mode)
 
         if (success) pendingNfcSuccessToken?.let { token ->
@@ -2616,21 +2646,34 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Start from invisible and below
         animationActionsContainer.alpha = 0f
-        animationActionsContainer.translationY = 60f
+        animationActionsContainer.translationY = dpToPx(RESULT_ACTIONS_TRAVEL_DP).toFloat()
         animationActionsContainer.visibility = View.VISIBLE
 
         // Animate in with fade + slide up
         animationActionsContainer.animate()
             .alpha(1f)
             .translationY(0f)
-            .setDuration(400)
-            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .setDuration(RESULT_ACTIONS_DURATION_MS)
+            .setInterpolator(resultEnterInterpolator)
             .start()
     }
 
+    /**
+     * Places the result text under the disc and brings it in alongside the result transition,
+     * as soon as the overlay has a size.
+     */
+    private fun showResultTextWithTransition(showAmount: Boolean) {
+        nfcAnimationContainer.doOnLayout {
+            placeResultTextBelowDisc(showAmount)
+            animateResultTextIn(showAmount)
+        }
+    }
+
+    /** The text rises into place as the check is drawn; the actions follow once it has landed. */
     private fun animateResultTextIn(showAmount: Boolean) {
-        val amountStartTranslation = animationAmountBaseTranslationY - dpToPx(16f).toFloat()
-        val labelStartTranslation = animationLabelBaseTranslationY - dpToPx(12f).toFloat()
+        val travel = dpToPx(RESULT_TEXT_TRAVEL_DP).toFloat()
+        val amountStartTranslation = animationAmountBaseTranslationY + travel
+        val labelStartTranslation = animationLabelBaseTranslationY + travel
 
         if (showAmount) {
             animationResultAmountText.visibility = View.VISIBLE
@@ -2667,18 +2710,49 @@ class PaymentRequestActivity : AppCompatActivity() {
             )
         }
 
-        AnimatorSet().apply {
-            if (showAmount) {
-                startDelay = 120L
-            }
-            duration = 320L
-            interpolator = android.view.animation.DecelerateInterpolator()
+        resultTextAnimator?.cancel()
+        resultTextAnimator = AnimatorSet().apply {
+            startDelay = RESULT_TEXT_DELAY_MS
+            duration = RESULT_TEXT_DURATION_MS
+            interpolator = resultEnterInterpolator
             playTogether(animators)
             start()
         }
     }
 
+    /** Shows the amount at the foot of the waiting screen, as the card tap screen does. */
+    private fun showWaitingTotal() {
+        val container = animationTotalContainer ?: return
+        animationTotalAmountText?.text = formattedAmountString
+        container.animate().cancel()
+        container.alpha = 0f
+        container.visibility = View.VISIBLE
+        container.animate()
+            .alpha(1f)
+            .setDuration(WAITING_TOTAL_FADE_IN_MS)
+            .setInterpolator(resultEnterInterpolator)
+            .start()
+    }
+
+    /** The result shows the amount under the disc, and the actions take the total's place. */
+    private fun hideWaitingTotal(animated: Boolean) {
+        val container = animationTotalContainer ?: return
+        container.animate().cancel()
+        if (!animated || container.visibility != View.VISIBLE) {
+            container.visibility = View.GONE
+            return
+        }
+        container.animate()
+            .alpha(0f)
+            .setDuration(WAITING_TOTAL_FADE_OUT_MS)
+            .withEndAction { container.visibility = View.GONE }
+            .start()
+    }
+
     private fun resetResultTextViews() {
+        hideWaitingTotal(animated = false)
+        resultTextAnimator?.cancel()
+        resultTextAnimator = null
         animationResultAmountText.animate().cancel()
         animationResultAmountText.visibility = View.GONE
         animationResultAmountText.alpha = 0f
@@ -2744,13 +2818,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         val systemInsets = insets.getInsetsIgnoringVisibility(
             WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
         )
-        val minBottomSpacingPx = dpToPx(72f)
-        val targetBottomMargin = maxOf(minBottomSpacingPx, systemInsets.bottom + dpToPx(24f))
+        val targetBottomMargin = systemInsets.bottom + dpToPx(RESULT_ACTIONS_BOTTOM_GAP_DP)
 
-        val layoutParams = animationActionsContainer.layoutParams as? ViewGroup.MarginLayoutParams ?: return
-        if (layoutParams.bottomMargin != targetBottomMargin) {
-            layoutParams.bottomMargin = targetBottomMargin
-            animationActionsContainer.layoutParams = layoutParams
+        for (anchored in listOfNotNull(animationActionsContainer, animationTotalContainer)) {
+            val layoutParams = anchored.layoutParams as? ViewGroup.MarginLayoutParams ?: continue
+            if (layoutParams.bottomMargin != targetBottomMargin) {
+                layoutParams.bottomMargin = targetBottomMargin
+                anchored.layoutParams = layoutParams
+            }
         }
     }
 
@@ -2805,6 +2880,20 @@ class PaymentRequestActivity : AppCompatActivity() {
         private const val NFC_HINT_TEXT_SP = 18f
         private const val NFC_HINT_GAP_DP = 24f
         private const val NFC_RESULT_GAP_DP = 28f
+        private const val RESULT_CAPTION_GAP_DP = 4f
+        private const val RESULT_AMOUNT_MAX_TEXT_SP = 56f
+        private const val RESULT_AMOUNT_MIN_TEXT_SP = 36f
+        private const val RESULT_AMOUNT_TEXT_STEP_SP = 2f
+        private const val RESULT_CAPTION_TEXT_SP = 18f
+        private const val RESULT_HEADLINE_TEXT_SP = 28f
+        private const val RESULT_TEXT_TRAVEL_DP = 12f
+        private const val RESULT_TEXT_DELAY_MS = 200L
+        private const val RESULT_TEXT_DURATION_MS = 280L
+        private const val RESULT_ACTIONS_TRAVEL_DP = 16f
+        private const val RESULT_ACTIONS_DURATION_MS = 300L
+        private const val RESULT_ACTIONS_BOTTOM_GAP_DP = 24f
+        private const val WAITING_TOTAL_FADE_IN_MS = 200L
+        private const val WAITING_TOTAL_FADE_OUT_MS = 150L
         private const val NFC_READ_TIMEOUT_MS = 5_000L
         private const val BTCPAY_INVOICE_TIMEOUT_MS = 15 * 60 * 1000L // 15 min
         private const val BTCPAY_MAX_POLL_ERRORS = 5
