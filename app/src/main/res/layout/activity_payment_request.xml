@@ -409,7 +409,7 @@
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginStart="@dimen/space_xl"
             android:layout_marginEnd="@dimen/space_xl"
-            android:layout_marginBottom="@dimen/space_xl"
+            android:layout_marginBottom="@dimen/space_l"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:visibility="gone">
@@ -417,21 +417,24 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/inter_semi_bold"
                 android:text="@string/basket_archive_total_label"
                 android:textColor="@color/color_text_secondary"
-                android:textSize="18sp" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/animation_total_amount"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
-                android:fontFeatureSettings="tnum"
-                android:letterSpacing="-0.02"
+                app:autoSizeMaxTextSize="68sp"
+                app:autoSizeMinTextSize="28sp"
+                app:autoSizeTextType="uniform"
+                android:fontFamily="@font/inter_semi_bold"
+                android:gravity="center"
+                android:letterSpacing="-0.06"
                 android:maxLines="1"
                 android:textColor="@color/color_text_primary"
-                android:textSize="56sp" />
+                android:textSize="68sp" />
         </LinearLayout>
 
         <!-- Result action buttons appear after animation completes -->

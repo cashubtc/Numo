@@ -49,6 +49,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import android.view.animation.DecelerateInterpolator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -76,6 +77,7 @@ import com.electricdreams.numo.payment.card.StripeCardSettings
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
+import com.electricdreams.numo.ui.util.isAnimationEnabled
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.core.payment.BtcPayQrCodeBuilder
 import com.electricdreams.numo.core.payment.IPaymentService
@@ -136,6 +138,9 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     /** True while Numo's own waiting screen covers checkout as Stripe confirms the charge. */
     private var isCardConfirming = false
+
+    /** True while the tap waiting screen has the status bar hidden. */
+    private var isStatusBarHiddenForWaiting = false
 
     /** True when the last attempt's outcome is unknown and the next tap checks on it. */
     private var cardNeedsStatusCheck = false
@@ -586,7 +591,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus && ::nfcAnimationContainer.isInitialized && nfcAnimationContainer.visibility == View.VISIBLE) {
+            val waiting = isStatusBarHiddenForWaiting
             applyFullscreenForAnimationOverlay()
+            if (waiting) hideStatusBarWhileWaiting()
         }
     }
 
@@ -1812,11 +1819,12 @@ class PaymentRequestActivity : AppCompatActivity() {
         isCardConfirming = true
 
         applyFullscreenForAnimationOverlay()
-        nfcAnimationContainer.visibility = View.VISIBLE
+        hideStatusBarWhileWaiting()
+        revealOverlay(animated = false)
         resetResultTextViews()
         resetResultActionButtons()
+        // The card tap screen drops its total once it has read the card, so it stays hidden.
         showNfcHint(getString(R.string.card_payment_status_confirming))
-        showWaitingTotal()
 
         nfcAnimationView.reset()
         nfcAnimationView.startReading()
@@ -2104,7 +2112,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (nfcAnimationContainer.visibility != View.VISIBLE) {
             nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
             applyFullscreenForAnimationOverlay()
-            nfcAnimationContainer.visibility = View.VISIBLE
+            revealOverlay(animated = false)
             nfcAnimationView.reset()
             resetResultTextViews()
             resetResultActionButtons()
@@ -2290,7 +2298,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
             Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
             applyFullscreenForAnimationOverlay()
-            nfcAnimationContainer.visibility = View.VISIBLE
+            revealOverlay(animated = false)
             nfcAnimationView.reset()
             resetResultTextViews()
             resetResultActionButtons()
@@ -2376,8 +2384,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
 
         applyFullscreenForAnimationOverlay()
-        
-        nfcAnimationContainer.visibility = View.VISIBLE
+        // Hiding the status bar shifts checkout, so it waits until checkout is covered.
+        revealOverlay(animated = true) {
+            val showingResult = animationResultAmountText.visibility == View.VISIBLE ||
+                animationActionsContainer?.visibility == View.VISIBLE
+            if (nfcAnimationContainer.visibility == View.VISIBLE && !showingResult) {
+                hideStatusBarWhileWaiting()
+            }
+        }
         resetResultTextViews()
         resetResultActionButtons()
         pendingNfcSuccessToken = null
@@ -2391,7 +2405,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         showWaitingTotal()
         
         nfcAnimationView.reset()
-        nfcAnimationView.startReading()
+        nfcAnimationView.startReading(animateIn = true)
         nfcAnimationStartedAtMs = SystemClock.elapsedRealtime()
         Log.d(TAG, "animation_started_ms=${nfcAnimationStartedAtMs - nfcOverlayShownAtMs}")
         startNfcSafetyTimeout()
@@ -2400,6 +2414,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun showNfcAnimationProcessing() {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
+        keepOverlayShown()
         
         // Vibrate when switching to processing phase
         try {
@@ -2411,8 +2426,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationResultLabelText.animate().cancel()
         animationResultLabelText.animate()
             .alpha(0f)
-            .setDuration(150)
-            .setInterpolator(android.view.animation.AccelerateInterpolator())
+            .setDuration(NFC_HINT_SWAP_OUT_MS)
+            .setInterpolator(resultEnterInterpolator)
             .withEndAction {
                 animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, NFC_HINT_TEXT_SP)
                 animationResultLabelText.gravity = android.view.Gravity.CENTER
@@ -2421,12 +2436,14 @@ class PaymentRequestActivity : AppCompatActivity() {
                 placeNfcHintBelowDisc()
                 animationResultLabelText.animate()
                     .alpha(NFC_HINT_ALPHA)
-                    .setDuration(200)
-                    .setInterpolator(android.view.animation.DecelerateInterpolator())
+                    .setDuration(NFC_HINT_SWAP_IN_MS)
+                    .setInterpolator(resultEnterInterpolator)
                     .start()
             }
             .start()
-        
+
+        // The card tap screen drops its total once it has read the card.
+        hideWaitingTotal(animated = true)
         nfcAnimationView.startProcessing()
     }
 
@@ -2437,7 +2454,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationResultLabelText.alpha = NFC_HINT_ALPHA
         animationResultLabelText.setTextColor(ContextCompat.getColor(this, R.color.color_text_primary))
         animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, NFC_HINT_TEXT_SP)
-        animationResultLabelText.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+        // The card tap screen's typeface, which the Stripe Terminal SDK bundles.
+        animationResultLabelText.typeface =
+            ResourcesCompat.getFont(this, com.stripe.cots.R.font.inter_semi_bold)
+                ?: android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
         animationResultLabelText.gravity = android.view.Gravity.CENTER
         animationResultLabelText.textAlignment = View.TEXT_ALIGNMENT_CENTER
         animationResultLabelText.letterSpacing = 0f
@@ -2506,13 +2526,57 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun hideNfcAnimationOverlay() {
-        nfcAnimationContainer.visibility = View.GONE
-        nfcAnimationView.reset()
-        resetResultTextViews()
-        resetResultActionButtons()
         restoreSystemBarsAfterAnimation()
         cancelNfcSafetyTimeout()
         isProcessingNfcPayment = false
+
+        nfcAnimationContainer.animate().cancel()
+        if (nfcAnimationContainer.visibility != View.VISIBLE || !isAnimationEnabled()) {
+            clearHiddenOverlay()
+            return
+        }
+        // Checkout returns as the waiting screen fades away over it.
+        nfcAnimationContainer.animate()
+            .alpha(0f)
+            .setDuration(OVERLAY_FADE_OUT_MS)
+            .setInterpolator(resultEnterInterpolator)
+            .withEndAction { clearHiddenOverlay() }
+            .start()
+    }
+
+    /** Stops a fade-out in progress, for when the overlay turns out to be needed after all. */
+    private fun keepOverlayShown() {
+        nfcAnimationContainer.animate().cancel()
+        nfcAnimationContainer.alpha = 1f
+    }
+
+    private fun clearHiddenOverlay() {
+        nfcAnimationContainer.visibility = View.GONE
+        nfcAnimationContainer.alpha = 1f
+        nfcAnimationView.reset()
+        resetResultTextViews()
+        resetResultActionButtons()
+    }
+
+    /**
+     * Shows the overlay over checkout. A tap fades it in; a result or the return from the card
+     * tap screen must cover checkout at once.
+     */
+    private fun revealOverlay(animated: Boolean, onShown: () -> Unit = {}) {
+        nfcAnimationContainer.animate().cancel()
+        nfcAnimationContainer.visibility = View.VISIBLE
+        if (!animated || !isAnimationEnabled()) {
+            nfcAnimationContainer.alpha = 1f
+            onShown()
+            return
+        }
+        nfcAnimationContainer.alpha = 0f
+        nfcAnimationContainer.animate()
+            .alpha(1f)
+            .setDuration(OVERLAY_FADE_IN_MS)
+            .setInterpolator(resultEnterInterpolator)
+            .withEndAction(onShown)
+            .start()
     }
 
     private fun startNfcSafetyTimeout() {
@@ -2539,6 +2603,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun showNfcAnimationSuccess(amountText: String, playSound: Boolean = true) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
+        keepOverlayShown()
 
         animationResultLabelText.animate().cancel()
 
@@ -2577,6 +2642,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun showNfcAnimationError(message: String) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
+        keepOverlayShown()
 
         animationResultLabelText.animate().cancel()
 
@@ -2793,6 +2859,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun applyFullscreenForAnimationOverlay() {
+        isStatusBarHiddenForWaiting = false
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
             show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
@@ -2804,7 +2871,18 @@ class PaymentRequestActivity : AppCompatActivity() {
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
     }
 
+    /**
+     * The card tap screen has no status bar, so the waiting screen has none either. The result
+     * and the return to checkout both show the bars again.
+     */
+    private fun hideStatusBarWhileWaiting() {
+        isStatusBarHiddenForWaiting = true
+        WindowInsetsControllerCompat(window, window.decorView)
+            .hide(WindowInsetsCompat.Type.statusBars())
+    }
+
     private fun restoreSystemBarsAfterAnimation() {
+        isStatusBarHiddenForWaiting = false
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
             show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
@@ -2818,14 +2896,25 @@ class PaymentRequestActivity : AppCompatActivity() {
         val systemInsets = insets.getInsetsIgnoringVisibility(
             WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
         )
-        val targetBottomMargin = systemInsets.bottom + dpToPx(RESULT_ACTIONS_BOTTOM_GAP_DP)
+        setBottomMargin(
+            animationActionsContainer,
+            systemInsets.bottom + dpToPx(RESULT_ACTIONS_BOTTOM_GAP_DP),
+        )
+        // The card tap screen keeps its total a fixed gap from the screen's edge, over the
+        // gesture bar. A taller navigation bar would cover the amount, so it sits above that.
+        val totalGap = dpToPx(WAITING_TOTAL_BOTTOM_GAP_DP)
+        val gestureBarMax = dpToPx(GESTURE_BAR_MAX_HEIGHT_DP)
+        setBottomMargin(
+            animationTotalContainer,
+            if (systemInsets.bottom <= gestureBarMax) totalGap else systemInsets.bottom,
+        )
+    }
 
-        for (anchored in listOfNotNull(animationActionsContainer, animationTotalContainer)) {
-            val layoutParams = anchored.layoutParams as? ViewGroup.MarginLayoutParams ?: continue
-            if (layoutParams.bottomMargin != targetBottomMargin) {
-                layoutParams.bottomMargin = targetBottomMargin
-                anchored.layoutParams = layoutParams
-            }
+    private fun setBottomMargin(view: View?, bottomMargin: Int) {
+        val layoutParams = view?.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        if (layoutParams.bottomMargin != bottomMargin) {
+            layoutParams.bottomMargin = bottomMargin
+            view.layoutParams = layoutParams
         }
     }
 
@@ -2878,7 +2967,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         private const val DISABLED_ALPHA = 0.38f
         private const val NFC_HINT_ALPHA = 1f
         private const val NFC_HINT_TEXT_SP = 18f
-        private const val NFC_HINT_GAP_DP = 24f
+        private const val NFC_HINT_GAP_DP = 22f
+        private const val NFC_HINT_SWAP_OUT_MS = 90L
+        private const val NFC_HINT_SWAP_IN_MS = 160L
+        private const val OVERLAY_FADE_IN_MS = 180L
+        private const val OVERLAY_FADE_OUT_MS = 120L
         private const val NFC_RESULT_GAP_DP = 28f
         private const val RESULT_CAPTION_GAP_DP = 4f
         private const val RESULT_AMOUNT_MAX_TEXT_SP = 56f
@@ -2892,6 +2985,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         private const val RESULT_ACTIONS_TRAVEL_DP = 16f
         private const val RESULT_ACTIONS_DURATION_MS = 300L
         private const val RESULT_ACTIONS_BOTTOM_GAP_DP = 24f
+        private const val WAITING_TOTAL_BOTTOM_GAP_DP = 16f
+        private const val GESTURE_BAR_MAX_HEIGHT_DP = 24f
         private const val WAITING_TOTAL_FADE_IN_MS = 200L
         private const val WAITING_TOTAL_FADE_OUT_MS = 150L
         private const val NFC_READ_TIMEOUT_MS = 5_000L
