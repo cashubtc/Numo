@@ -36,6 +36,8 @@ internal object CardCheckText {
         Failure.LOCATION_NOT_FOUND -> R.string.stripe_card_check_problem_location
         Failure.STRIPE_UNREACHABLE -> R.string.stripe_card_check_problem_unreachable
         Failure.STRIPE_ERROR -> R.string.stripe_card_check_problem_stripe
+        Failure.DEBUG_NEEDS_TEST_KEY,
+        Failure.READER_NEEDS_DEVELOPER_MODE,
         Failure.READER_NEEDS_SIMULATION,
         Failure.SIMULATION_NEEDS_TEST_KEY,
         Failure.READER_FAILED -> R.string.stripe_card_check_problem_reader
@@ -72,6 +74,8 @@ internal object CardCheckText {
             R.string.stripe_card_stripe_error,
             outcome.detail.orEmpty(),
         )
+        Failure.DEBUG_NEEDS_TEST_KEY -> context.getString(R.string.stripe_card_debug_test_key)
+        Failure.READER_NEEDS_DEVELOPER_MODE -> context.getString(R.string.stripe_card_debug_enable_developer)
         Failure.READER_NEEDS_SIMULATION ->
             context.getString(R.string.card_payment_debug_reader_unsupported)
         Failure.SIMULATION_NEEDS_TEST_KEY ->
@@ -83,12 +87,13 @@ internal object CardCheckText {
 
     /** Label of the fix button, or null when there is nothing the merchant can do here. */
     @StringRes
-    fun fixLabel(fix: Fix): Int? = when (fix) {
+    fun fixLabel(fix: Fix, locationFix: LocationPermissionFix): Int? = when (fix) {
         Fix.NONE -> null
         Fix.OPEN_NFC_SETTINGS -> R.string.stripe_card_fix_nfc
-        Fix.GRANT_LOCATION -> R.string.stripe_card_fix_location
+        Fix.GRANT_LOCATION -> locationFix.actionLabel
         Fix.REPLACE_KEY -> R.string.stripe_card_fix_key
         Fix.CHOOSE_LOCATION -> R.string.stripe_card_fix_choose_location
+        Fix.OPEN_ABOUT -> R.string.stripe_card_fix_about
         Fix.OPEN_DEVELOPER_SETTINGS -> R.string.stripe_card_fix_developer
         Fix.RETRY -> R.string.stripe_card_fix_retry
     }

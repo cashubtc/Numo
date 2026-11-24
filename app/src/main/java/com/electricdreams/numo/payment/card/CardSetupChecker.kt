@@ -35,7 +35,9 @@ class CardSetupChecker(private val environment: Environment) {
         LOCATION_NOT_FOUND,
         STRIPE_UNREACHABLE,
         STRIPE_ERROR,
+        READER_NEEDS_DEVELOPER_MODE,
         READER_NEEDS_SIMULATION,
+        DEBUG_NEEDS_TEST_KEY,
         SIMULATION_NEEDS_TEST_KEY,
         READER_FAILED,
     }
@@ -47,6 +49,7 @@ class CardSetupChecker(private val environment: Environment) {
         GRANT_LOCATION,
         REPLACE_KEY,
         CHOOSE_LOCATION,
+        OPEN_ABOUT,
         OPEN_DEVELOPER_SETTINGS,
         RETRY,
     }
@@ -63,7 +66,7 @@ class CardSetupChecker(private val environment: Environment) {
         data object Skipped : Outcome
     }
 
-    data class Report(val outcomes: Map<Check, Outcome>) {
+    data class Report(val outcomes: Map<Check, Outcome>, val isTestMode: Boolean = false) {
         /** True when every check that was asked for passed. */
         val passed: Boolean get() = outcomes.isNotEmpty() && outcomes.values.all { it is Outcome.Passed }
 
@@ -73,6 +76,10 @@ class CardSetupChecker(private val environment: Environment) {
     /** How starting the reader ended. */
     sealed interface ReaderResult {
         data object Started : ReaderResult
+
+        data object DebugNeedsTestKey : ReaderResult
+
+        data object NeedsDeveloperMode : ReaderResult
 
         /** A debuggable build cannot use the physical reader; the simulated one is needed. */
         data object NeedsSimulation : ReaderResult
@@ -100,7 +107,7 @@ class CardSetupChecker(private val environment: Environment) {
 
         fun hasLocationPermission(): Boolean
 
-        fun loadConfig(): StripeCardConfig?
+        suspend fun loadConfig(): StripeCardConfig?
 
         /** @throws IOException as [StripeConnectionTokenClient.createConnectionToken]. */
         suspend fun createConnectionToken(config: StripeCardConfig)
@@ -133,15 +140,14 @@ class CardSetupChecker(private val environment: Environment) {
         val config = checkStripe(::set)
 
         if (includeReader) {
-            val ready = config != null && outcomes.values.all { it is Outcome.Passed }
-            if (ready) {
+            if (config != null && outcomes.values.all { it is Outcome.Passed }) {
                 set(Check.READER_STARTS, Outcome.Running)
-                set(Check.READER_STARTS, readerOutcome(environment.startReader(config!!)))
+                set(Check.READER_STARTS, readerOutcome(environment.startReader(config)))
             } else {
                 set(Check.READER_STARTS, Outcome.Skipped)
             }
         }
-        return Report(outcomes.toMap())
+        return Report(outcomes.toMap(), isTestMode = config?.isTestMode == true)
     }
 
     private fun checkPhone(set: (Check, Outcome) -> Unit) {
@@ -225,8 +231,12 @@ class CardSetupChecker(private val environment: Environment) {
 
     private fun readerOutcome(result: ReaderResult): Outcome = when (result) {
         ReaderResult.Started -> Outcome.Passed
+        ReaderResult.NeedsDeveloperMode ->
+            Outcome.Failed(Failure.READER_NEEDS_DEVELOPER_MODE, Fix.OPEN_ABOUT)
         ReaderResult.NeedsSimulation ->
             Outcome.Failed(Failure.READER_NEEDS_SIMULATION, Fix.OPEN_DEVELOPER_SETTINGS)
+        ReaderResult.DebugNeedsTestKey ->
+            Outcome.Failed(Failure.DEBUG_NEEDS_TEST_KEY, Fix.REPLACE_KEY)
         ReaderResult.SimulationNeedsTestKey ->
             Outcome.Failed(Failure.SIMULATION_NEEDS_TEST_KEY, Fix.OPEN_DEVELOPER_SETTINGS)
         is ReaderResult.Error -> Outcome.Failed(Failure.READER_FAILED, Fix.RETRY, result.message)

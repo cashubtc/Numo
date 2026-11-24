@@ -49,12 +49,22 @@ class StripeLocationsClient(
         val url = baseUrl.newBuilder()
             .addPathSegments("v1/terminal/locations")
             .addQueryParameter("limit", "100")
-            .build()
-        val json = StripeHttp.execute(httpClient, authorized(restrictedKey).url(url).get().build())
-        val data = json.get("data")?.takeIf { it.isJsonArray }?.asJsonArray
-            ?: throw IOException("Stripe response did not include locations")
-        return data.mapNotNull { element ->
-            element.takeIf { it.isJsonObject }?.asJsonObject?.let(::parseLocation)
+        val locations = mutableListOf<StripeLocation>()
+        val cursors = mutableSetOf<String>()
+        while (true) {
+            val request = authorized(restrictedKey).url(url.build()).get().build()
+            val json = StripeHttp.execute(httpClient, request)
+            val data = json.get("data")?.takeIf { it.isJsonArray }?.asJsonArray
+                ?: throw IOException("Stripe response did not include locations")
+            data.mapNotNullTo(locations) { element ->
+                element.takeIf { it.isJsonObject }?.asJsonObject?.let(::parseLocation)
+            }
+            if (json.get("has_more")?.asBoolean != true) return locations
+            val cursor = data.lastOrNull()?.takeIf { it.isJsonObject }?.asJsonObject.string("id")
+            if (cursor.isNullOrBlank() || !cursors.add(cursor)) {
+                throw IOException("Stripe did not return a new location cursor")
+            }
+            url.setQueryParameter("starting_after", cursor)
         }
     }
 
@@ -77,20 +87,23 @@ class StripeLocationsClient(
         restrictedKey: String,
         displayName: String,
         address: StripeLocationAddress,
+        idempotencyKey: String,
     ): StripeLocation {
         val url = baseUrl.newBuilder().addPathSegments("v1/terminal/locations").build()
         val body = FormBody.Builder()
             .add("display_name", displayName.trim())
             .add("address[line1]", address.line1.trim())
-            .add("address[city]", address.city.trim())
-            .add("address[postal_code]", address.postalCode.trim())
-            .add("address[country]", address.country.trim().uppercase())
             .apply {
+                address.city.trim().takeIf { it.isNotEmpty() }?.let { add("address[city]", it) }
+                address.postalCode.trim().takeIf { it.isNotEmpty() }?.let { add("address[postal_code]", it) }
+                add("address[country]", address.country.trim().uppercase())
                 address.line2?.trim()?.takeIf { it.isNotEmpty() }?.let { add("address[line2]", it) }
                 address.state?.trim()?.takeIf { it.isNotEmpty() }?.let { add("address[state]", it) }
             }
             .build()
-        val json = StripeHttp.execute(httpClient, authorized(restrictedKey).url(url).post(body).build())
+        val request = authorized(restrictedKey).url(url).post(body)
+            .header("Idempotency-Key", idempotencyKey).build()
+        val json = StripeHttp.execute(httpClient, request)
         return parseLocation(json) ?: throw IOException("Stripe response did not include the location")
     }
 

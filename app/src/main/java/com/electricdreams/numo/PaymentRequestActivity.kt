@@ -3,12 +3,14 @@ package com.electricdreams.numo
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.ComponentName
 import android.nfc.NfcAdapter
 import android.nfc.cardemulation.CardEmulation
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import com.electricdreams.numo.util.getVibrator
 import com.electricdreams.numo.util.vibrateCompat
 import android.os.Handler
@@ -85,6 +87,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -1037,37 +1040,34 @@ class PaymentRequestActivity : AppCompatActivity() {
      * that reassures the merchant.
      */
     private fun observeConnectivityForPayment() {
-        val contactlessIcon = findViewById<ImageView>(R.id.contactless_icon)
-        val instructionText = findViewById<TextView>(R.id.instruction_text)
-        val iconGap = resources.getDimensionPixelSize(R.dimen.space_m)
-        val offlinePill = findViewById<View>(R.id.offline_pill)
-        offlinePill.setOnClickListener {
-            OfflineExplainerActivity.start(this, paymentOnScreen = confirmsAfterReconnect())
-        }
-        ViewCompat.replaceAccessibilityAction(
-            offlinePill,
-            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
-            getString(R.string.offline_strip_action_details),
-            null
-        )
+        val online = ConnectivityMonitor.getInstance(this).isOnline
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    ConnectivityMonitor.getInstance(this@PaymentRequestActivity).isOnline.collect { online ->
-                        contactlessIcon.visibility = if (online) View.VISIBLE else View.GONE
-                        instructionText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                            marginStart = if (online) iconGap else 0
+                    combine(online, OfflineStripController.nfcOff) { connected, nfcOff ->
+                        connected && !nfcOff
+                    }.collect { canTap ->
+                        if (tabManager.getCurrentTab() != PaymentTabManager.PaymentTab.CARD) {
+                            showScanInstruction(canTap)
                         }
-                        instructionText.setText(
-                            if (online) R.string.payment_request_instruction_scan_or_tap
-                            else R.string.payment_request_instruction_scan
-                        )
                         refreshWaitingStatus()
                     }
                 }
                 launch { OfflineStripController.stripMode.collect(::renderOfflinePill) }
             }
         }
+    }
+
+    private fun showScanInstruction(canTap: Boolean) {
+        val instruction = findViewById<TextView>(R.id.instruction_text) ?: return
+        findViewById<ImageView>(R.id.contactless_icon).visibility = if (canTap) View.VISIBLE else View.GONE
+        instruction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            marginStart = if (canTap) resources.getDimensionPixelSize(R.dimen.space_m) else 0
+        }
+        instruction.setText(
+            if (canTap) R.string.payment_request_instruction_scan_or_tap
+            else R.string.payment_request_instruction_scan
+        )
     }
 
     private fun refreshWaitingStatus() {
@@ -1103,6 +1103,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         val text = findViewById<TextView>(R.id.offline_pill_text)
         pill.animate().cancel()
         if (mode == null) {
+            pill.isClickable = false
+            pill.isFocusable = false
             if (pill.visibility != View.VISIBLE) return
             pill.animate().alpha(0f).scaleX(PILL_HIDDEN_SCALE).scaleY(PILL_HIDDEN_SCALE)
                 .setDuration(PILL_OUT_MS)
@@ -1110,11 +1112,26 @@ class PaymentRequestActivity : AppCompatActivity() {
                 .start()
             return
         }
-        val offline = mode == OfflineStripView.Mode.OFFLINE
         text.setText(mode.title)
         text.setTextColor(ContextCompat.getColor(this, mode.color))
-        pill.isClickable = offline
-        pill.isFocusable = offline
+        pill.setOnClickListener {
+            when (mode) {
+                OfflineStripView.Mode.OFFLINE ->
+                    OfflineExplainerActivity.start(this, paymentOnScreen = confirmsAfterReconnect())
+                OfflineStripView.Mode.NFC_OFF -> try {
+                    startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+                } catch (e: ActivityNotFoundException) {
+                    Log.w(TAG, "Could not open NFC settings", e)
+                }
+                OfflineStripView.Mode.BACK_ONLINE -> Unit
+            }
+        }
+        pill.isClickable = mode.action != null
+        pill.isFocusable = mode.action != null
+        ViewCompat.replaceAccessibilityAction(
+            pill, AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
+            mode.action?.let(::getString), null,
+        )
         if (pill.visibility != View.VISIBLE) {
             pill.alpha = 0f
             pill.scaleX = PILL_HIDDEN_SCALE
@@ -1703,8 +1720,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (!::cardContainer.isInitialized) return
         cancelCardCollection()
         shareButton.visibility = View.VISIBLE
-        findViewById<TextView>(R.id.instruction_text)
-            ?.setText(R.string.payment_request_instruction_scan_or_tap)
+        val canTap = ConnectivityMonitor.getInstance(this).isOnlineNow() && !OfflineStripController.nfcOff.value
+        showScanInstruction(canTap)
     }
 
     /**

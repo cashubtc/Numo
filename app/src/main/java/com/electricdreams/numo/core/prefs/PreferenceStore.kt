@@ -43,6 +43,8 @@ class ThreadSafePreferences(
         migrateLegacyPreferences()
     }
 
+    fun contains(key: String): Boolean = synchronized(lock) { prefs.contains(key) }
+
     fun getBoolean(key: String, default: Boolean = false): Boolean =
         synchronized(lock) { prefs.getBoolean(key, default) }
 
@@ -61,15 +63,35 @@ class ThreadSafePreferences(
         }
     }
 
-    fun commitStrings(values: Map<String, String?>): Boolean = synchronized(lock) {
+    /** Reads through this store and applies related changes under the same lock. */
+    fun <T> edit(update: SharedPreferences.Editor.() -> T): T = synchronized(lock) {
+        val editor = prefs.edit()
+        val result = editor.update()
+        editor.apply()
+        result
+    }
+
+    fun commitStrings(values: Map<String, String?>): Boolean = commitValues(values, emptyMap())
+
+    fun commitValues(
+        values: Map<String, String?>,
+        booleans: Map<String, Boolean>,
+    ): Boolean = synchronized(lock) {
+        val oldBooleans = booleans.keys.associateWith { key ->
+            if (prefs.contains(key)) prefs.getBoolean(key, false) else null
+        }
         val previous = values.keys.associateWith { prefs.getString(it, null) }
         val editor = prefs.edit()
         values.forEach { (key, value) -> editor.putString(key, value) }
+        booleans.forEach { (key, value) -> editor.putBoolean(key, value) }
         if (editor.commit()) {
             true
         } else {
             val rollback = prefs.edit()
             previous.forEach { (key, value) -> rollback.putString(key, value) }
+            oldBooleans.forEach { (key, value) ->
+                if (value == null) rollback.remove(key) else rollback.putBoolean(key, value)
+            }
             rollback.commit()
             false
         }

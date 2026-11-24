@@ -42,6 +42,16 @@
     <string name="stripe_card_removed">Stripe disconnected</string>
     <string name="stripe_card_save_failed">Could not store the key securely on this device</string>
 
+    <string name="stripe_card_location_save_failed">Couldn\'t save this location on the device. Try again.</string>
+    <string name="stripe_card_status_test_ready">Ready for test payments</string>
+    <string name="stripe_card_check_test_passed">Stripe test mode passed</string>
+    <string name="stripe_card_check_reader_retry_body">Run the full setup check to test the reader again.</string>
+    <string name="stripe_card_check_test_body">Test payments are on. To collect real money, connect a live Stripe account.</string>
+    <string name="stripe_card_debug_test_key">This debug build uses a simulated reader. Replace the live key with a Stripe test key to continue.</string>
+    <string name="stripe_card_debug_enable_developer">For a simulated reader, enable Developer mode by tapping the version five times in About.</string>
+    <string name="stripe_card_fix_about">Open About</string>
+    <string name="stripe_card_fix_app_settings">Open app settings</string>
+
     <!-- Card payments: guided setup -->
     <string name="stripe_card_setup_title">Set up card payments</string>
     <string name="stripe_card_setup_next">Next</string>
@@ -75,7 +85,7 @@
     <string name="stripe_card_add_location_name">Location name</string>
     <string name="stripe_card_add_location_country">Country</string>
     <string name="stripe_card_add_location_street">Street address</string>
-    <string name="stripe_card_add_location_unit">Flat, unit or other (optional)</string>
+    <string name="stripe_card_add_location_unit">Address line 2</string>
     <string name="stripe_card_add_location_city">City</string>
     <string name="stripe_card_add_location_state">State or region</string>
     <string name="stripe_card_add_location_postal">Postal code</string>

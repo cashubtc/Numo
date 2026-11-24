@@ -31,7 +31,7 @@ class CardSetupCheckerTest {
         override fun isDeviceSupported() = deviceSupported
         override fun isNfcEnabled() = nfcEnabled
         override fun hasLocationPermission() = locationPermission
-        override fun loadConfig() = config
+        override suspend fun loadConfig() = config
 
         override suspend fun createConnectionToken(config: StripeCardConfig) {
             tokenRequests++

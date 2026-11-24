@@ -52,7 +52,6 @@ class OfflineStripController private constructor(
     private var resumedActivity: WeakReference<Activity>? = null
     private var mode: OfflineStripView.Mode? = null
     private var hideJob: Job? = null
-    private var nfcOff = false
 
     private val nfcReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) = refreshNfc()
@@ -73,8 +72,8 @@ class OfflineStripController private constructor(
             // Each screen still re-reads the NFC state when it resumes.
             Log.w(TAG, "Could not listen for NFC being switched on or off", e)
         }
-        nfcOff = isNfcOff()
-        if (nfcOff) setMode(restingMode())
+        _nfcOff.value = isNfcOff()
+        if (nfcOff.value) setMode(restingMode())
         scope.launch {
             ConnectivityMonitor.getInstance(app).isOnline.collect(::onConnectivityChanged)
         }
@@ -100,7 +99,7 @@ class OfflineStripController private constructor(
 
     /** What the strip shows when the connection has nothing to say. */
     private fun restingMode(): OfflineStripView.Mode? =
-        if (nfcOff) OfflineStripView.Mode.NFC_OFF else null
+        if (nfcOff.value) OfflineStripView.Mode.NFC_OFF else null
 
     /** A device without an NFC chip has nothing to switch on, so it is never "off". */
     private fun isNfcOff(): Boolean = try {
@@ -112,8 +111,8 @@ class OfflineStripController private constructor(
 
     private fun refreshNfc() {
         val off = isNfcOff()
-        if (off == nfcOff) return
-        nfcOff = off
+        if (off == nfcOff.value) return
+        _nfcOff.value = off
         // The connection states keep the strip until they are done with it.
         if (mode == null || mode == OfflineStripView.Mode.NFC_OFF) setMode(restingMode())
     }
@@ -177,6 +176,9 @@ class OfflineStripController private constructor(
 
         /** How long "Back online" stays up before the strip tucks away. */
         private const val BACK_ONLINE_HOLD_MS = 2_000L
+
+        private val _nfcOff = MutableStateFlow(false)
+        val nfcOff = _nfcOff.asStateFlow()
 
         private val _stripMode = MutableStateFlow<OfflineStripView.Mode?>(null)
 

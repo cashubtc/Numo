@@ -32,8 +32,8 @@ import com.google.android.material.progressindicator.IndeterminateDrawable
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.transition.MaterialFadeThrough
 import com.google.android.material.transition.MaterialSharedAxis
-import java.io.IOException
 import java.util.Locale
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,6 +70,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
     internal var locationsClient = StripeLocationsClient()
 
     private lateinit var mode: Mode
+    private var locationRequestId: String? = null
     private var step = Step.KEY
     private var isBusy = false
 
@@ -86,7 +87,8 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
         settings = StripeCardSettings.getInstance(this)
         mode = Mode.entries.firstOrNull { it.name == intent.getStringExtra(EXTRA_MODE) } ?: Mode.SETUP
-        selectedLocationId = settings.storedLocationId().ifEmpty { null }
+        selectedLocationId = savedInstanceState?.getString(STATE_LOCATION_ID)
+            ?: settings.storedLocationId().ifEmpty { null }
 
         setupKeyStep()
         setupLocationStep()
@@ -97,7 +99,21 @@ class StripeCardSetupActivity : AppCompatActivity() {
             override fun handleOnBackPressed() = goBack()
         })
 
-        showStep(if (mode == Mode.EDIT_LOCATION) Step.LOCATION else Step.KEY, animate = false)
+        val start = Step.entries.firstOrNull { it.name == savedInstanceState?.getString(STATE_STEP) }
+            ?: if (mode == Mode.EDIT_LOCATION) Step.LOCATION else Step.KEY
+        showStep(start, animate = false)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_REQUEST_ID, locationRequestId)
+        outState.putString(STATE_STEP, step.name)
+        outState.putString(STATE_LOCATION_ID, selectedLocationId)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        locationRequestId = savedInstanceState.getString(STATE_REQUEST_ID)
     }
 
     // region Steps
@@ -249,10 +265,13 @@ class StripeCardSetupActivity : AppCompatActivity() {
             val result = withContext(Dispatchers.IO) {
                 runCatching { locationsClient.listLocations(key) }
             }
-            setBusy(false)
             val error = result.exceptionOrNull()
+            if (error == null) {
+                acceptKey(key, result.getOrThrow())
+                return@launch
+            }
+            setBusy(false)
             when {
-                error == null -> acceptKey(key, result.getOrThrow())
                 // Such a key could take payments, but the location could then only be typed in
                 // by its ID, which Stripe gives no way to verify with the same key.
                 error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN -> showFieldError(
@@ -267,21 +286,22 @@ class StripeCardSetupActivity : AppCompatActivity() {
         }
     }
 
-    private fun acceptKey(key: String, listed: List<StripeLocation>) {
-        if (!settings.saveKey(key)) {
+    private suspend fun acceptKey(key: String, listed: List<StripeLocation>) {
+        val saved = withContext(Dispatchers.IO) { settings.saveKey(key) }
+        setBusy(false)
+        if (!saved) {
             Toast.makeText(this, R.string.stripe_card_save_failed, Toast.LENGTH_LONG).show()
             return
         }
+        binding.stripeKeyInput.text?.clear()
+        showCurrentKey(StripeCardSettings.maskKey(key))
         locations = listed
         val only = listed.singleOrNull()
         when {
             mode == Mode.EDIT_KEY -> done()
             // One location leaves nothing to choose. It shows on the status page afterwards,
             // where it can be changed or another added.
-            only != null -> {
-                settings.saveLocation(only.id, only.displayName, only.place)
-                done()
-            }
+            only != null -> saveSelectedLocation(only)
             // None yet: adding one is the only way on.
             listed.isEmpty() -> showStep(Step.ADD_LOCATION)
             else -> showStep(Step.LOCATION)
@@ -431,8 +451,28 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
     private fun submitLocation() {
         val location = locations?.firstOrNull { it.id == selectedLocationId } ?: return
-        settings.saveLocation(location.id, location.displayName, location.place)
-        done()
+        saveSelectedLocation(location)
+    }
+
+    private fun saveSelectedLocation(location: StripeLocation) {
+        setBusy(true)
+        lifecycleScope.launch {
+            val saved = withContext(Dispatchers.IO) {
+                settings.saveLocation(location.id, location.displayName, location.place)
+            }
+            setBusy(false)
+            if (saved) {
+                done()
+            } else {
+                selectedLocationId = location.id
+                showStep(Step.LOCATION)
+                Toast.makeText(
+                    this@StripeCardSetupActivity,
+                    R.string.stripe_card_location_save_failed,
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+        }
     }
 
     // endregion
@@ -452,16 +492,21 @@ class StripeCardSetupActivity : AppCompatActivity() {
         countryCodesByName.entries.firstOrNull { it.value == locale.country }?.let {
             binding.countryInput.setText(it.key, false)
         }
-        requiredFields().forEach { (layout, input) ->
-            input.doAfterTextChanged { layout.error = null }
+        addressFields().forEach { (layout, input) ->
+            input.doAfterTextChanged {
+                layout.error = null
+                locationRequestId = null
+            }
         }
         binding.postalInput.setOnEditorActionListener(submitOnAction)
     }
 
-    private fun requiredFields(): List<Pair<TextInputLayout, EditText>> = listOf(
+    private fun addressFields(): List<Pair<TextInputLayout, EditText>> = listOf(
         binding.shopNameLayout to binding.shopNameInput,
         binding.countryLayout to binding.countryInput,
         binding.streetLayout to binding.streetInput,
+        binding.unitLayout to binding.unitInput,
+        binding.stateLayout to binding.stateInput,
         binding.cityLayout to binding.cityInput,
         binding.postalLayout to binding.postalInput,
     )
@@ -469,12 +514,19 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private fun submitNewLocation() {
         val key = settings.storedKey() ?: return showStep(Step.KEY)
         var complete = true
-        requiredFields().forEach { (layout, input) ->
-            val missing = input.text.isNullOrBlank()
+        val country = countryCodesByName[binding.countryInput.text.toString()]
+        addressFields().forEach { (layout, input) ->
+            val required = when (layout) {
+                binding.unitLayout -> country == "MX"
+                binding.stateLayout -> country in STATE_REQUIRED
+                binding.cityLayout -> country !in CITY_OPTIONAL
+                binding.postalLayout -> country != "HK" && country != "GI"
+                else -> true
+            }
+            val missing = required && input.text.isNullOrBlank()
             layout.error = if (missing) getString(R.string.stripe_card_add_location_required) else null
             if (missing) complete = false
         }
-        val country = countryCodesByName[binding.countryInput.text?.toString().orEmpty()]
         if (country == null) {
             binding.countryLayout.error = getString(R.string.stripe_card_add_location_required)
             complete = false
@@ -490,17 +542,17 @@ class StripeCardSetupActivity : AppCompatActivity() {
             postalCode = binding.postalInput.text.toString(),
             country = country,
         )
+        val requestId = locationRequestId ?: UUID.randomUUID().toString().also { locationRequestId = it }
         binding.addLocationError.visibility = View.GONE
         setBusy(true)
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
-                runCatching { locationsClient.createLocation(key, name, address) }
+                runCatching { locationsClient.createLocation(key, name, address, requestId) }
             }
             setBusy(false)
             result.onSuccess { location ->
                 locations = locations.orEmpty() + location
-                settings.saveLocation(location.id, location.displayName, location.place)
-                done()
+                saveSelectedLocation(location)
             }.onFailure { error ->
                 Log.w(TAG, "Could not create the Stripe location", error)
                 binding.addLocationError.text =
@@ -547,6 +599,12 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "StripeCardSetup"
+        // Stripe Terminal location address requirements, by ISO country code.
+        private val STATE_REQUIRED = setOf("AU", "CA", "ES", "HK", "IT", "JP", "MX", "US")
+        private val CITY_OPTIONAL = setOf("BG", "CY", "HR", "IE", "MT", "SG", "SI", "HK", "GI")
+        private const val STATE_REQUEST_ID = "location_request_id"
+        private const val STATE_LOCATION_ID = "selected_location_id"
+        private const val STATE_STEP = "setup_step"
         private const val EXTRA_MODE = "mode"
         private const val EXTRA_THEN_CHECK = "then_check"
         /**

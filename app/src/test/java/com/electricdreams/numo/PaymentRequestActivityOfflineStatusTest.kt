@@ -1,8 +1,14 @@
 package com.electricdreams.numo
 
+import android.provider.Settings
+import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
+import com.electricdreams.numo.ui.offline.OfflineStripController
+import com.electricdreams.numo.ui.offline.OfflineStripView
+import kotlinx.coroutines.flow.MutableStateFlow
 import com.electricdreams.numo.payment.PaymentTabManager
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -13,6 +19,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
 
@@ -80,6 +87,42 @@ class PaymentRequestActivityOfflineStatusTest {
         status.text = waiting
         refreshStatus()
         assertEquals(waiting, status.text.toString())
+    }
+
+    @Test
+    fun `NFC changes update the scan instruction and the NFC pill opens settings`() {
+        val online = MutableStateFlow(true)
+        whenever(monitor.isOnline).thenReturn(online)
+        val nfcOff = ReflectionHelpers.getStaticField<MutableStateFlow<Boolean>>(
+            OfflineStripController::class.java, "_nfcOff"
+        )
+        val strip = ReflectionHelpers.getStaticField<MutableStateFlow<OfflineStripView.Mode?>>(
+            OfflineStripController::class.java, "_stripMode"
+        )
+        val controller = Robolectric.buildActivity(PaymentRequestActivity::class.java).create().start()
+        val checkout = controller.get()
+        val instruction = checkout.findViewById<TextView>(R.id.instruction_text)
+        val contactless = checkout.findViewById<ImageView>(R.id.contactless_icon)
+        val pill = checkout.findViewById<View>(R.id.offline_pill)
+        try {
+            nfcOff.value = true
+            strip.value = OfflineStripView.Mode.NFC_OFF
+            shadowOf(checkout.mainLooper).idle()
+            assertEquals(activity.getString(R.string.payment_request_instruction_scan), instruction.text)
+            assertEquals(View.GONE, contactless.visibility)
+            pill.performClick()
+            assertEquals(Settings.ACTION_NFC_SETTINGS, shadowOf(checkout).nextStartedActivity.action)
+
+            nfcOff.value = false
+            strip.value = null
+            shadowOf(checkout.mainLooper).idle()
+            assertEquals(activity.getString(R.string.payment_request_instruction_scan_or_tap), instruction.text)
+            assertEquals(View.VISIBLE, contactless.visibility)
+        } finally {
+            controller.stop().destroy()
+            nfcOff.value = false
+            strip.value = null
+        }
     }
 
     private fun refreshStatus() {

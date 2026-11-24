@@ -1,6 +1,7 @@
 package com.electricdreams.numo.payment.card
 
 import android.content.Context
+import java.util.UUID
 import com.electricdreams.numo.core.prefs.KeystoreSecretCipher
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.prefs.SecretCipher
@@ -27,7 +28,7 @@ data class StripeCardConfig(
             val trimmed = key.trim()
             return (trimmed.startsWith(LIVE_KEY_PREFIX) || trimmed.startsWith(TEST_KEY_PREFIX)) &&
                 trimmed.length > TEST_KEY_PREFIX.length &&
-                trimmed.none { it.isWhitespace() }
+                trimmed.all { it in '!'..'~' }
         }
 
         fun isValidLocationId(locationId: String): Boolean {
@@ -49,24 +50,93 @@ class StripeCardSettings(
 
     var isEnabled: Boolean
         get() = prefs.getBoolean(KEY_ENABLED, false)
-        set(value) = prefs.putBoolean(KEY_ENABLED, value)
+        set(value) {
+            prefs.edit {
+                putBoolean(KEY_ENABLE_ON_PASS, value)
+                putBoolean(KEY_ENABLED, value)
+            }
+        }
+
+    private val enableOnPass: Boolean
+        get() {
+            // Older forms stored the switch alone. Guided setups also recorded validation.
+            val previousIntent = when {
+                prefs.contains(KEY_CHECK_PASSED) -> isEnabled || !hasPassedCheck
+                hasStoredKey() -> prefs.getBoolean(KEY_ENABLED, true)
+                else -> true
+            }
+            return prefs.getBoolean(KEY_ENABLE_ON_PASS, previousIntent)
+        }
+
+    internal val configurationRevision: String?
+        get() = prefs.getString(KEY_REVISION)
+
+    val readerCheckFailed: Boolean get() = prefs.getBoolean(KEY_READER_FAILED, false)
+
+    /** A late reader callback may only update the configuration that was actually checked. */
+    fun recordFullCheck(
+        revision: String?,
+        report: CardSetupChecker.Report,
+        requestedEnable: Boolean,
+    ): Boolean = prefs.edit {
+        if (revision != configurationRevision) return@edit false
+        putString(KEY_LAST_CHECKED_AT, System.currentTimeMillis().toString())
+        if (report.passed) {
+            val enable = requestedEnable || enableOnPass
+            putBoolean(KEY_CHECK_PASSED, true)
+            putBoolean(KEY_READER_FAILED, false)
+            putBoolean(KEY_ENABLE_ON_PASS, enable)
+            putBoolean(KEY_ENABLED, enable)
+        } else if (report.outcomes[CardSetupChecker.Check.READER_STARTS] is CardSetupChecker.Outcome.Failed) {
+            putBoolean(KEY_READER_FAILED, true)
+        }
+        true
+    }
 
     /**
      * True once a full setup check has passed for the stored key and location. Setups enabled
      * before the check existed count as passed.
      */
     var hasPassedCheck: Boolean
-        get() = prefs.getBoolean(KEY_CHECK_PASSED, false) || isEnabled
+        get() = prefs.getBoolean(KEY_CHECK_PASSED, isEnabled)
         set(value) = prefs.putBoolean(KEY_CHECK_PASSED, value)
 
-    /** Returns the stored configuration, or null when it is incomplete or cannot be decrypted. */
-    fun loadConfig(): StripeCardConfig? {
-        val encryptedKey = prefs.getString(KEY_RESTRICTED_KEY) ?: return null
-        val restrictedKey = cipher.decrypt(encryptedKey) ?: return null
-        val locationId = prefs.getString(KEY_LOCATION_ID) ?: return null
-        if (!StripeCardConfig.isValidRestrictedKey(restrictedKey)) return null
-        if (!StripeCardConfig.isValidLocationId(locationId)) return null
-        return StripeCardConfig(restrictedKey, locationId)
+    fun loadConfig(): StripeCardConfig? = configFor(storedKey(), storedLocationId())
+
+    private fun configFor(key: String?, locationId: String): StripeCardConfig? =
+        if (key != null && StripeCardConfig.isValidLocationId(locationId)) StripeCardConfig(key, locationId)
+        else null
+
+    data class Snapshot(
+        val config: StripeCardConfig?,
+        val hasStoredKey: Boolean,
+        val maskedKey: String?,
+        val isTestMode: Boolean,
+        val locationId: String,
+        val locationName: String?,
+        val locationPlace: String?,
+        val enabled: Boolean,
+        val passed: Boolean,
+        val readerFailed: Boolean,
+        val lastCheckedAt: Long?,
+    )
+
+    fun snapshot(): Snapshot {
+        val key = storedKey()
+        val id = storedLocationId()
+        return Snapshot(
+            config = configFor(key, id),
+            hasStoredKey = hasStoredKey(),
+            maskedKey = key?.let(::maskKey),
+            isTestMode = key?.startsWith(StripeCardConfig.TEST_KEY_PREFIX) == true,
+            locationId = id,
+            locationName = storedLocationName(),
+            locationPlace = storedLocationPlace(),
+            enabled = isEnabled,
+            passed = hasPassedCheck,
+            readerFailed = readerCheckFailed,
+            lastCheckedAt = lastCheckedAt,
+        )
     }
 
     /** Location ID shown in settings; it is not secret. */
@@ -98,9 +168,7 @@ class StripeCardSettings(
         val key = restrictedKey.trim()
         if (!StripeCardConfig.isValidRestrictedKey(key)) return false
         val encrypted = cipher.encrypt(key) ?: return false
-        if (key != storedKey()) requireNewCheck()
-        prefs.putString(KEY_RESTRICTED_KEY, encrypted)
-        return true
+        return saveConfiguration(mapOf(KEY_RESTRICTED_KEY to encrypted), key != storedKey())
     }
 
     /**
@@ -108,14 +176,14 @@ class StripeCardSettings(
      *
      * @param place where the shop is, e.g. "Washington, US", shown under its name.
      */
-    fun saveLocation(locationId: String, name: String?, place: String? = null) {
-        if (locationId.trim() != storedLocationId()) requireNewCheck()
-        prefs.commitStrings(
+    fun saveLocation(locationId: String, name: String?, place: String? = null): Boolean {
+        return saveConfiguration(
             mapOf(
                 KEY_LOCATION_ID to locationId.trim(),
                 KEY_LOCATION_NAME to name?.trim()?.takeIf { it.isNotEmpty() },
                 KEY_LOCATION_PLACE to place?.trim()?.takeIf { it.isNotEmpty() },
-            )
+            ),
+            locationId.trim() != storedLocationId(),
         )
     }
 
@@ -137,35 +205,47 @@ class StripeCardSettings(
     /** @return false when the key could not be encrypted, in which case nothing is stored. */
     fun saveConfig(config: StripeCardConfig): Boolean {
         val encrypted = cipher.encrypt(config.restrictedKey.trim()) ?: return false
-        prefs.commitStrings(
-            mapOf(
-                KEY_RESTRICTED_KEY to encrypted,
-                KEY_LOCATION_ID to config.locationId.trim(),
-            )
+        return saveConfiguration(
+            mapOf(KEY_RESTRICTED_KEY to encrypted, KEY_LOCATION_ID to config.locationId.trim()),
+            loadConfig() != config,
         )
-        return true
     }
 
-    /** A changed key or location is unproven, so card payments stay off until a check passes. */
-    private fun requireNewCheck() {
-        prefs.putBoolean(KEY_ENABLED, false)
-        prefs.putBoolean(KEY_CHECK_PASSED, false)
-    }
+    private fun saveConfiguration(values: Map<String, String?>, changed: Boolean): Boolean =
+        if (changed) {
+            prefs.commitValues(
+                values + mapOf(KEY_LAST_CHECKED_AT to null, KEY_REVISION to UUID.randomUUID().toString()),
+                mapOf(
+                    KEY_ENABLE_ON_PASS to enableOnPass,
+                    KEY_ENABLED to false,
+                    KEY_CHECK_PASSED to false,
+                    KEY_READER_FAILED to false,
+                ),
+            )
+        } else prefs.commitStrings(values)
 
     fun clear() {
-        prefs.remove(KEY_RESTRICTED_KEY)
-        prefs.remove(KEY_LOCATION_ID)
-        prefs.remove(KEY_LOCATION_NAME)
-        prefs.remove(KEY_LOCATION_PLACE)
-        prefs.remove(KEY_LAST_CHECKED_AT)
-        prefs.putBoolean(KEY_ENABLED, false)
-        prefs.putBoolean(KEY_CHECK_PASSED, false)
+        prefs.edit {
+            putString(KEY_REVISION, UUID.randomUUID().toString())
+            remove(KEY_RESTRICTED_KEY)
+            remove(KEY_LOCATION_ID)
+            remove(KEY_LOCATION_NAME)
+            remove(KEY_LOCATION_PLACE)
+            remove(KEY_LAST_CHECKED_AT)
+            putBoolean(KEY_ENABLED, false)
+            remove(KEY_CHECK_PASSED)
+            remove(KEY_ENABLE_ON_PASS)
+            remove(KEY_READER_FAILED)
+        }
     }
 
     /** Card payments are offered only when enabled and fully configured. */
-    fun isReady(): Boolean = isEnabled && loadConfig() != null
+    fun isReady(): Boolean = isEnabled && !readerCheckFailed && loadConfig() != null
 
     companion object {
+        private const val KEY_REVISION = "stripe_card_configuration_revision"
+        private const val KEY_ENABLE_ON_PASS = "stripe_card_enable_on_pass"
+        private const val KEY_READER_FAILED = "stripe_card_reader_failed"
         private const val KEY_ENABLED = "stripe_card_enabled"
         private const val KEY_RESTRICTED_KEY = "stripe_card_restricted_key"
         private const val KEY_LOCATION_ID = "stripe_card_location_id"

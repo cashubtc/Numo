@@ -51,6 +51,7 @@ class StripeCardSettingsTest {
         assertFalse(StripeCardConfig.isValidRestrictedKey("pk_live_abc"))
         assertFalse(StripeCardConfig.isValidRestrictedKey("rk_test_"))
         assertFalse(StripeCardConfig.isValidRestrictedKey("rk_test_a b"))
+        assertFalse(StripeCardConfig.isValidRestrictedKey("rk_test_é"))
     }
 
     @Test
@@ -154,10 +155,49 @@ class StripeCardSettingsTest {
 
     @Test
     fun `a setup enabled before the check existed counts as checked`() {
-        settings.saveConfig(StripeCardConfig("rk_test_secretvalue", "tml_shop"))
-        settings.isEnabled = true
+        prefs.putBoolean("stripe_card_enabled", true)
 
         assertTrue(settings.hasPassedCheck)
+    }
+
+    private val passingCheck = CardSetupChecker.Report(
+        CardSetupChecker.Check.entries.associateWith { CardSetupChecker.Outcome.Passed }
+    )
+
+    @Test
+    fun `an existing merchant pause survives both key and location edits`() {
+        settings.saveKey("rk_test_first")
+        settings.saveLocation("tml_old", "Old shop")
+        // Paused by a version predating the separate enable preference.
+        prefs.remove("stripe_card_enable_on_pass")
+        prefs.putBoolean("stripe_card_check_passed", true)
+        settings.saveKey("rk_test_second")
+        settings.saveLocation("tml_new", "New shop")
+        settings.recordFullCheck(settings.configurationRevision, passingCheck, requestedEnable = false)
+        assertTrue(settings.hasPassedCheck)
+        assertFalse(settings.isEnabled)
+        settings.recordFullCheck(settings.configurationRevision, passingCheck, requestedEnable = true)
+        assertTrue(settings.isEnabled)
+    }
+
+    @Test
+    fun `legacy switch off stays paused after a key edit`() {
+        prefs.putString("stripe_card_restricted_key", cipher.encrypt("rk_test_old"))
+        prefs.putString("stripe_card_location_id", "tml_old")
+        prefs.putBoolean("stripe_card_enabled", false)
+        settings.saveKey("rk_test_new")
+        settings.recordFullCheck(settings.configurationRevision, passingCheck, requestedEnable = false)
+        assertFalse(settings.isEnabled)
+    }
+
+    @Test
+    fun `a full check for a replaced configuration cannot enable payments`() {
+        settings.saveKey("rk_test_old")
+        val revision = settings.configurationRevision
+        settings.saveKey("rk_test_new")
+        assertFalse(settings.recordFullCheck(revision, passingCheck, requestedEnable = true))
+        assertFalse(settings.isEnabled)
+        assertNull(settings.lastCheckedAt)
     }
 
     @Test

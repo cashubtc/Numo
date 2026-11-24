@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.electricdreams.numo.BuildConfig
+import com.electricdreams.numo.feature.settings.DeveloperPrefs
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import java.io.IOException
@@ -18,7 +20,9 @@ import kotlinx.coroutines.withContext
 /** The real phone and the real Stripe, for [CardSetupChecker]. */
 class AndroidCardSetupEnvironment(
     context: Context,
-    private val settings: StripeCardSettings = StripeCardSettings.getInstance(context),
+    private val readConfig: suspend () -> StripeCardConfig? = {
+        withContext(Dispatchers.IO) { StripeCardSettings.getInstance(context).loadConfig() }
+    },
     private val tokenClient: StripeConnectionTokenClient = StripeConnectionTokenClient(),
     private val locationsClient: StripeLocationsClient = StripeLocationsClient(),
 ) : CardSetupChecker.Environment {
@@ -34,7 +38,7 @@ class AndroidCardSetupEnvironment(
         Manifest.permission.ACCESS_FINE_LOCATION,
     ) == PackageManager.PERMISSION_GRANTED
 
-    override fun loadConfig(): StripeCardConfig? = settings.loadConfig()
+    override suspend fun loadConfig(): StripeCardConfig? = readConfig()
 
     override suspend fun createConnectionToken(config: StripeCardConfig) {
         withContext(Dispatchers.IO) { tokenClient.createConnectionToken(config) }
@@ -58,7 +62,17 @@ class AndroidCardSetupEnvironment(
     override suspend fun startReader(config: StripeCardConfig): CardSetupChecker.ReaderResult =
         withContext(Dispatchers.Main) {
             // Stripe rejects a second connection attempt while one is under way.
-            readerLock.withLock { connectReader(config) }
+            readerLock.withLock {
+                when {
+                    BuildConfig.DEBUG && !config.isTestMode ->
+                        CardSetupChecker.ReaderResult.DebugNeedsTestKey
+                    BuildConfig.DEBUG && !DeveloperPrefs.isDeveloperModeEnabled(appContext) ->
+                        CardSetupChecker.ReaderResult.NeedsDeveloperMode
+                    BuildConfig.DEBUG && !DeveloperPrefs.isStripeReaderSimulated(appContext) ->
+                        CardSetupChecker.ReaderResult.NeedsSimulation
+                    else -> connectReader(config)
+                }
+            }
         }
 
     private suspend fun connectReader(config: StripeCardConfig): CardSetupChecker.ReaderResult = try {

@@ -1,6 +1,10 @@
 package com.electricdreams.numo.feature.settings
 
+import android.text.method.PasswordTransformationMethod
 import android.view.View
+import android.widget.AutoCompleteTextView
+import android.widget.EditText
+import android.widget.RadioGroup
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.R
@@ -14,13 +18,21 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowToast
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
@@ -37,6 +49,9 @@ class StripeCardSetupActivityTest {
         ActivityScenario.launch(StripeCardSetupActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val layout = activity.findViewById<TextInputLayout>(R.id.stripe_key_layout)
+                val field = activity.findViewById<EditText>(R.id.stripe_key_input)
+                assertTrue(field.transformationMethod is PasswordTransformationMethod)
+                assertFalse(field.isSaveEnabled)
                 assertNull(layout.placeholderText)
                 assertNull(layout.helperText)
                 assertTrue(layout.isExpandedHintEnabled)
@@ -78,12 +93,7 @@ class StripeCardSetupActivityTest {
                         .setText("rk_test_abc123")
                     activity.findViewById<View>(R.id.next_button).performClick()
 
-                    // Stripe is asked on a background thread; give its answer time to land.
-                    val deadline = System.currentTimeMillis() + 5_000
-                    while (layout.error == null && System.currentTimeMillis() < deadline) {
-                        Thread.sleep(20)
-                        shadowOf(activity.mainLooper).idle()
-                    }
+                    activity.idleUntil { layout.error != null }
 
                     assertEquals(
                         "This key can't see your locations. In Stripe, give it Write access to " +
@@ -113,7 +123,7 @@ class StripeCardSetupActivityTest {
     /** Pastes a key into a fresh setup whose Stripe account has [locations], and waits for the answer. */
     private fun submitKey(
         vararg locations: String,
-        assertions: (StripeCardSetupActivity, StripeCardSettings) -> Unit,
+        assertions: (StripeCardSetupActivity, StripeCardSettings, MockWebServer) -> Unit,
     ) {
         val server = MockWebServer()
         server.enqueue(MockResponse().setBody("""{"data":[${locations.joinToString(",")}]}"""))
@@ -131,13 +141,12 @@ class StripeCardSetupActivityTest {
                         .setText("rk_test_abc123")
                     activity.findViewById<View>(R.id.next_button).performClick()
 
-                    val deadline = System.currentTimeMillis() + 5_000
-                    while (!settings.hasStoredKey() && System.currentTimeMillis() < deadline) {
-                        Thread.sleep(20)
-                        shadowOf(activity.mainLooper).idle()
+                    activity.idleUntil {
+                        activity.isFinishing || activity.findViewById<View>(R.id.key_container).visibility == View.GONE
                     }
-                    shadowOf(activity.mainLooper).idle()
-                    assertions(activity, settings)
+                    assertEquals("", activity.findViewById<EditText>(R.id.stripe_key_input).text.toString())
+                    server.takeRequest()
+                    assertions(activity, settings, server)
                 }
             }
         } finally {
@@ -147,7 +156,7 @@ class StripeCardSetupActivityTest {
 
     @Test
     fun `an account with one location uses it without asking`() {
-        submitKey(location("tml_only1", "Corner shop")) { activity, settings ->
+        submitKey(location("tml_only1", "Corner shop")) { activity, settings, _ ->
             assertEquals("tml_only1", settings.storedLocationId())
             assertEquals("Corner shop", settings.storedLocationName())
             assertTrue(activity.isFinishing)
@@ -156,7 +165,7 @@ class StripeCardSetupActivityTest {
 
     @Test
     fun `an account with several locations asks which one`() {
-        submitKey(location("tml_one1", "Corner shop"), location("tml_two2", "Market stall")) { activity, settings ->
+        submitKey(location("tml_one1", "Corner shop"), location("tml_two2", "Market stall")) { activity, settings, _ ->
             assertEquals("", settings.storedLocationId())
             assertFalse(activity.isFinishing)
             assertEquals(
@@ -168,7 +177,7 @@ class StripeCardSetupActivityTest {
 
     @Test
     fun `an account with no location goes straight to adding one`() {
-        submitKey { activity, settings ->
+        submitKey { activity, settings, _ ->
             assertEquals("", settings.storedLocationId())
             assertEquals(
                 View.VISIBLE,
@@ -176,4 +185,64 @@ class StripeCardSetupActivityTest {
             )
         }
     }
+    @Test
+    fun `a failed location save leaves the picker open with the same selection`() {
+        submitKey(location("tml_old", "Old"), location("tml_new", "New")) { activity, settings, _ ->
+            settings.saveLocation("tml_old", "Old")
+            activity.settings = spy(settings).also {
+                doReturn(false).whenever(it).saveLocation("tml_new", "New", "Berlin, DE")
+            }
+            val list = activity.findViewById<RadioGroup>(R.id.location_list)
+            list.check(list.findViewWithTag<View>("tml_new").id)
+            activity.findViewById<View>(R.id.next_button).performClick()
+            activity.idleUntil { ShadowToast.getTextOfLatestToast() != null }
+            assertEquals(activity.getString(R.string.stripe_card_location_save_failed),
+                ShadowToast.getTextOfLatestToast().toString())
+            assertEquals("tml_old", settings.storedLocationId())
+            assertEquals("tml_new", list.findViewById<View>(list.checkedRadioButtonId).tag)
+            assertFalse(activity.isFinishing)
+            assertNull(shadowOf(activity).nextStartedActivity)
+        }
+    }
+
+    @Test
+    fun `country rules validate before submission and retries reuse the request key`() {
+        submitKey { activity, _, server ->
+            fun field(id: Int) = activity.findViewById<EditText>(id)
+            fun country(code: String) {
+                activity.findViewById<AutoCompleteTextView>(R.id.country_input)
+                    .setText(Locale("", code).getDisplayCountry(Locale.getDefault()), false)
+            }
+            val next = activity.findViewById<View>(R.id.next_button)
+            field(R.id.shop_name_input).setText("Shop")
+            field(R.id.street_input).setText("1 Main")
+            country("US")
+            next.performClick()
+            for (id in listOf(R.id.city_layout, R.id.state_layout, R.id.postal_layout)) {
+                assertNotNull(activity.findViewById<TextInputLayout>(id).error)
+            }
+            country("MX")
+            next.performClick()
+            assertNotNull(activity.findViewById<TextInputLayout>(R.id.unit_layout).error)
+            assertEquals(1, server.requestCount)
+
+            country("HK")
+            field(R.id.state_input).setText("Hong Kong Island")
+            fun failedSubmission(): String {
+                server.enqueue(MockResponse().setResponseCode(503))
+                next.performClick()
+                activity.idleUntil { activity.findViewById<View>(R.id.add_location_error).isShown }
+                val request = requireNotNull(server.takeRequest(5, TimeUnit.SECONDS))
+                val body = request.body.readUtf8()
+                assertFalse(body.contains("city"))
+                assertFalse(body.contains("postal_code"))
+                return requireNotNull(request.getHeader("Idempotency-Key"))
+            }
+            val firstId = failedSubmission()
+            assertEquals(firstId, failedSubmission())
+            field(R.id.shop_name_input).setText("New name")
+            assertNotEquals(firstId, failedSubmission())
+        }
+    }
+
 }

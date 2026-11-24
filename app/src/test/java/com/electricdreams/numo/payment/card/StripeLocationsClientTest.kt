@@ -1,5 +1,6 @@
 package com.electricdreams.numo.payment.card
 
+import java.io.IOException
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -55,6 +56,24 @@ class StripeLocationsClientTest {
     }
 
     @Test
+    fun `all pages are listed using the last location as the cursor`() {
+        server.enqueue(MockResponse().setBody("""{"has_more":true,"data":[{"id":"tml_first"},{"id":"tml_second"}]}"""))
+        server.enqueue(MockResponse().setBody("""{"has_more":false,"data":[{"id":"tml_last"}]}"""))
+
+        assertEquals(listOf("tml_first", "tml_second", "tml_last"),
+            client.listLocations("rk_test_key").map { it.id })
+        server.takeRequest()
+        assertEquals("tml_second", server.takeRequest().requestUrl?.queryParameter("starting_after"))
+    }
+
+    @Test
+    fun `a page without the promised cursor fails without looping`() {
+        server.enqueue(MockResponse().setBody("""{"has_more":true,"data":[]}"""))
+        assertThrows(IOException::class.java) { client.listLocations("rk_test_key") }
+        assertEquals(1, server.requestCount)
+    }
+
+    @Test
     fun `looks up one location by its ID`() {
         server.enqueue(
             MockResponse().setBody(
@@ -105,11 +124,13 @@ class StripeLocationsClientTest {
                 postalCode = "10115",
                 country = "de",
             ),
+            idempotencyKey = "create-shop",
         )
 
         assertEquals(StripeLocation("tml_new", "Corner shop", "Berlin", "DE"), location)
         val request = server.takeRequest()
         assertEquals("POST", request.method)
+        assertEquals("create-shop", request.getHeader("Idempotency-Key"))
         assertEquals("/v1/terminal/locations", request.path)
         assertEquals(
             "display_name=Corner%20shop&address%5Bline1%5D=Hauptstr.%201&address%5Bcity%5D=Berlin" +
@@ -131,6 +152,7 @@ class StripeLocationsClientTest {
                 "rk_test_abc123",
                 "Shop",
                 StripeLocationAddress("1 Main St", null, "Springfield", "IL", "x", "US"),
+                "create-shop",
             )
         }
 

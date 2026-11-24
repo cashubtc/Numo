@@ -1,10 +1,13 @@
 package com.electricdreams.numo.feature.settings
 
+import android.content.pm.PackageManager
+import android.provider.Settings
 import android.view.View
 import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.R
+import com.electricdreams.numo.payment.card.AndroidCardSetupEnvironment
 import com.electricdreams.numo.payment.card.CardSetupChecker
 import com.electricdreams.numo.payment.card.CardSetupChecker.ReaderResult
 import com.electricdreams.numo.payment.card.StripeCardConfig
@@ -12,6 +15,7 @@ import com.electricdreams.numo.payment.card.StripeCardSettings
 import com.electricdreams.numo.payment.card.StripeConnectionTokenClient.StripeApiException
 import java.io.IOException
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -27,12 +31,15 @@ class StripeCardCheckActivityTest {
 
     private class FakeEnvironment(
         var nfcEnabled: Boolean = true,
+        val locationGranted: Boolean = true,
         var tokenError: IOException? = null,
+        val key: String = "rk_live_example",
+        val reader: ReaderResult? = ReaderResult.Started,
     ) : CardSetupChecker.Environment {
         override fun isDeviceSupported() = true
         override fun isNfcEnabled() = nfcEnabled
-        override fun hasLocationPermission() = true
-        override fun loadConfig() = StripeCardConfig("rk_test_abc123", "tml_shop")
+        override fun hasLocationPermission() = locationGranted
+        override suspend fun loadConfig() = StripeCardConfig(key, "tml_shop")
         override suspend fun locationStatus(config: StripeCardConfig) =
             CardSetupChecker.LocationStatus.FOUND
         override suspend fun createConnectionToken(config: StripeCardConfig) {
@@ -41,7 +48,8 @@ class StripeCardCheckActivityTest {
         var readerStarts = 0
         override suspend fun startReader(config: StripeCardConfig): ReaderResult {
             readerStarts++
-            return ReaderResult.Started
+            return reader ?: AndroidCardSetupEnvironment(ApplicationProvider.getApplicationContext())
+                .startReader(config)
         }
     }
 
@@ -66,6 +74,7 @@ class StripeCardCheckActivityTest {
         )
         ActivityScenario.launch<StripeCardCheckActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
+                activity.idleUntil { activity.findViewById<View>(R.id.primary_button).isEnabled }
                 activity.checkerFactory = { CardSetupChecker(environment) }
                 activity.runCheck()
                 shadowOf(activity.mainLooper).idle()
@@ -85,6 +94,24 @@ class StripeCardCheckActivityTest {
             assertTrue(settings.isEnabled)
             assertTrue(settings.hasPassedCheck)
         }
+    }
+
+    @Test
+    fun `a sandbox pass identifies test payments`() {
+        runCheck(FakeEnvironment(key = "rk_test_example")) { activity ->
+            assertEquals("Stripe test mode passed", activity.text(R.id.summary_title))
+            assertTrue(activity.text(R.id.summary_body).contains("To collect real money"))
+        }
+    }
+
+    @Test
+    fun `a full reader failure persists through skipped checks until a full pass`() {
+        settings.isEnabled = true
+        runCheck(FakeEnvironment(reader = ReaderResult.Error("no reader"))) {
+            assertTrue(settings.readerCheckFailed)
+        }
+        runCheck(FakeEnvironment(nfcEnabled = false)) { assertTrue(settings.readerCheckFailed) }
+        runCheck(FakeEnvironment()) { assertFalse(settings.readerCheckFailed) }
     }
 
     @Test
@@ -144,4 +171,44 @@ class StripeCardCheckActivityTest {
             assertTrue(settings.isEnabled)
         }
     }
+    @Test
+    fun `denying precise location offers app settings and waits for a tap`() {
+        runCheck(FakeEnvironment(locationGranted = false)) { activity ->
+            val button = activity.findViewById<TextView>(R.id.primary_button)
+            button.performClick()
+            shadowOf(activity).nextStartedActivity // Consume the system permission request.
+            val request = shadowOf(activity).lastRequestedPermission
+            activity.onRequestPermissionsResult(
+                request.requestCode, request.requestedPermissions,
+                IntArray(request.requestedPermissions.size) { PackageManager.PERMISSION_DENIED },
+            )
+            activity.idleUntil { button.text == "Open app settings" }
+            assertNull(shadowOf(activity).nextStartedActivity)
+            button.performClick()
+            assertEquals(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                shadowOf(activity).nextStartedActivity.action)
+        }
+    }
+
+    @Test
+    fun `reader fixes open the screen for the missing prerequisite`() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        fun assertFix(key: String, target: Class<*>) {
+            runCheck(FakeEnvironment(key = key, reader = null)) { activity ->
+                activity.findViewById<View>(R.id.primary_button).performClick()
+                assertEquals(target.name, shadowOf(activity).nextStartedActivity.component?.className)
+            }
+        }
+        try {
+            DeveloperPrefs.setDeveloperModeEnabled(context, false)
+            assertFix("rk_test_example", AboutActivity::class.java)
+            assertFix("rk_live_example", StripeCardSetupActivity::class.java)
+            DeveloperPrefs.setDeveloperModeEnabled(context, true)
+            DeveloperPrefs.setStripeReaderSimulated(context, false)
+            assertFix("rk_test_example", DeveloperSettingsActivity::class.java)
+        } finally {
+            DeveloperPrefs.setDeveloperModeEnabled(context, false)
+        }
+    }
+
 }

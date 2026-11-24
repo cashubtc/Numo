@@ -20,6 +20,7 @@ import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.lifecycleScope
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
@@ -33,7 +34,9 @@ import com.electricdreams.numo.databinding.ItemCardAttentionBinding
 import com.electricdreams.numo.payment.card.AndroidCardSetupEnvironment
 import com.electricdreams.numo.payment.card.CardSetupChecker
 import com.electricdreams.numo.payment.card.CardSetupChecker.Fix
+import com.electricdreams.numo.payment.card.StripeCardConfig
 import com.electricdreams.numo.payment.card.StripeCardSettings
+import com.electricdreams.numo.payment.card.StripeCardSettings.Snapshot
 import com.electricdreams.numo.payment.card.StripeLocationsClient
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.util.DialogHelper
@@ -49,7 +52,7 @@ import com.electricdreams.numo.ui.util.applySettingsWindowInsets
  */
 class StripeCardSettingsActivity : AppCompatActivity() {
 
-    private enum class State { UNSUPPORTED, NOT_SET_UP, CHECKING, READY, PAUSED, UNCHECKED, ATTENTION }
+    private enum class State { UNSUPPORTED, NOT_SET_UP, READY, TEST_READY, PAUSED, UNCHECKED, ATTENTION, CHECK_ERROR }
 
     private lateinit var binding: ActivityStripeCardSettingsBinding
 
@@ -57,8 +60,8 @@ class StripeCardSettingsActivity : AppCompatActivity() {
     internal lateinit var settings: StripeCardSettings
 
     /** Replaceable so tests can decide what the phone and Stripe report. */
-    internal var checkerFactory: () -> CardSetupChecker = {
-        CardSetupChecker(AndroidCardSetupEnvironment(this))
+    internal var checkerFactory: (StripeCardConfig) -> CardSetupChecker = { config ->
+        CardSetupChecker(AndroidCardSetupEnvironment(this, readConfig = { config }))
     }
 
     /** Replaceable so tests can stand in for Stripe. */
@@ -158,58 +161,65 @@ class StripeCardSettingsActivity : AppCompatActivity() {
     }
 
     /** Shows what is already known, then confirms it with the quick checks. */
-    internal fun refresh() {
+    internal fun refresh(): Job {
         checkJob?.cancel()
-        binding.checkProgress.hide()
-        setSwitch(settings.isEnabled)
-        binding.keyRow.setTrailingText(settings.maskedKey())
-        showLastChecked()
-        showLocation()
-        loadMissingLocationName()
+        locationNameJob?.cancel()
+        binding.checkProgress.show()
+        return lifecycleScope.launch {
+            try {
+                val snapshot = withContext(Dispatchers.IO) { settings.snapshot() }
+                setSwitch(snapshot.enabled)
+                binding.keyRow.setTrailingText(snapshot.maskedKey)
+                showLastChecked(snapshot.lastCheckedAt)
+                showLocation(snapshot)
+                binding.disconnectRow.visibility = if (snapshot.hasStoredKey) View.VISIBLE else View.GONE
 
-        when {
-            !StripeTerminalManager.isDeviceSupported(this) && !settings.hasStoredKey() ->
-                show(State.UNSUPPORTED)
-            settings.loadConfig() == null -> show(State.NOT_SET_UP)
-            else -> {
-                show(State.CHECKING)
-                // Says the state above is still being confirmed; hidden again before a quick
-                // check could make it flash.
-                binding.checkProgress.show()
-                checkJob = lifecycleScope.launch {
-                    val report = try {
-                        checkerFactory().run(includeReader = false)
-                    } finally {
-                        // A check cancelled by the next refresh must not hide that one's progress.
-                        if (isActive) binding.checkProgress.hide()
-                    }
-                    val failures = failuresToShow(report)
-                    show(if (failures.isEmpty()) knownState() else State.ATTENTION, failures)
+                val config = snapshot.config
+                if (config == null) {
+                    val unsupported = !snapshot.hasStoredKey &&
+                        !StripeTerminalManager.isDeviceSupported(this@StripeCardSettingsActivity)
+                    show(if (unsupported) State.UNSUPPORTED else State.NOT_SET_UP)
+                    return@launch
                 }
+
+                loadMissingLocationName(snapshot, config)
+                show(knownState(snapshot), readerFailed = snapshot.readerFailed)
+                val report = checkerFactory(config).run(includeReader = false)
+                val state = if (report.passed) knownState(snapshot) else State.ATTENTION
+                show(state, failuresToShow(report), snapshot.readerFailed)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // HTTP client exceptions can include request headers.
+                Log.e(TAG, "Could not check Stripe settings (${e.javaClass.simpleName})")
+                binding.disconnectRow.visibility = View.VISIBLE
+                show(State.CHECK_ERROR)
+            } finally {
+                if (isActive) binding.checkProgress.hide()
             }
-        }
+        }.also { checkJob = it }
     }
 
     /** The shop leads the page, and its row repeats the name so it reads as changeable. */
-    private fun showLocation() {
-        val name = settings.storedLocationName()
+    private fun showLocation(snapshot: Snapshot) {
+        val name = snapshot.locationName
         binding.accountTitle.text = name ?: getString(R.string.stripe_card_account_fallback_title)
         val mode = getString(
-            if (settings.isTestMode() == true) R.string.stripe_card_account_test_mode
+            if (snapshot.isTestMode) R.string.stripe_card_account_test_mode
             else R.string.stripe_card_account_live_mode
         )
         binding.accountSubtitle.text =
-            listOfNotNull(settings.storedLocationPlace(), mode).joinToString(" · ")
+            listOfNotNull(snapshot.locationPlace, mode).joinToString(" · ")
         binding.locationRow.setTrailingText(
-            name ?: settings.storedLocationId()
+            name ?: snapshot.locationId
                 .ifEmpty { getString(R.string.stripe_card_location_row_missing) }
         )
     }
 
     /** When the full check last ran, in the system's own words ("5 min. ago", "Yesterday"). */
-    private fun showLastChecked() {
+    private fun showLastChecked(lastCheckedAt: Long?) {
         binding.checkRow.setTrailingText(
-            settings.lastCheckedAt?.let {
+            lastCheckedAt?.let {
                 DateUtils.getRelativeTimeSpanString(
                     it,
                     System.currentTimeMillis(),
@@ -224,10 +234,8 @@ class StripeCardSettingsActivity : AppCompatActivity() {
      * A location entered by its ID has no name stored. Ask Stripe for it once, so the row shows
      * the shop rather than "tml_…"; the ID stays when the key may not read locations.
      */
-    private fun loadMissingLocationName() {
-        locationNameJob?.cancel()
-        if (settings.storedLocationName() != null) return
-        val config = settings.loadConfig() ?: return
+    private fun loadMissingLocationName(snapshot: Snapshot, config: StripeCardConfig) {
+        if (snapshot.locationName != null) return
         locationNameJob = lifecycleScope.launch {
             val location = withContext(Dispatchers.IO) {
                 runCatching { locationsClient.getLocation(config.restrictedKey, config.locationId) }
@@ -236,14 +244,16 @@ class StripeCardSettingsActivity : AppCompatActivity() {
             val name = location?.displayName?.takeIf { it != location.id } ?: return@launch
             if (settings.storedLocationId() != location.id) return@launch
             settings.saveLocationName(name, location.place)
-            showLocation()
+            showLocation(snapshot.copy(locationName = name, locationPlace = location.place))
         }
     }
 
     /** Where things stood after the last full check. */
-    private fun knownState(): State = when {
-        settings.isEnabled -> State.READY
-        settings.hasPassedCheck -> State.PAUSED
+    private fun knownState(snapshot: Snapshot): State = when {
+        snapshot.readerFailed -> State.ATTENTION
+        snapshot.enabled && snapshot.isTestMode -> State.TEST_READY
+        snapshot.enabled -> State.READY
+        snapshot.passed -> State.PAUSED
         else -> State.UNCHECKED
     }
 
@@ -263,7 +273,11 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun show(state: State, failures: List<CardSetupChecker.Outcome.Failed> = emptyList()) {
+    private fun show(
+        state: State,
+        failures: List<CardSetupChecker.Outcome.Failed> = emptyList(),
+        readerFailed: Boolean = false,
+    ) {
         val configured = state != State.UNSUPPORTED && state != State.NOT_SET_UP
         binding.configuredContainer.visibility = if (configured) View.VISIBLE else View.GONE
         binding.introContainer.visibility = if (state == State.NOT_SET_UP) View.VISIBLE else View.GONE
@@ -273,13 +287,6 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         binding.statusCard.visibility = if (state == State.NOT_SET_UP) View.GONE else View.VISIBLE
         binding.accountHeader.visibility = binding.configuredContainer.visibility
 
-        if (state == State.CHECKING) {
-            // Show the last known state while the quick checks run: nothing flashes or resizes
-            // unless the answer actually changed.
-            show(knownState())
-            return
-        }
-
         binding.attentionList.removeAllViews()
         when (state) {
             State.UNSUPPORTED -> addCard(
@@ -288,7 +295,7 @@ class StripeCardSettingsActivity : AppCompatActivity() {
                 getString(R.string.stripe_card_body_unsupported),
             )
             // All is well: the Status row says so, and a card would only repeat it.
-            State.READY, State.PAUSED -> Unit
+            State.READY, State.TEST_READY, State.PAUSED -> Unit
             State.UNCHECKED -> addCard(
                 R.drawable.ic_info, R.color.color_text_secondary,
                 getString(R.string.stripe_card_headline_unchecked),
@@ -296,7 +303,21 @@ class StripeCardSettingsActivity : AppCompatActivity() {
                 R.string.stripe_card_check_row_title,
             ) { openCheck(enableOnPass = false) }
             State.ATTENTION -> showFailures(failures)
-            State.NOT_SET_UP, State.CHECKING -> Unit
+            State.CHECK_ERROR -> addCard(
+                R.drawable.ic_warning, R.color.color_warning,
+                getString(R.string.stripe_card_check_incomplete_title),
+                getString(R.string.stripe_card_check_incomplete_body),
+                R.string.stripe_card_fix_retry,
+            ) { refresh() }
+            State.NOT_SET_UP -> Unit
+        }
+        if (readerFailed) {
+            addCard(
+                R.drawable.ic_warning, R.color.color_warning,
+                getString(R.string.stripe_card_check_problem_reader),
+                getString(R.string.stripe_card_check_reader_retry_body),
+                R.string.stripe_card_check_row_title,
+            ) { openCheck(enableOnPass = false) }
         }
         showStatus(state)
     }
@@ -304,8 +325,9 @@ class StripeCardSettingsActivity : AppCompatActivity() {
     private fun showStatus(state: State) {
         val (text, color) = when (state) {
             State.READY -> R.string.stripe_card_status_ready to R.color.color_success_green
+            State.TEST_READY -> R.string.stripe_card_status_test_ready to R.color.color_success_green
             State.PAUSED -> R.string.stripe_card_status_paused to R.color.color_text_secondary
-            State.ATTENTION -> R.string.stripe_card_status_attention to R.color.color_warning
+            State.ATTENTION, State.CHECK_ERROR -> R.string.stripe_card_status_attention to R.color.color_warning
             else -> R.string.stripe_card_status_unchecked to R.color.color_text_secondary
         }
         binding.statusRow.setTrailingText(getString(text))
@@ -319,17 +341,8 @@ class StripeCardSettingsActivity : AppCompatActivity() {
                 R.drawable.ic_warning, R.color.color_warning,
                 getString(CardCheckText.failureTitle(failure.failure)),
                 CardCheckText.problemBody(this, failure),
-                CardCheckText.fixLabel(failure.fix),
+                CardCheckText.fixLabel(failure.fix, locationFix),
             ) { applyFix(failure.fix) }
-        }
-        // The check failed without naming a problem; the full check will.
-        if (failures.isEmpty()) {
-            addCard(
-                R.drawable.ic_warning, R.color.color_warning,
-                getString(R.string.stripe_card_headline_attention),
-                getString(R.string.stripe_card_body_attention),
-                R.string.stripe_card_see_fixes,
-            ) { openCheck(enableOnPass = false) }
         }
     }
 
@@ -376,6 +389,7 @@ class StripeCardSettingsActivity : AppCompatActivity() {
                 leaveToFix(StripeCardSetupActivity.editKeyIntent(this, thenCheck = true))
             Fix.CHOOSE_LOCATION ->
                 leaveToFix(StripeCardSetupActivity.editLocationIntent(this, thenCheck = true))
+            Fix.OPEN_ABOUT -> leaveToFix(Intent(this, AboutActivity::class.java))
             Fix.OPEN_DEVELOPER_SETTINGS ->
                 leaveToFix(Intent(this, DeveloperSettingsActivity::class.java))
         }

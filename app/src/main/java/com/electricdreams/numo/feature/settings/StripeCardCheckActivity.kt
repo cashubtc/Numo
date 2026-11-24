@@ -95,6 +95,7 @@ class StripeCardCheckActivity : AppCompatActivity() {
         showRunning(null)
 
         checkJob = lifecycleScope.launch {
+            val revision = settings.configurationRevision
             val report = try {
                 checkerFactory().run(includeReader = true) { check, outcome ->
                     outcomes[check] = outcome
@@ -106,7 +107,9 @@ class StripeCardCheckActivity : AppCompatActivity() {
                 Log.e(TAG, "Setup check failed unexpectedly", e)
                 CardSetupChecker.Report(emptyMap())
             }
-            onFinished(report)
+            val requestedEnable = intent.getBooleanExtra(EXTRA_ENABLE_ON_PASS, false)
+            if (settings.recordFullCheck(revision, report, requestedEnable)) onFinished(report)
+            else showIncomplete()
         }
     }
 
@@ -123,10 +126,9 @@ class StripeCardCheckActivity : AppCompatActivity() {
     }
 
     private fun onFinished(report: CardSetupChecker.Report) {
-        settings.lastCheckedAt = System.currentTimeMillis()
         binding.primaryButton.isEnabled = true
         when {
-            report.passed -> showPassed()
+            report.passed -> showPassed(report.isTestMode)
             // The merchant fixes one problem at a time; the check re-runs after each fix.
             else -> report.outcomes.values.filterIsInstance<Outcome.Failed>().let { failures ->
                 failures.firstOrNull()?.let { showProblem(it, failures.size) } ?: showIncomplete()
@@ -134,20 +136,22 @@ class StripeCardCheckActivity : AppCompatActivity() {
         }
     }
 
-    private fun showPassed() {
-        val turnOn = intent.getBooleanExtra(EXTRA_ENABLE_ON_PASS, false) || !settings.hasPassedCheck
-        settings.hasPassedCheck = true
-        if (turnOn) settings.isEnabled = true
-
+    private fun showPassed(testMode: Boolean) {
         showOrb(Orb.PASSED, R.drawable.ic_check)
         showText(
             getString(
-                if (settings.isEnabled) R.string.stripe_card_check_ready
-                else R.string.stripe_card_check_summary_passed
+                when {
+                    testMode -> R.string.stripe_card_check_test_passed
+                    settings.isEnabled -> R.string.stripe_card_check_ready
+                    else -> R.string.stripe_card_check_summary_passed
+                }
             ),
             getString(
-                if (settings.isEnabled) R.string.stripe_card_check_summary_passed_body
-                else R.string.stripe_card_check_summary_passed_paused_body
+                when {
+                    !settings.isEnabled -> R.string.stripe_card_check_summary_passed_paused_body
+                    testMode -> R.string.stripe_card_check_test_body
+                    else -> R.string.stripe_card_check_summary_passed_body
+                }
             ),
         )
         showProblemDots(0)
@@ -164,7 +168,7 @@ class StripeCardCheckActivity : AppCompatActivity() {
         )
         showProblemDots(problemCount)
 
-        val fixLabel = CardCheckText.fixLabel(problem.fix)
+        val fixLabel = CardCheckText.fixLabel(problem.fix, locationFix)
         if (fixLabel == null) {
             // Nothing can be done on this phone, so the only way on is out.
             binding.primaryButton.setText(R.string.stripe_card_check_done)
@@ -180,6 +184,7 @@ class StripeCardCheckActivity : AppCompatActivity() {
 
     /** The check itself broke, which says nothing about the setup. */
     private fun showIncomplete() {
+        binding.primaryButton.isEnabled = true
         showOrb(Orb.FAILED, R.drawable.ic_exclamation)
         showText(
             getString(R.string.stripe_card_check_incomplete_title),
@@ -332,6 +337,7 @@ class StripeCardCheckActivity : AppCompatActivity() {
                 leaveToFix(StripeCardSetupActivity.editKeyIntent(this, thenCheck = false))
             Fix.CHOOSE_LOCATION ->
                 leaveToFix(StripeCardSetupActivity.editLocationIntent(this, thenCheck = false))
+            Fix.OPEN_ABOUT -> leaveToFix(Intent(this, AboutActivity::class.java))
             Fix.OPEN_DEVELOPER_SETTINGS ->
                 leaveToFix(Intent(this, DeveloperSettingsActivity::class.java))
         }

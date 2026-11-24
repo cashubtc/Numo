@@ -335,6 +335,7 @@
 
                             <com.google.android.material.materialswitch.MaterialSwitch
                                 android:id="@+id/stripe_card_enable_switch"
+                                android:saveEnabled="false"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:contentDescription="@string/stripe_card_enable_title"
@@ -375,18 +376,19 @@
 
                     </LinearLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/disconnect_row"
-                        style="@style/Widget.Numo.Button.Tertiary"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_l"
-                        android:minHeight="48dp"
-                        android:paddingHorizontal="0dp"
-                        android:text="@string/stripe_card_disconnect_title"
-                        android:textColor="@color/color_error" />
-
                 </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/disconnect_row"
+                    style="@style/Widget.Numo.Button.Tertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_l"
+                    android:visibility="gone"
+                    android:minHeight="48dp"
+                    android:paddingHorizontal="0dp"
+                    android:text="@string/stripe_card_disconnect_title"
+                    android:textColor="@color/color_error" />
 
             </LinearLayout>
 

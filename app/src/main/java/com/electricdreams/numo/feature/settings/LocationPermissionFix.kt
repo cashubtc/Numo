@@ -3,40 +3,46 @@ package com.electricdreams.numo.feature.settings
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
-import android.os.SystemClock
+import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import com.electricdreams.numo.R
 
-/**
- * Asks for the location permission Stripe needs. Android stops showing its dialog once the
- * merchant has refused for good, and then answers at once; only in that case does this open
- * the app's settings page instead. A dialog that was merely dismissed is asked again next time.
- *
- * Create it as a property of the activity, so it registers before the activity starts.
- *
- * @param onLeaveForSettings called just before the app's settings page opens.
- * @param onAnswered called when the dialog was shown and answered, either way.
- */
+/** Requests precise location, then offers an explicit settings action if it is still denied. */
 internal class LocationPermissionFix(
     private val activity: ComponentActivity,
     private val onLeaveForSettings: () -> Unit = {},
     private val onAnswered: () -> Unit,
 ) {
 
-    private var askedAt = 0L
+    private var denied = false
+
+    init {
+        activity.savedStateRegistry.registerSavedStateProvider(TAG) {
+            Bundle().apply { putBoolean("denied", denied) }
+        }
+        activity.addOnContextAvailableListener {
+            denied = activity.savedStateRegistry.consumeRestoredStateForKey(TAG)?.getBoolean("denied") == true
+        }
+    }
+
+    val actionLabel: Int
+        get() = if (denied) R.string.stripe_card_fix_app_settings else R.string.stripe_card_fix_location
 
     private val launcher = activity.registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
-        val granted = grants[Manifest.permission.ACCESS_FINE_LOCATION] == true
-        val answeredWithoutDialog = SystemClock.elapsedRealtime() - askedAt < DIALOG_MIN_MS
-        if (!granted && answeredWithoutDialog) openAppSettings() else onAnswered()
+        denied = grants[Manifest.permission.ACCESS_FINE_LOCATION] != true
+        onAnswered()
     }
 
     fun ask() {
-        askedAt = SystemClock.elapsedRealtime()
+        if (denied) {
+            openAppSettings()
+            return
+        }
         launcher.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -62,12 +68,5 @@ internal class LocationPermissionFix(
 
     companion object {
         private const val TAG = "LocationPermissionFix"
-
-        /**
-         * A refusal faster than a dialog can be read and answered came from Android itself.
-         * Set generously for slow tills: guessing "no dialog" wrongly only opens the settings
-         * page, while guessing "dialog" wrongly would leave a button that appears to do nothing.
-         */
-        private const val DIALOG_MIN_MS = 800L
     }
 }
