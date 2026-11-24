@@ -8,10 +8,7 @@
     <string name="stripe_card_invalid_key">Introduce una clave restringida que empiece por rk_live_ o rk_test_. No se aceptan claves secretas (sk_…).</string>
     <string name="stripe_card_save_failed">No se pudo guardar la clave de forma segura en este dispositivo</string>
     <string name="stripe_card_removed">Clave de Stripe eliminada</string>
-    <string name="payment_request_tab_card">Tarjeta</string>
-    <string name="payment_request_instruction_card">Acerca la tarjeta a este teléfono</string>
-    <string name="card_payment_status_preparing">Preparando el lector de tarjetas…</string>
-    <string name="card_payment_status_waiting">Esperando la tarjeta…</string>
+    <string name="card_payment_status_confirming">Confirmando el pago…</string>
     <string name="card_payment_status_cancelled">Pago con tarjeta cancelado</string>
     <string name="card_payment_status_failed">Error en el pago con tarjeta: %1$s</string>
     <string name="card_payment_status_unresolved">No se pudo confirmar el pago con tarjeta. Toca el botón para comprobar su estado; la tarjeta no se cobrará dos veces.</string>
@@ -22,10 +19,10 @@
     <string name="card_payment_status_amount_unavailable">Importe con tarjeta no disponible: el precio de bitcoin en %1$s aún no se ha cargado</string>
     <string name="card_payment_status_location_required">Stripe requiere el permiso de ubicación para los pagos con tarjeta</string>
     <string name="card_payment_status_not_configured">Los pagos con tarjeta no están configurados</string>
-    <string name="card_payment_action_charge">Cobrar %1$s</string>
-    <string name="card_payment_action_retry">Reintentar</string>
+    <string name="card_payment_button">Tarjeta</string>
+    <string name="card_payment_button_amount">Tarjeta · %1$s</string>
+    <string name="card_payment_action_check">Comprobar pago con tarjeta</string>
     <string name="transaction_detail_payment_type_card_value">Tarjeta (Stripe)</string>
-    <string name="default_payment_method_option_card">Tarjeta</string>
     <string name="developer_settings_simulate_stripe_reader">Simular el lector de tarjetas de Stripe</string>
     <string name="card_payment_simulation_requires_test_key">El lector simulado requiere una clave de prueba de Stripe (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe requiere una versión de producción para leer tarjetas físicas. Para hacer pruebas, activa el lector simulado en los ajustes de desarrollador.</string>

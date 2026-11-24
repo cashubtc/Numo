@@ -114,7 +114,6 @@ class SettingsActivity : AppCompatActivity() {
             PaymentTab.UNIFIED -> R.string.default_payment_method_option_unified
             PaymentTab.CASHU -> R.string.default_payment_method_option_cashu
             PaymentTab.LIGHTNING -> R.string.default_payment_method_option_lightning
-            PaymentTab.CARD -> R.string.default_payment_method_option_card
         }))
 
         val theme = when (prefs.getString(ThemeSettingsActivity.PREF_THEME)) {

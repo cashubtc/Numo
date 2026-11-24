@@ -271,6 +271,18 @@
         <item name="elevation">0dp</item>
     </style>
 
+    <!-- Card payment on the checkout screen: a quiet outlined pill beneath the QR code -->
+    <style name="Widget.Numo.Button.CardPay" parent="Widget.Button.Secondary.Outlined">
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="cornerRadius">@dimen/radius_button_pill</item>
+        <item name="iconTint">@color/color_text_primary</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">@dimen/space_s</item>
+        <item name="iconSize">20dp</item>
+    </style>
+
     <style name="Widget.Numo.Button.Segmented" parent="Widget.Button.Secondary">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>

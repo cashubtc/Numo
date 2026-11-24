@@ -10,13 +10,11 @@ class DefaultPaymentMethodManager private constructor(context: Context) {
 
     fun getDefaultPaymentMethod(): PaymentTab {
         val saved = prefs.getString(KEY_DEFAULT_METHOD, PaymentTab.UNIFIED.name)
-        val method = try {
+        return try {
             PaymentTab.valueOf(saved ?: PaymentTab.UNIFIED.name)
         } catch (e: IllegalArgumentException) {
             PaymentTab.UNIFIED
         }
-        // Card collection needs an explicit tap by the merchant, so it is never the default.
-        return if (method == PaymentTab.CARD) PaymentTab.UNIFIED else method
     }
 
     fun setDefaultPaymentMethod(method: PaymentTab) {

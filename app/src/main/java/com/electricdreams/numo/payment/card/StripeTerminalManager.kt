@@ -4,11 +4,13 @@ import android.Manifest
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
+import com.electricdreams.numo.R
 import com.electricdreams.numo.feature.settings.DeveloperPrefs
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.TerminalApplicationDelegate
@@ -30,6 +32,7 @@ import com.stripe.stripeterminal.external.models.PaymentIntent
 import com.stripe.stripeterminal.external.models.PaymentIntentParameters
 import com.stripe.stripeterminal.external.models.PaymentIntentStatus
 import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TapUseCase
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
@@ -309,6 +312,42 @@ object StripeTerminalManager {
             )
         }
 
+    /** How Stripe's tap screen is styled: its theme and the three colours an app may set. */
+    internal data class TapScreenStyle(
+        val dark: Boolean,
+        val primary: Int,
+        val success: Int,
+        val error: Int,
+    )
+
+    /**
+     * Styles Stripe's tap screen after the screen that opened it. Stripe draws that screen
+     * itself and only lets an app choose its light or dark theme and three colours, so it
+     * follows Numo's theme and takes Numo's foreground, success and error colours.
+     */
+    internal fun tapScreenStyle(context: Context): TapScreenStyle {
+        val nightMode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        // Colours are resolved here because Stripe's screen runs in its own process.
+        return TapScreenStyle(
+            dark = nightMode == Configuration.UI_MODE_NIGHT_YES,
+            primary = ContextCompat.getColor(context, R.color.color_primary_green),
+            success = ContextCompat.getColor(context, R.color.color_success_green),
+            error = ContextCompat.getColor(context, R.color.color_error),
+        )
+    }
+
+    private fun TapScreenStyle.toUxConfiguration(): TapToPayUxConfiguration =
+        TapToPayUxConfiguration.Builder()
+            .theme(if (dark) TapToPayUxConfiguration.Theme.DARK else TapToPayUxConfiguration.Theme.LIGHT)
+            .colorScheme(
+                TapToPayUxConfiguration.ColorScheme.Builder()
+                    .primary(TapToPayUxConfiguration.Color.Value(primary))
+                    .success(TapToPayUxConfiguration.Color.Value(success))
+                    .error(TapToPayUxConfiguration.Color.Value(error))
+                    .build()
+            )
+            .build()
+
     /**
      * Charges [amount] with Stripe's Tap to Pay UI and returns the succeeded PaymentIntent.
      *
@@ -317,6 +356,7 @@ object StripeTerminalManager {
      * [onPaymentIntent] must persist each new intent before collection or confirmation starts.
      * Collection can be cancelled by cancelling the calling coroutine until the card has been
      * read; after that [isCharging] is true and the caller must let the charge finish.
+     * [onCharging] runs at that point, as Stripe's tap screen closes and the charge is confirmed.
      *
      * @throws CardPaymentException when the payment fails, is cancelled or is unresolved.
      */
@@ -328,8 +368,10 @@ object StripeTerminalManager {
         metadata: Map<String, String>,
         previous: CardPaymentReference? = null,
         onPaymentIntent: (PaymentIntent) -> Unit = {},
+        onCharging: () -> Unit = {},
     ): PaymentIntent {
         val terminal = ensureInitialized(context)
+        terminal.setTapToPayUxConfiguration(tapScreenStyle(context).toUxConfiguration())
         var intent: PaymentIntent? = null
         try {
             var current = if (previous == null) {
@@ -356,6 +398,7 @@ object StripeTerminalManager {
             intent = current
 
             isCharging = true
+            onCharging()
             val confirmed = try {
                 confirmPaymentIntent(terminal, current)
             } finally {

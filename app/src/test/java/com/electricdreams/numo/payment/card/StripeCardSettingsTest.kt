@@ -168,11 +168,13 @@ class StripeCardSettingsTest {
     }
 
     @Test
-    fun `card is never returned as the default payment method`() {
-        val manager = DefaultPaymentMethodManager.getInstance(context)
+    fun `a default payment method saved as card falls back to bitcoin`() {
+        // Earlier builds could store the card tab; card is now a button, not a method.
+        context.getSharedPreferences("default_payment_method_prefs", Context.MODE_PRIVATE)
+            .edit().putString("default_method", "CARD").commit()
 
-        manager.setDefaultPaymentMethod(PaymentTab.CARD)
+        val method = DefaultPaymentMethodManager.getInstance(context).getDefaultPaymentMethod()
 
-        assertEquals(PaymentTab.UNIFIED, manager.getDefaultPaymentMethod())
+        assertEquals(PaymentTab.UNIFIED, method)
     }
 }
