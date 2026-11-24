@@ -25,7 +25,6 @@
     <string name="stripe_card_removed">Stripe 키를 삭제했습니다</string>
     <string name="payment_request_tab_card">카드</string>
     <string name="payment_request_instruction_card">카드 결제</string>
-    <string name="card_payment_status_ready">결제 버튼을 눌러 카드 결제를 시작하세요</string>
     <string name="card_payment_status_preparing">카드 리더 준비 중…</string>
     <string name="card_payment_status_waiting">카드를 기다리는 중…</string>
     <string name="card_payment_status_cancelled">카드 결제가 취소되었습니다</string>

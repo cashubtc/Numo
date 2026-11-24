@@ -25,7 +25,6 @@
     <string name="stripe_card_removed">Chave da Stripe removida</string>
     <string name="payment_request_tab_card">Cartão</string>
     <string name="payment_request_instruction_card">Pagamento com cartão</string>
-    <string name="card_payment_status_ready">Toque em Cobrar para iniciar o pagamento com cartão</string>
     <string name="card_payment_status_preparing">Preparando o leitor de cartão…</string>
     <string name="card_payment_status_waiting">Aguardando o cartão…</string>
     <string name="card_payment_status_cancelled">Pagamento com cartão cancelado</string>

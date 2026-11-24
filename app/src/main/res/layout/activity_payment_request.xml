@@ -277,9 +277,10 @@
                 android:layout_marginTop="@dimen/space_l"
                 android:accessibilityLiveRegion="polite"
                 android:gravity="center"
-                android:text="@string/card_payment_status_ready"
+                android:text="@string/card_payment_status_preparing"
                 android:textColor="@color/color_text_secondary"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:visibility="gone" />
 
             <ProgressBar
                 android:id="@+id/card_progress"
@@ -291,7 +292,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/card_action_button"
-                style="@style/Widget.Numo.Button"
+                style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="wrap_content"
                 android:layout_height="56dp"
                 android:layout_marginTop="@dimen/space_m"

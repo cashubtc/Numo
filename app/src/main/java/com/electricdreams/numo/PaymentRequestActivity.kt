@@ -1695,7 +1695,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             startCardPayment()
         } else {
             resolveCardAmount()
-            showCardIdle(getString(R.string.card_payment_status_ready), showAction = true)
+            showCardIdle(message = null, showAction = true)
         }
     }
 
@@ -1861,12 +1861,14 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun showCardBusy(message: String) {
         cardStatusText.text = message
+        cardStatusText.visibility = View.VISIBLE
         cardProgress.visibility = View.VISIBLE
         cardActionButton.visibility = View.GONE
     }
 
-    private fun showCardIdle(message: String, showAction: Boolean) {
+    private fun showCardIdle(message: String?, showAction: Boolean) {
         cardStatusText.text = message
+        cardStatusText.visibility = if (message == null) View.GONE else View.VISIBLE
         cardProgress.visibility = View.GONE
         cardActionButton.visibility = if (showAction && !hasTerminalOutcome) View.VISIBLE else View.GONE
     }

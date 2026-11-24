@@ -25,7 +25,6 @@
     <string name="stripe_card_removed">Stripe-Schlüssel entfernt</string>
     <string name="payment_request_tab_card">Karte</string>
     <string name="payment_request_instruction_card">Kartenzahlung</string>
-    <string name="card_payment_status_ready">Tippe auf die Schaltfläche, um die Kartenzahlung zu starten</string>
     <string name="card_payment_status_preparing">Kartenleser wird vorbereitet…</string>
     <string name="card_payment_status_waiting">Warte auf Karte…</string>
     <string name="card_payment_status_cancelled">Kartenzahlung abgebrochen</string>

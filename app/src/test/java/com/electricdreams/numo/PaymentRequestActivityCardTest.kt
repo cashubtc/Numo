@@ -167,10 +167,13 @@ class PaymentRequestActivityCardTest {
     fun `missing bitcoin price offers a retry instead of charging`() {
         ReflectionHelpers.setField(activity, "formattedAmountString", "12,345 sats")
 
+        call("enterCardMode")
+        assertEquals(View.GONE, cardStatus.visibility)
         call("startCardPayment")
 
         val message = cardStatus.text.toString()
         assertTrue(message, message.startsWith("Card amount unavailable"))
+        assertEquals(View.VISIBLE, cardStatus.visibility)
         assertEquals(View.VISIBLE, cardAction.visibility)
         assertEquals(View.GONE, cardProgress.visibility)
         assertEquals(null, ReflectionHelpers.getField<Job?>(activity, "cardJob"))
@@ -197,7 +200,7 @@ class PaymentRequestActivityCardTest {
 
         call("enterCardMode")
 
-        assertEquals(activity.getString(R.string.card_payment_status_ready), cardStatus.text.toString())
+        assertEquals(View.GONE, cardStatus.visibility)
         assertEquals(View.VISIBLE, cardAction.visibility)
         assertEquals(View.GONE, cardProgress.visibility)
         assertEquals(null, ReflectionHelpers.getField<Job?>(activity, "cardJob"))
