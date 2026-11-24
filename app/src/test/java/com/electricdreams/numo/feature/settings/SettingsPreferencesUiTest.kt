@@ -18,6 +18,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+import com.electricdreams.numo.BuildConfig
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.payment.DefaultPaymentMethodManager
@@ -149,23 +150,29 @@ class SettingsPreferencesUiTest {
     }
 
     @Test
-    fun `Stripe reader uses the saved developer switch for discovery`() {
+    fun `Stripe reader defaults for the build type and uses the saved developer switch`() {
         val config = StripeCardConfig("rk_test_example", "tml_example")
         DeveloperPrefs.setDeveloperModeEnabled(context, true)
         ActivityScenario.launch(DeveloperSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val toggle = activity.findViewById<MaterialSwitch>(R.id.simulate_stripe_reader_switch)
-                assertFalse(toggle.isChecked)
-                assertFalse(StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
-                toggle.performClick()
+                assertEquals(BuildConfig.DEBUG, toggle.isChecked)
+                assertEquals(BuildConfig.DEBUG,
+                    StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+
+                activity.findViewById<android.view.View>(R.id.simulate_stripe_reader_item).performClick()
+                assertEquals(!BuildConfig.DEBUG, toggle.isChecked)
             }
             scenario.recreate()
             scenario.onActivity { activity ->
                 val toggle = activity.findViewById<MaterialSwitch>(R.id.simulate_stripe_reader_switch)
-                assertTrue(toggle.isChecked)
-                assertTrue(StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+                assertEquals(!BuildConfig.DEBUG, toggle.isChecked)
+                assertEquals(!BuildConfig.DEBUG,
+                    StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+
                 toggle.performClick()
-                assertFalse(StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+                assertEquals(BuildConfig.DEBUG,
+                    StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
             }
         }
     }

@@ -55,6 +55,9 @@ class DeveloperSettingsActivity : AppCompatActivity() {
         binding.simulateStripeReaderSwitch.setOnCheckedChangeListener { _, checked ->
             DeveloperPrefs.setStripeReaderSimulated(this, checked)
         }
+        binding.simulateStripeReaderItem.setOnClickListener {
+            binding.simulateStripeReaderSwitch.performClick()
+        }
     }
 
     private fun showRestartOnboardingDialog() {
