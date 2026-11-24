@@ -31,6 +31,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowToast
+import org.robolectric.shadows.ShadowLooper
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
@@ -152,6 +153,8 @@ class PaymentRequestActivityCardTest {
         assertEquals(View.VISIBLE, overlay.visibility)
 
         showCardIdle(activity.getString(R.string.card_payment_status_unresolved), needsStatusCheck = true)
+        // The waiting screen fades out over checkout before it goes.
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
         assertEquals(View.GONE, overlay.visibility)
     }
 
