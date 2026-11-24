@@ -1,24 +1,25 @@
 package com.electricdreams.numo.feature.settings
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.ActivityStripeCardSettingsBinding
 import com.electricdreams.numo.payment.card.StripeCardConfig
+import com.electricdreams.numo.payment.card.StripeCardConnectionTester
 import com.electricdreams.numo.payment.card.StripeCardSettings
-import com.electricdreams.numo.payment.card.StripeConnectionTokenClient
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
@@ -33,11 +34,24 @@ class StripeCardSettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityStripeCardSettingsBinding
     private lateinit var settings: StripeCardSettings
-    private val tokenClient = StripeConnectionTokenClient()
+    private val connectionTester = StripeCardConnectionTester()
 
     private var isTestingConnection = false
     private var isUpdatingSwitch = false
     private var isLoadingSettings = false
+    private var enableAfterConnectionTest = false
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        if (grants[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
+            testConnection()
+        } else {
+            enableAfterConnectionTest = false
+            setStatus(getString(R.string.card_payment_status_location_required), R.color.color_error)
+            updateSwitch()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,17 +72,27 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         }
         binding.stripeCardEnableSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isUpdatingSwitch) return@setOnCheckedChangeListener
-            // Enabling must not depend on the merchant leaving the page first.
-            if (isChecked && !persistForm()) {
+            if (!isChecked) {
+                enableAfterConnectionTest = false
+                settings.isEnabled = false
                 updateSwitch()
                 return@setOnCheckedChangeListener
             }
-            settings.isEnabled = isChecked
+            enableAfterConnectionTest = true
+            if (!persistForm()) {
+                enableAfterConnectionTest = false
+                updateSwitch()
+                return@setOnCheckedChangeListener
+            }
             updateSwitch()
+            testConnection()
         }
         binding.stripeRestrictedKeyInput.doAfterTextChanged { onFieldEdited() }
         binding.stripeLocationInput.doAfterTextChanged { onFieldEdited() }
-        binding.testConnectionRow.setOnClickListener { testConnection() }
+        binding.testConnectionRow.setOnClickListener {
+            enableAfterConnectionTest = false
+            testConnection()
+        }
         binding.removeKeyRow.setOnClickListener { confirmRemoveKey() }
         binding.stripeTutorialRow.setOnClickListener {
             startActivity(Intent(this, StripeCardTutorialActivity::class.java))
@@ -105,7 +129,7 @@ class StripeCardSettingsActivity : AppCompatActivity() {
 
     private fun updateSwitch() {
         val deviceSupported = StripeTerminalManager.isDeviceSupported(this)
-        val canEnable = deviceSupported && formConfig() != null
+        val canEnable = deviceSupported && formConfig() != null && !isTestingConnection
         isUpdatingSwitch = true
         binding.stripeCardEnableSwitch.isEnabled = canEnable
         binding.stripeCardEnableSwitch.isChecked =
@@ -168,19 +192,34 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         if (isTestingConnection) return
         val config = formConfig()
         if (config == null) {
+            enableAfterConnectionTest = false
             showFieldErrors(onlyNonEmpty = false)
+            updateSwitch()
+            return
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            updateSwitch()
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                )
+            )
             return
         }
 
         isTestingConnection = true
+        updateSwitch()
         setStatus(getString(R.string.stripe_card_test_connecting), R.color.color_text_secondary)
 
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                runCatching { tokenClient.createConnectionToken(config) }
-            }
+            val result = runCatching { connectionTester.validate(this@StripeCardSettingsActivity, config) }
             isTestingConnection = false
             result.onSuccess {
+                if (enableAfterConnectionTest && config == formConfig()) settings.isEnabled = true
+                enableAfterConnectionTest = false
                 val message = if (config.isTestMode) {
                     R.string.stripe_card_test_success_test_mode
                 } else {
@@ -188,10 +227,12 @@ class StripeCardSettingsActivity : AppCompatActivity() {
                 }
                 setStatus(getString(message), R.color.color_success_green)
             }.onFailure { e ->
-                Log.w(TAG, "Stripe connection test failed", e)
+                enableAfterConnectionTest = false
+                Log.w(TAG, "Stripe connection and device test failed", e)
                 val reason = e.message ?: e.javaClass.simpleName
                 setStatus(getString(R.string.stripe_card_test_failed, reason), R.color.color_error)
             }
+            updateSwitch()
         }
     }
 

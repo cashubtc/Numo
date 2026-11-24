@@ -12,7 +12,7 @@
     <string name="stripe_card_location_label">Terminal ロケーション ID (tml_…)</string>
     <string name="stripe_card_section_test">テスト</string>
     <string name="stripe_card_test_title">接続テスト</string>
-    <string name="stripe_card_test_subtitle">キーとロケーションを Stripe で確認します</string>
+    <string name="stripe_card_test_subtitle">キー、ロケーション、このデバイスを確認します</string>
     <string name="stripe_card_test_connecting">Stripe に接続中…</string>
     <string name="stripe_card_test_success">Stripe に接続しました</string>
     <string name="stripe_card_test_success_test_mode">Stripe に接続しました（テストモード）</string>

@@ -12,7 +12,7 @@
     <string name="stripe_card_location_label">ID de ubicación de Terminal (tml_…)</string>
     <string name="stripe_card_section_test">Prueba</string>
     <string name="stripe_card_test_title">Probar conexión</string>
-    <string name="stripe_card_test_subtitle">Comprueba la clave y la ubicación con Stripe</string>
+    <string name="stripe_card_test_subtitle">Comprueba la clave, la ubicación y este dispositivo</string>
     <string name="stripe_card_test_connecting">Conectando con Stripe…</string>
     <string name="stripe_card_test_success">Conectado a Stripe</string>
     <string name="stripe_card_test_success_test_mode">Conectado a Stripe (modo de prueba)</string>

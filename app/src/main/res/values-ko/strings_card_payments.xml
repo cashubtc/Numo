@@ -12,7 +12,7 @@
     <string name="stripe_card_location_label">Terminal 위치 ID (tml_…)</string>
     <string name="stripe_card_section_test">테스트</string>
     <string name="stripe_card_test_title">연결 테스트</string>
-    <string name="stripe_card_test_subtitle">Stripe에서 키와 위치를 확인합니다</string>
+    <string name="stripe_card_test_subtitle">키, 위치, 이 기기의 호환성을 확인합니다</string>
     <string name="stripe_card_test_connecting">Stripe에 연결 중…</string>
     <string name="stripe_card_test_success">Stripe에 연결됨</string>
     <string name="stripe_card_test_success_test_mode">Stripe에 연결됨 (테스트 모드)</string>

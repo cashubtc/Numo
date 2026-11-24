@@ -12,7 +12,7 @@
     <string name="stripe_card_location_label">Terminal-Standort-ID (tml_…)</string>
     <string name="stripe_card_section_test">Test</string>
     <string name="stripe_card_test_title">Verbindung testen</string>
-    <string name="stripe_card_test_subtitle">Prüft Schlüssel und Standort bei Stripe</string>
+    <string name="stripe_card_test_subtitle">Prüft Schlüssel, Standort und dieses Gerät</string>
     <string name="stripe_card_test_connecting">Verbindung zu Stripe wird hergestellt…</string>
     <string name="stripe_card_test_success">Mit Stripe verbunden</string>
     <string name="stripe_card_test_success_test_mode">Mit Stripe verbunden (Testmodus)</string>
