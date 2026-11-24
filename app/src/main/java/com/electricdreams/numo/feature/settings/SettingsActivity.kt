@@ -112,12 +112,13 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         val method = DefaultPaymentMethodManager.getInstance(this).getDefaultPaymentMethod()
-        binding.defaultPaymentMethodSettingsItem.setSubtitle(getString(when (method) {
-            PaymentTab.UNIFIED -> R.string.default_payment_method_option_unified
-            PaymentTab.CASHU -> R.string.default_payment_method_option_cashu
-            PaymentTab.LIGHTNING -> R.string.default_payment_method_option_lightning
-            PaymentTab.CARD -> R.string.default_payment_method_option_card
-        }))
+        binding.defaultPaymentMethodSettingsItem.setSubtitle(getString(
+            if (method == PaymentTab.CARD) {
+                R.string.default_payment_method_option_card
+            } else {
+                R.string.default_payment_method_option_unified
+            }
+        ))
 
         val theme = when (prefs.getString(ThemeSettingsActivity.PREF_THEME)) {
             ThemeSettingsActivity.THEME_OBSIDIAN -> R.string.theme_settings_option_obsidian

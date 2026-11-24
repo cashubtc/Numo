@@ -39,9 +39,7 @@ class DefaultPaymentMethodSettingsActivity : AppCompatActivity() {
 
         radioGroup.setOnCheckedChangeListener { _, checkedId ->
             val selectedTab = when (checkedId) {
-                R.id.radio_unified -> PaymentTab.UNIFIED
-                R.id.radio_cashu -> PaymentTab.CASHU
-                R.id.radio_lightning -> PaymentTab.LIGHTNING
+                R.id.radio_card -> PaymentTab.CARD
                 else -> PaymentTab.UNIFIED
             }
             defaultPaymentMethodManager.setDefaultPaymentMethod(selectedTab)
@@ -51,10 +49,8 @@ class DefaultPaymentMethodSettingsActivity : AppCompatActivity() {
     private fun loadCurrentPreference() {
         val currentMethod = defaultPaymentMethodManager.getDefaultPaymentMethod()
         val radioButtonId = when (currentMethod) {
-            PaymentTab.UNIFIED -> R.id.radio_unified
-            PaymentTab.CASHU -> R.id.radio_cashu
-            PaymentTab.LIGHTNING -> R.id.radio_lightning
-            PaymentTab.CARD -> R.id.radio_unified
+            PaymentTab.CARD -> R.id.radio_card
+            else -> R.id.radio_unified
         }
         radioGroup.check(radioButtonId)
     }

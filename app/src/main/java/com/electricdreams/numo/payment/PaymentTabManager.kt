@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import com.electricdreams.numo.R
 
 /**
@@ -50,7 +51,6 @@ class PaymentTabManager(
     enum class PaymentTab {
         UNIFIED, CASHU, LIGHTNING,
 
-        /** Card payments are never a default method; they need the merchant to start a tap. */
         CARD,
     }
 
@@ -84,12 +84,47 @@ class PaymentTabManager(
         lightningTab.setOnClickListener(null)
 
         reorderTabs()
-
-        // Bitcoin uses the unified Cashu + Lightning request and is always the initial method.
-        selectTab(PaymentTab.UNIFIED)
+        selectDefaultPaymentMethod()
 
         unifiedTab.setOnClickListener { selectTab(PaymentTab.UNIFIED) }
         cardTab?.setOnClickListener { selectTab(PaymentTab.CARD) }
+        unifiedTab.setOnLongClickListener {
+            setDefaultTab(PaymentTab.UNIFIED)
+            true
+        }
+        cardTab?.setOnLongClickListener {
+            setDefaultTab(PaymentTab.CARD)
+            true
+        }
+    }
+
+    /** Selects Card only when it is both the saved default and available for this checkout. */
+    fun selectDefaultPaymentMethod() {
+        val defaultMethod = DefaultPaymentMethodManager.getInstance(unifiedTab.context)
+            .getDefaultPaymentMethod()
+        val cardAvailable = cardTab?.visibility == View.VISIBLE
+        selectTab(if (defaultMethod == PaymentTab.CARD && cardAvailable) {
+            PaymentTab.CARD
+        } else {
+            PaymentTab.UNIFIED
+        })
+    }
+
+    private fun setDefaultTab(tab: PaymentTab) {
+        DefaultPaymentMethodManager.getInstance(unifiedTab.context).setDefaultPaymentMethod(tab)
+        selectTab(tab)
+        val label = when (tab) {
+            PaymentTab.CARD -> R.string.default_payment_method_option_card
+            else -> R.string.payment_request_tab_unified
+        }
+        Toast.makeText(
+            unifiedTab.context,
+            unifiedTab.context.getString(
+                R.string.payment_request_default_method_set,
+                unifiedTab.context.getString(label),
+            ),
+            Toast.LENGTH_SHORT,
+        ).show()
     }
 
     /** Shows or hides the Card tab. Hiding it while selected falls back to Bitcoin. */

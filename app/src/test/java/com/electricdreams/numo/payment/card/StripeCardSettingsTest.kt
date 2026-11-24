@@ -113,11 +113,22 @@ class StripeCardSettingsTest {
     }
 
     @Test
-    fun `card is never returned as the default payment method`() {
+    fun `card is returned as the default payment method`() {
         val manager = DefaultPaymentMethodManager.getInstance(context)
 
         manager.setDefaultPaymentMethod(PaymentTab.CARD)
 
-        assertEquals(PaymentTab.UNIFIED, manager.getDefaultPaymentMethod())
+        assertEquals(PaymentTab.CARD, manager.getDefaultPaymentMethod())
+    }
+
+    @Test
+    fun `legacy bitcoin defaults resolve to unified bitcoin`() {
+        val manager = DefaultPaymentMethodManager.getInstance(context)
+
+        listOf(PaymentTab.CASHU, PaymentTab.LIGHTNING).forEach { legacyMethod ->
+            manager.setDefaultPaymentMethod(legacyMethod)
+
+            assertEquals(PaymentTab.UNIFIED, manager.getDefaultPaymentMethod())
+        }
     }
 }

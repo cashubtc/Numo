@@ -772,13 +772,10 @@
     <string name="settings_item_withdrawals_title">Abhebungen</string>
     <string name="settings_item_withdrawals_subtitle">Auto-Abhebungseinstellungen und -verlauf</string>
     <string name="settings_item_default_payment_method_title">Standardzahlung</string>
-    <string name="settings_item_default_payment_method_subtitle">Unified</string>
     <string name="default_payment_method_explainer_title">Schnelleinstellungen</string>
-    <string name="default_payment_method_explainer_body">Du kannst die Standardzahlungsmethode direkt auf dem Zahlungsbildschirm ändern, indem du einen der Tabs Unified, Cashu oder Lightning lange drückst.</string>
-    <string name="default_payment_method_section_options">STANDARD-QR-CODE</string>
-    <string name="default_payment_method_option_unified">Unified (Cashu + Lightning)</string>
-    <string name="default_payment_method_option_cashu">Cashu</string>
-    <string name="default_payment_method_option_lightning">Lightning</string>
+    <string name="default_payment_method_explainer_body">Du kannst die Standardzahlungsmethode direkt im Checkout ändern, indem du den Tab Bitcoin oder Karte lange drückst.</string>
+    <string name="default_payment_method_section_options">STANDARDZAHLUNGSMETHODE</string>
+    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
 
 
     <string name="manual_withdraw_section_title">Manuelle Abhebung</string>

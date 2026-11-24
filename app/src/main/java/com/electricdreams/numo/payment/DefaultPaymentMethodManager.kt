@@ -15,13 +15,13 @@ class DefaultPaymentMethodManager private constructor(context: Context) {
         } catch (e: IllegalArgumentException) {
             PaymentTab.UNIFIED
         }
-        // Card collection needs an explicit tap by the merchant, so it is never the default.
-        return if (method == PaymentTab.CARD) PaymentTab.UNIFIED else method
+        return if (method == PaymentTab.CARD) PaymentTab.CARD else PaymentTab.UNIFIED
     }
 
     fun setDefaultPaymentMethod(method: PaymentTab) {
+        val normalizedMethod = if (method == PaymentTab.CARD) PaymentTab.CARD else PaymentTab.UNIFIED
         prefs.edit {
-            putString(KEY_DEFAULT_METHOD, method.name)
+            putString(KEY_DEFAULT_METHOD, normalizedMethod.name)
         }
     }
 

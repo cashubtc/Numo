@@ -51,16 +51,24 @@ class SettingsPreferencesUiTest {
 
     @Test
     fun `payment choices restore the saved option and persist row taps`() {
-        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.LIGHTNING)
+        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.CARD)
         ActivityScenario.launch(DefaultPaymentMethodSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                val lightning = activity.findViewById<MaterialRadioButton>(R.id.radio_lightning)
-                val cashu = activity.findViewById<MaterialRadioButton>(R.id.radio_cashu)
-                assertTrue(lightning.isChecked)
-                cashu.performClick()
-                assertTrue(cashu.isChecked)
-                assertFalse(lightning.isChecked)
-                assertEquals(PaymentTab.CASHU,
+                val card = activity.findViewById<MaterialRadioButton>(R.id.radio_card)
+                val unified = activity.findViewById<MaterialRadioButton>(R.id.radio_unified)
+                assertTrue(card.isChecked)
+                assertEquals(2,
+                    activity.findViewById<android.widget.RadioGroup>(
+                        R.id.payment_method_radio_group).childCount)
+
+                unified.performClick()
+                assertTrue(unified.isChecked)
+                assertFalse(card.isChecked)
+                assertEquals(PaymentTab.UNIFIED,
+                    DefaultPaymentMethodManager.getInstance(activity).getDefaultPaymentMethod())
+
+                card.performClick()
+                assertEquals(PaymentTab.CARD,
                     DefaultPaymentMethodManager.getInstance(activity).getDefaultPaymentMethod())
             }
         }

@@ -797,13 +797,10 @@
     <string name="settings_item_withdrawals_title">Withdrawals</string>
     <string name="settings_item_withdrawals_subtitle">Auto-withdraw settings and history</string>
     <string name="settings_item_default_payment_method_title">Default Payment</string>
-    <string name="settings_item_default_payment_method_subtitle">Unified</string>
     <string name="default_payment_method_explainer_title">Quick Settings</string>
-    <string name="default_payment_method_explainer_body">You can quickly change the default payment method directly from the payment screen by long-pressing on any of the Unified, Cashu, or Lightning tabs.</string>
-    <string name="default_payment_method_section_options">Default QR code</string>
-    <string name="default_payment_method_option_unified">Unified (Cashu + Lightning)</string>
-    <string name="default_payment_method_option_cashu">Cashu</string>
-    <string name="default_payment_method_option_lightning">Lightning</string>
+    <string name="default_payment_method_explainer_body">You can change the default payment method directly from checkout by long-pressing the Bitcoin or Card tab.</string>
+    <string name="default_payment_method_section_options">Default payment method</string>
+    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
 
     
     <string name="manual_withdraw_section_title">Manual Withdraw</string>
