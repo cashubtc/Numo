@@ -367,19 +367,26 @@
 
         <TextView
             android:id="@+id/animation_result_amount"
+            android:accessibilityLiveRegion="polite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|center_vertical"
+            android:layout_marginStart="@dimen/space_xl"
+            android:layout_marginEnd="@dimen/space_xl"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
             android:gravity="center"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
             android:textAlignment="center"
             android:translationY="-180dp"
             android:textColor="@android:color/white"
             android:textSize="56sp"
-            android:textStyle="bold"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/animation_result_label"
+            android:accessibilityLiveRegion="polite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|center_vertical"
@@ -391,8 +398,41 @@
             android:translationY="-120dp"
             android:textColor="@android:color/white"
             android:textSize="18sp"
-            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
             android:visibility="gone" />
+
+        <!-- The amount stays in view while waiting, where the card tap screen shows its total -->
+        <LinearLayout
+            android:id="@+id/animation_total_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginStart="@dimen/space_xl"
+            android:layout_marginEnd="@dimen/space_xl"
+            android:layout_marginBottom="@dimen/space_xl"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/basket_archive_total_label"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/animation_total_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:fontFeatureSettings="tnum"
+                android:letterSpacing="-0.02"
+                android:maxLines="1"
+                android:textColor="@color/color_text_primary"
+                android:textSize="56sp" />
+        </LinearLayout>
 
         <!-- Result action buttons appear after animation completes -->
         <LinearLayout
@@ -402,39 +442,26 @@
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginStart="@dimen/space_xl"
             android:layout_marginEnd="@dimen/space_xl"
-            android:layout_marginBottom="@dimen/space_3xl"
+            android:layout_marginBottom="@dimen/space_xl"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/animation_view_details_button"
+                style="@style/Widget.Numo.Button.OnColor.Text"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
+                android:layout_height="48dp"
                 android:text="@string/payment_received_button_view_details"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 android:visibility="gone" />
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/animation_close_button"
+                style="@style/Widget.Numo.Button.OnColor.Filled"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
-                android:layout_marginTop="@dimen/space_m"
-                android:background="@drawable/bg_button_black"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:text="@string/payment_request_animation_close"
-                android:textColor="@color/color_text_on_dark"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_marginTop="@dimen/space_s"
+                android:text="@string/payment_request_animation_close" />
         </LinearLayout>
     </FrameLayout>
 

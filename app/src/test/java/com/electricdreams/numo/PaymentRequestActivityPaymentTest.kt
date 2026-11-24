@@ -331,6 +331,37 @@ class PaymentRequestActivityPaymentTest {
         ).apply { isAccessible = true }.invoke(activity, type, null)
     }
 
+    @Test
+    fun `success shows the amount with a small caption`() {
+        PaymentRequestActivity::class.java.getDeclaredMethod(
+            "showNfcAnimationSuccess", String::class.java, Boolean::class.javaPrimitiveType,
+        ).apply { isAccessible = true }.invoke(activity, "1,000 sats", false)
+
+        val amount: TextView = ReflectionHelpers.getField(activity, "animationResultAmountText")
+        val caption: TextView = ReflectionHelpers.getField(activity, "animationResultLabelText")
+        assertEquals("1,000 sats", amount.text.toString())
+        assertEquals(activity.getString(R.string.transaction_detail_type_payment_received), caption.text.toString())
+        assertEquals(18f, resultTextSizeSp(caption), 0.01f)
+    }
+
+    @Test
+    fun `failure shows its title as the headline`() {
+        PaymentRequestActivity::class.java.getDeclaredMethod(
+            "showNfcAnimationError", String::class.java,
+        ).apply { isAccessible = true }.invoke(activity, "Payment failed")
+
+        val amount: TextView = ReflectionHelpers.getField(activity, "animationResultAmountText")
+        val title: TextView = ReflectionHelpers.getField(activity, "animationResultLabelText")
+        assertEquals("", amount.text.toString())
+        assertEquals(activity.getString(R.string.payment_failure_title), title.text.toString())
+        assertEquals(28f, resultTextSizeSp(title), 0.01f)
+    }
+
+    private fun resultTextSizeSp(text: TextView): Float {
+        val metrics = activity.resources.displayMetrics
+        return text.textSize / (metrics.density * activity.resources.configuration.fontScale)
+    }
+
     private fun displaySuccess() {
         PaymentRequestActivity::class.java.getDeclaredMethod(
             "onNfcAnimationResultDisplayed", Boolean::class.javaPrimitiveType,
