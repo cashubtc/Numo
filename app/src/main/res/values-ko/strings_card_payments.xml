@@ -13,10 +13,7 @@
     <string name="stripe_card_invalid_key">rk_live_ 또는 rk_test_로 시작하는 제한된 키를 입력하세요. 비밀 키(sk_…)는 사용할 수 없습니다.</string>
     <string name="stripe_card_save_failed">이 기기에 키를 안전하게 저장할 수 없습니다</string>
     <string name="stripe_card_removed">Stripe 키를 삭제했습니다</string>
-    <string name="payment_request_tab_card">카드</string>
-    <string name="payment_request_instruction_card">카드 결제</string>
-    <string name="card_payment_status_preparing">카드 리더 준비 중…</string>
-    <string name="card_payment_status_waiting">카드를 기다리는 중…</string>
+    <string name="card_payment_status_confirming">결제 확인 중…</string>
     <string name="card_payment_status_cancelled">카드 결제가 취소되었습니다</string>
     <string name="card_payment_status_failed">카드 결제 실패: %1$s</string>
     <string name="card_payment_status_unresolved">카드 결제를 확인할 수 없습니다. 버튼을 눌러 상태를 확인하세요. 카드에 두 번 청구되지 않습니다.</string>
@@ -27,8 +24,9 @@
     <string name="card_payment_status_amount_unavailable">카드 결제 금액을 계산할 수 없습니다: %1$s 기준 비트코인 가격을 아직 불러오지 못했습니다</string>
     <string name="card_payment_status_location_required">Stripe 카드 결제에는 위치 권한이 필요합니다</string>
     <string name="card_payment_status_not_configured">카드 결제가 설정되지 않았습니다</string>
-    <string name="card_payment_action_charge">%1$s 결제</string>
-    <string name="card_payment_action_retry">다시 시도</string>
+    <string name="card_payment_button">카드</string>
+    <string name="card_payment_button_amount">카드 · %1$s</string>
+    <string name="card_payment_action_check">카드 결제 확인</string>
     <string name="transaction_detail_payment_type_card_value">카드 (Stripe)</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe 카드 리더 시뮬레이션</string>
     <string name="card_payment_simulation_requires_test_key">시뮬레이션에는 Stripe 샌드박스 키(rk_test_…)가 필요합니다.</string>

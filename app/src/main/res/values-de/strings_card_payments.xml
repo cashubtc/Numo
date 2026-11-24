@@ -13,10 +13,7 @@
     <string name="stripe_card_invalid_key">Gib einen eingeschränkten Schlüssel ein, der mit rk_live_ oder rk_test_ beginnt. Geheime Schlüssel (sk_…) werden nicht akzeptiert.</string>
     <string name="stripe_card_save_failed">Der Schlüssel konnte auf diesem Gerät nicht sicher gespeichert werden</string>
     <string name="stripe_card_removed">Stripe-Schlüssel entfernt</string>
-    <string name="payment_request_tab_card">Karte</string>
-    <string name="payment_request_instruction_card">Kartenzahlung</string>
-    <string name="card_payment_status_preparing">Kartenleser wird vorbereitet…</string>
-    <string name="card_payment_status_waiting">Warte auf Karte…</string>
+    <string name="card_payment_status_confirming">Zahlung wird bestätigt…</string>
     <string name="card_payment_status_cancelled">Kartenzahlung abgebrochen</string>
     <string name="card_payment_status_failed">Kartenzahlung fehlgeschlagen: %1$s</string>
     <string name="card_payment_status_unresolved">Die Kartenzahlung konnte nicht bestätigt werden. Tippe auf die Schaltfläche, um den Status zu prüfen; die Karte wird nicht doppelt belastet.</string>
@@ -27,8 +24,9 @@
     <string name="card_payment_status_amount_unavailable">Kartenbetrag nicht verfügbar: Der Bitcoin-Kurs in %1$s ist noch nicht geladen</string>
     <string name="card_payment_status_location_required">Stripe benötigt für Kartenzahlungen die Standortberechtigung</string>
     <string name="card_payment_status_not_configured">Kartenzahlungen sind nicht eingerichtet</string>
-    <string name="card_payment_action_charge">%1$s belasten</string>
-    <string name="card_payment_action_retry">Erneut versuchen</string>
+    <string name="card_payment_button">Karte</string>
+    <string name="card_payment_button_amount">Karte · %1$s</string>
+    <string name="card_payment_action_check">Kartenzahlung prüfen</string>
     <string name="transaction_detail_payment_type_card_value">Karte (Stripe)</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe-Kartenleser simulieren</string>
     <string name="card_payment_simulation_requires_test_key">Der simulierte Kartenleser benötigt einen Stripe-Sandbox-Schlüssel (rk_test_…).</string>

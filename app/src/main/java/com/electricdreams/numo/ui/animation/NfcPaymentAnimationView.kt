@@ -8,10 +8,10 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PathMeasure
+import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Shader
 import android.util.AttributeSet
@@ -19,9 +19,18 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import com.electricdreams.numo.R
+import kotlin.math.abs
 import kotlin.math.min
 
+/**
+ * Full-screen animation for a bitcoin payment made by tapping a phone.
+ *
+ * While waiting it mirrors the card tap screen that Stripe draws, so both ways of tapping
+ * look alike: a disc holding the contactless waves, in the screen's own colours, sending out
+ * rings in bursts. The same disc then turns into the result circle, so nothing moves.
+ */
 class NfcPaymentAnimationView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -42,23 +51,21 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
     }
 
     private val colorIdle = ContextCompat.getColor(context, R.color.color_nfc_idle)
-    private val colorReading = ContextCompat.getColor(context, R.color.color_bitcoin_orange)
-    private val colorProcessing = ContextCompat.getColor(context, R.color.color_accent_blue)
+    private val colorSurface = ContextCompat.getColor(context, R.color.color_bg_white)
+    private val colorForeground = ContextCompat.getColor(context, R.color.color_text_primary)
+    private val colorDiscActive = ColorUtils.blendARGB(colorSurface, colorForeground, DISC_ACTIVE_BLEND)
     private val colorSuccess = ContextCompat.getColor(context, R.color.color_nfc_success)
-    private val colorSuccessGradientStart = ContextCompat.getColor(context, R.color.color_nfc_success_gradient_start)
-    private val colorSuccessGradientEnd = ContextCompat.getColor(context, R.color.color_nfc_success_gradient_end)
     private val colorError = ContextCompat.getColor(context, R.color.color_error)
 
+    private val argb = ArgbEvaluator()
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val successGradientPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val spinnerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val discPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val discOutlinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+    private val wavePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
-        color = Color.WHITE
-    }
-    private val resultCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-        color = Color.WHITE
     }
     private val resultIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -70,29 +77,48 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
     private var resultType: ResultType? = null
 
     private var currentBackgroundColor = colorIdle
-    private var spinnerRotation = 0f
-    private var spinnerPulse = 1f
-    private var spinnerAlpha = 0f
-    private var resultCircleScale = 0f
+
+    /**
+     * 0..1 looping, one burst per loop: a highlight runs out through the contactless waves,
+     * then rings leave the disc one after another, growing and fading.
+     */
+    private var burstPhase = 0f
+
+    /** 0 while reading, 1 once the payment is being processed: the disc fills in. */
+    private var processingProgress = 0f
+
+    /** 1 while waiting, 0 once the result has taken over. */
+    private var waitAlpha = 0f
+
+    /** 0 = waiting disc, 1 = white result circle. */
+    private var morph = 0f
     private var resultIconProgress = 0f
 
     private var centerX = 0f
-    private var centerY = 0f
-    private var spinnerRadius = 0f
-    private var spinnerStrokeWidth = 0f
-    private var resultCircleRadius = 0f
-    private var successGradient: LinearGradient? = null
 
+    /** Centre of the disc, placed where the card tap screen has its disc. */
+    private var centerY = 0f
+    private var discRadius = 0f
+
+    /** The result icons are sized from this; it is the disc, which becomes the result circle. */
+    private val resultCircleRadius: Float
+        get() = discRadius
+
+    private val waveBounds = RectF()
     private val checkPath = Path()
     private val checkPathMeasure = PathMeasure()
     private val checkPathSegment = Path()
     private var checkPathLength = 0f
 
-    private var spinAnimator: ValueAnimator? = null
-    private var pulseAnimator: ValueAnimator? = null
+    private var burstAnimator: ValueAnimator? = null
+    private var processingAnimator: ValueAnimator? = null
     private var transitionAnimator: AnimatorSet? = null
 
     private var onResultDisplayedListener: ((Boolean) -> Unit)? = null
+
+    /** Bottom edge of the disc, in this view's coordinates, for placing text below it. */
+    val discBottom: Float
+        get() = centerY + discRadius
 
     fun setOnResultDisplayedListener(listener: ((Boolean) -> Unit)?) {
         onResultDisplayedListener = listener
@@ -103,32 +129,19 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
         state = State.READING
         resultType = null
-        currentBackgroundColor = colorReading
-        spinnerRotation = 0f
-        spinnerPulse = 1f
-        spinnerAlpha = 1f
-        resultCircleScale = 0f
+        currentBackgroundColor = colorSurface
+        burstPhase = 0f
+        processingProgress = 0f
+        waitAlpha = 1f
+        morph = 0f
         resultIconProgress = 0f
 
-        spinAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-            duration = 1100L
+        burstAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = BURST_PERIOD_MS
             repeatCount = ValueAnimator.INFINITE
             interpolator = LinearInterpolator()
             addUpdateListener { animator ->
-                spinnerRotation = animator.animatedValue as Float
-                invalidate()
-            }
-            start()
-        }
-
-        pulseAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 1200L
-            repeatCount = ValueAnimator.INFINITE
-            repeatMode = ValueAnimator.REVERSE
-            interpolator = DecelerateInterpolator()
-            addUpdateListener { animator ->
-                val progress = animator.animatedValue as Float
-                spinnerPulse = 1f + (progress * 0.08f)
+                burstPhase = animator.animatedValue as Float
                 invalidate()
             }
             start()
@@ -139,17 +152,17 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
     fun startProcessing() {
         if (state != State.READING) return
-        
+
         state = State.PROCESSING
-        
-        val colorAnimator = ValueAnimator.ofObject(ArgbEvaluator(), currentBackgroundColor, colorProcessing).apply {
-            duration = 360L
+        processingAnimator = ValueAnimator.ofFloat(processingProgress, 1f).apply {
+            duration = 300L
+            interpolator = DecelerateInterpolator()
             addUpdateListener { animator ->
-                currentBackgroundColor = animator.animatedValue as Int
+                processingProgress = animator.animatedValue as Float
                 invalidate()
             }
+            start()
         }
-        colorAnimator.start()
     }
 
     fun showSuccess(_amountText: String) {
@@ -165,10 +178,10 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         state = State.IDLE
         resultType = null
         currentBackgroundColor = colorIdle
-        spinnerRotation = 0f
-        spinnerPulse = 1f
-        spinnerAlpha = 0f
-        resultCircleScale = 0f
+        burstPhase = 0f
+        processingProgress = 0f
+        waitAlpha = 0f
+        morph = 0f
         resultIconProgress = 0f
         invalidate()
     }
@@ -200,25 +213,26 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
             }
         }
 
-        val spinnerFadeAnimator = ValueAnimator.ofFloat(spinnerAlpha, 0f).apply {
-            duration = 280L
+        val waitFadeAnimator = ValueAnimator.ofFloat(waitAlpha, 0f).apply {
+            duration = 220L
             addUpdateListener { animator ->
-                spinnerAlpha = animator.animatedValue as Float
+                waitAlpha = animator.animatedValue as Float
                 invalidate()
             }
         }
 
-        val circleAnimator = ValueAnimator.ofFloat(0.82f, 1f).apply {
-            duration = 320L
+        val morphAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 360L
+            interpolator = DecelerateInterpolator(1.6f)
             addUpdateListener { animator ->
-                resultCircleScale = animator.animatedValue as Float
+                morph = animator.animatedValue as Float
                 invalidate()
             }
         }
 
         val iconAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 300L
-            startDelay = 120L
+            startDelay = 200L
             interpolator = DecelerateInterpolator()
             addUpdateListener { animator ->
                 resultIconProgress = animator.animatedValue as Float
@@ -227,7 +241,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         }
 
         transitionAnimator = AnimatorSet().apply {
-            playTogether(colorAnimator, spinnerFadeAnimator, circleAnimator, iconAnimator)
+            playTogether(colorAnimator, waitFadeAnimator, morphAnimator, iconAnimator)
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     state = State.RESULT
@@ -238,42 +252,44 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
             start()
         }
 
-        spinAnimator?.cancel()
-        pulseAnimator?.cancel()
+        burstAnimator?.cancel()
+        processingAnimator?.cancel()
     }
 
     private fun cancelAnimations() {
-        spinAnimator?.cancel()
-        pulseAnimator?.cancel()
+        burstAnimator?.cancel()
+        processingAnimator?.cancel()
         transitionAnimator?.cancel()
-        spinAnimator = null
-        pulseAnimator = null
+        burstAnimator = null
+        processingAnimator = null
         transitionAnimator = null
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         centerX = w / 2f
-        centerY = h * 0.55f
+        centerY = h * CENTER_Y
 
-        val minSize = min(w, h).toFloat()
-        spinnerRadius = resources.getDimension(R.dimen.nfc_spinner_radius).coerceAtMost(minSize * 0.24f)
-        spinnerStrokeWidth = resources.getDimension(R.dimen.nfc_spinner_stroke_width)
-        resultCircleRadius = resources.getDimension(R.dimen.nfc_result_circle_radius).coerceAtMost(minSize * 0.31f)
+        discRadius = min(w, h) * DISC_RADIUS
 
-        spinnerPaint.strokeWidth = spinnerStrokeWidth
-        resultIconPaint.strokeWidth = resources.getDimension(R.dimen.nfc_result_icon_stroke_width)
+        discOutlinePaint.strokeWidth = discRadius * DISC_OUTLINE_WIDTH
+        wavePaint.strokeWidth = discRadius * WAVE_STROKE
+        resultIconPaint.strokeWidth = discRadius * RESULT_ICON_STROKE
         resultIconPaint.color = colorSuccess
-        successGradient = LinearGradient(
-            0f,
-            0f,
-            w.toFloat(),
-            h.toFloat(),
-            colorSuccessGradientStart,
-            colorSuccessGradientEnd,
+
+        // A soft glow that stays around the disc between bursts.
+        glowPaint.shader = RadialGradient(
+            centerX,
+            centerY,
+            discRadius * GLOW_RADIUS,
+            intArrayOf(
+                ColorUtils.setAlphaComponent(colorForeground, alphaOf(GLOW_ALPHA)),
+                ColorUtils.setAlphaComponent(colorForeground, alphaOf(GLOW_ALPHA)),
+                ColorUtils.setAlphaComponent(colorForeground, 0),
+            ),
+            floatArrayOf(0f, 1f / GLOW_RADIUS, 1f),
             Shader.TileMode.CLAMP,
         )
-        successGradientPaint.shader = successGradient
 
         rebuildCheckPath()
     }
@@ -304,46 +320,63 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
         backgroundPaint.color = currentBackgroundColor
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), backgroundPaint)
-        if (resultType == ResultType.SUCCESS &&
-            (state == State.RESULT_TRANSITION || state == State.RESULT) &&
-            successGradient != null
-        ) {
-            successGradientPaint.alpha = when (state) {
-                State.RESULT -> 255
-                State.RESULT_TRANSITION -> (resultIconProgress * 255).toInt().coerceIn(0, 255)
-                else -> 0
-            }
-            canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), successGradientPaint)
+
+        if (waitAlpha > 0f) {
+            glowPaint.alpha = alphaOf(waitAlpha)
+            canvas.drawCircle(centerX, centerY, discRadius * GLOW_RADIUS, glowPaint)
+            drawBurstRings(canvas)
         }
 
-        if (state == State.READING || state == State.PROCESSING || state == State.RESULT_TRANSITION) {
-            val radius = spinnerRadius * spinnerPulse
-            val rect = RectF(
-                centerX - radius,
-                centerY - radius,
-                centerX + radius,
-                centerY + radius,
-            )
+        val waitingFill = argb.evaluate(processingProgress, colorSurface, colorDiscActive) as Int
+        discPaint.color = argb.evaluate(morph, waitingFill, Color.WHITE) as Int
+        canvas.drawCircle(centerX, centerY, discRadius, discPaint)
 
-            spinnerPaint.alpha = (spinnerAlpha * 255).toInt().coerceIn(0, 255)
-            canvas.save()
-            canvas.rotate(spinnerRotation, centerX, centerY)
-            canvas.drawArc(rect, 0f, 300f, false, spinnerPaint)
-            canvas.restore()
+        if (waitAlpha > 0f) {
+            discOutlinePaint.color = colorForeground
+            discOutlinePaint.alpha = alphaOf(waitAlpha * DISC_OUTLINE_ALPHA)
+            canvas.drawCircle(centerX, centerY, discRadius - discOutlinePaint.strokeWidth / 2f, discOutlinePaint)
+            drawContactlessWaves(canvas)
         }
 
         if (state == State.RESULT_TRANSITION || state == State.RESULT) {
-            if (resultCircleScale > 0f) {
-                canvas.drawCircle(
-                    centerX,
-                    centerY,
-                    resultCircleRadius * resultCircleScale,
-                    resultCirclePaint,
-                )
-            }
             drawResultIcon(canvas)
         }
     }
+
+    /**
+     * Rings leave the disc one after another, slowing as they grow and fading as they go.
+     * They are filled and overlap, so the screen is brightest near the disc and steps down
+     * outwards, as on the card tap screen.
+     */
+    private fun drawBurstRings(canvas: Canvas) {
+        val elapsedMs = burstPhase * BURST_PERIOD_MS
+        ringPaint.color = colorForeground
+        for (i in 0 until RING_COUNT) {
+            val t = (elapsedMs - RING_FIRST_DELAY_MS - i * RING_STAGGER_MS) / RING_LIFE_MS
+            if (t <= 0f || t >= 1f) continue
+            val travelled = 1f - (1f - t) * (1f - t)
+            val radius = discRadius * (1f + (RING_MAX_RADIUS - 1f) * travelled)
+            ringPaint.alpha = alphaOf(waitAlpha * RING_ALPHA * (1f - t))
+            canvas.drawCircle(centerX, centerY, radius, ringPaint)
+        }
+    }
+
+    /** The contactless symbol's waves. A highlight runs outward through them while waiting. */
+    private fun drawContactlessWaves(canvas: Canvas) {
+        wavePaint.color = argb.evaluate(processingProgress, colorForeground, colorSurface) as Int
+        val originX = centerX - discRadius * WAVE_ORIGIN_OFFSET
+        for (i in 0 until WAVE_COUNT) {
+            val waveRadius = discRadius * (WAVE_FIRST_RADIUS + WAVE_SPACING * i)
+            // The highlight crosses the waves at the start of each burst, then they rest.
+            val highlightAt = burstPhase * BURST_PERIOD_MS / WAVE_SWEEP_MS * (WAVE_COUNT + 1) - 1f
+            val highlight = (1f - abs(highlightAt - i)).coerceIn(0f, 1f)
+            wavePaint.alpha = alphaOf(waitAlpha * (WAVE_ALPHA_REST + (1f - WAVE_ALPHA_REST) * highlight))
+            waveBounds.set(originX - waveRadius, centerY - waveRadius, originX + waveRadius, centerY + waveRadius)
+            canvas.drawArc(waveBounds, -WAVE_HALF_SWEEP, WAVE_HALF_SWEEP * 2f, false, wavePaint)
+        }
+    }
+
+    private fun alphaOf(fraction: Float): Int = (fraction * 255).toInt().coerceIn(0, 255)
 
     private fun drawResultIcon(canvas: Canvas) {
         val result = resultType ?: return
@@ -397,5 +430,38 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         reset()
+    }
+
+    companion object {
+        // Geometry and timing measured from the card tap screen. Sizes are fractions of the
+        // view's width or multiples of the disc radius.
+        private const val CENTER_Y = 0.417f
+        private const val DISC_RADIUS = 0.26f
+        private const val DISC_OUTLINE_WIDTH = 0.1f
+        private const val DISC_OUTLINE_ALPHA = 0.38f
+        private const val RESULT_ICON_STROKE = 0.075f
+
+        /** How far the disc fills towards the foreground colour while processing. */
+        private const val DISC_ACTIVE_BLEND = 0.8f
+
+        private const val GLOW_RADIUS = 2.7f
+        private const val GLOW_ALPHA = 0.12f
+
+        private const val BURST_PERIOD_MS = 1800L
+        private const val RING_COUNT = 3
+        private const val RING_FIRST_DELAY_MS = 150f
+        private const val RING_STAGGER_MS = 210f
+        private const val RING_LIFE_MS = 1350f
+        private const val RING_MAX_RADIUS = 3.7f
+        private const val RING_ALPHA = 0.12f
+
+        private const val WAVE_SWEEP_MS = 520f
+        private const val WAVE_COUNT = 4
+        private const val WAVE_ORIGIN_OFFSET = 0.3f
+        private const val WAVE_FIRST_RADIUS = 0.14f
+        private const val WAVE_SPACING = 0.13f
+        private const val WAVE_STROKE = 0.055f
+        private const val WAVE_HALF_SWEEP = 38f
+        private const val WAVE_ALPHA_REST = 0.35f
     }
 }
