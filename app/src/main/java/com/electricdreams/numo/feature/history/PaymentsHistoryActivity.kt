@@ -392,7 +392,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
         renderFilterRow(historyFilter)
     }
 
-    /** "Filter" / "Filter (N)" pill plus one removable chip per active filter. */
+    /** "Filter" / "Filter · N" pill plus one removable chip per active filter. */
     private fun renderFilterRow(filter: HistoryFilter) {
         val count = filter.activeCount
         binding.filterButton.text = if (count == 0) {

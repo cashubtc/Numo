@@ -29,18 +29,4 @@
     <string name="developer_settings_simulate_stripe_reader">Simular el lector de tarjetas de Stripe</string>
     <string name="card_payment_simulation_requires_test_key">El lector simulado requiere una clave de prueba de Stripe (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe requiere una versión de producción para leer tarjetas físicas. Para hacer pruebas, activa el lector simulado en los ajustes de desarrollador.</string>
-    <string name="stripe_tutorial_title">Configuración de Stripe</string>
-    <string name="stripe_tutorial_entry_title">Tutorial de configuración</string>
-    <string name="stripe_tutorial_entry_subtitle">Tres pasos para conectar tu cuenta de Stripe</string>
-    <string name="stripe_tutorial_progress">%1$d de %2$d</string>
-    <string name="stripe_tutorial_cancel">Cancelar</string>
-    <string name="stripe_tutorial_back">Atrás</string>
-    <string name="stripe_tutorial_next">Siguiente</string>
-    <string name="stripe_tutorial_done">Listo</string>
-    <string name="stripe_tutorial_key_title">Crea una clave restringida</string>
-    <string name="stripe_tutorial_key_body">Developers → API keys → Create restricted key.\nActiva Terminal Connection Tokens: Write. Usa una clave distinta para cada teléfono.</string>
-    <string name="stripe_tutorial_location_title">Añade tu ubicación</string>
-    <string name="stripe_tutorial_location_body">Terminal → Locations → Create location.\nIntroduce la dirección de tu tienda y copia su ID tml_….</string>
-    <string name="stripe_tutorial_connect_title">Conecta Numo</string>
-    <string name="stripe_tutorial_connect_body">Pega la clave y el ID de ubicación.\nPrueba la conexión y activa los pagos con tarjeta.</string>
 </resources>

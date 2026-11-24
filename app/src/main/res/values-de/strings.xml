@@ -643,7 +643,7 @@
     <string name="saved_baskets_empty_icon">Keine gespeicherten Warenkörbe</string>
     <string name="saved_baskets_empty_title">Keine gespeicherten Warenkörbe</string>
     <string name="saved_baskets_empty_subtitle">Speichere einen Warenkorb, um ihn für später offen zu halten.\nPerfekt für Rechnungen oder Restauranttische.</string>
-    <string name="saved_baskets_meta_format">%1$s, %2$s</string>
+    <string name="saved_baskets_meta_format">%1$s • %2$s</string>
     <string name="saved_baskets_action_rename">Umbenennen</string>
     <string name="saved_baskets_action_delete">Löschen</string>
     <string name="saved_baskets_rename_title">Warenkorb umbenennen</string>
@@ -741,8 +741,8 @@
     <string name="auto_withdraw_threshold_subtitle">Auslösen, wenn Saldo überschreitet</string>
     <string name="auto_withdraw_threshold_label">Schwellenwert</string>
     <string name="auto_withdraw_threshold_hint">Abhebung auslösen, wenn der Saldo diesen Betrag erreicht</string>
-    <string name="auto_withdraw_threshold_helper">Min: ₿1.000 – Max: ₿1.000.000</string>
-    <string name="auto_withdraw_threshold_helper_dynamic">Min: %1$s – Max: ₿1.000.000</string>
+    <string name="auto_withdraw_threshold_helper">Min: ₿1.000 • Max: ₿1.000.000</string>
+    <string name="auto_withdraw_threshold_helper_dynamic">Min: %1$s • Max: ₿1.000.000</string>
 
     <string name="auto_withdraw_percentage_title">Abhebungsbetrag</string>
     <string name="auto_withdraw_percentage_subtitle">Prozentsatz des Saldos zum Senden</string>
@@ -931,7 +931,7 @@
     <string name="pin_setup_continue">Fortfahren</string>
     <string name="pin_setup_back">Zurück</string>
     <string name="pin_setup_enter_at_least">Gib mindestens %d Ziffern ein</string>
-    <string name="pin_setup_more_needed">%1$d Ziffer%2$s, %3$d mehr erforderlich</string>
+    <string name="pin_setup_more_needed">%1$d Ziffer%2$s · %3$d mehr erforderlich</string>
     <string name="pin_setup_set_pin">PIN festlegen</string>
 
     <!-- PIN Entry Screen -->
@@ -994,7 +994,7 @@
     <string name="insights_quick_charge">Schnelle Zahlungsanfrage</string>
     <string name="insights_items_count_one">1 Artikel</string>
     <string name="insights_items_count_other">%1$d Artikel</string>
-    <string name="insights_items_lead_with_more">%1$s: %2$s +%3$d mehr</string>
+    <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d mehr</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
     <string name="insights_empty_day">Keine Verkäufe am %1$s</string>
     <plurals name="insights_sales_count">
@@ -1050,7 +1050,7 @@
     <string name="mint_discovery_empty">Keine Mint-Empfehlungen gefunden. Prüfe deine Verbindung und versuche es erneut.</string>
     <string name="mint_discovery_loading">Suche über Nostr-Relays…</string>
     <string name="mint_discovery_no_matches">Keine Mints entsprechen deiner Suche.</string>
-    <string name="mint_discovery_rating">★ %1$s (%2$d Empfehlungen)</string>
+    <string name="mint_discovery_rating">★ %1$s · %2$d Empfehlungen</string>
     <string name="mint_discovery_retry">Erneut versuchen</string>
     <string name="mint_discovery_search_hint">Mints suchen</string>
     <string name="mint_discovery_select">Mint auswählen</string>

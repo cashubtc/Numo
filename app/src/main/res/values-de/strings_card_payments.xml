@@ -29,18 +29,4 @@
     <string name="developer_settings_simulate_stripe_reader">Stripe-Kartenleser simulieren</string>
     <string name="card_payment_simulation_requires_test_key">Der simulierte Kartenleser benötigt einen Stripe-Sandbox-Schlüssel (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe benötigt für kontaktlose Kartenzahlungen einen Release-Build. Aktiviere für Sandbox-Tests den simulierten Kartenleser in den Entwicklereinstellungen.</string>
-    <string name="stripe_tutorial_title">Stripe-Einrichtung</string>
-    <string name="stripe_tutorial_entry_title">Einrichtungsanleitung</string>
-    <string name="stripe_tutorial_entry_subtitle">Drei Schritte zum Verbinden deines Stripe-Kontos</string>
-    <string name="stripe_tutorial_progress">%1$d von %2$d</string>
-    <string name="stripe_tutorial_cancel">Abbrechen</string>
-    <string name="stripe_tutorial_back">Zurück</string>
-    <string name="stripe_tutorial_next">Weiter</string>
-    <string name="stripe_tutorial_done">Fertig</string>
-    <string name="stripe_tutorial_key_title">Eingeschränkten Schlüssel erstellen</string>
-    <string name="stripe_tutorial_key_body">Developers → API keys → Create restricted key.\nAktiviere Terminal Connection Tokens: Write. Verwende für jedes Telefon einen eigenen Schlüssel.</string>
-    <string name="stripe_tutorial_location_title">Standort hinzufügen</string>
-    <string name="stripe_tutorial_location_body">Terminal → Locations → Create location.\nGib die Adresse deines Geschäfts ein und kopiere die tml_…-ID.</string>
-    <string name="stripe_tutorial_connect_title">Numo verbinden</string>
-    <string name="stripe_tutorial_connect_body">Füge Schlüssel und Standort-ID ein.\nTeste die Verbindung und aktiviere Kartenzahlungen.</string>
 </resources>

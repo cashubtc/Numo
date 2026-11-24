@@ -71,7 +71,7 @@ object SaleSummaries {
         return null
     }
 
-    /** "2 × Latte", "1 × Latte, 1 × Croissant", "3 items: Latte +2 more", or "Quick charge" */
+    /** "2 × Latte", "1 × Latte, 1 × Croissant", "3 items · Latte +2 more", or "Quick charge" */
     fun title(context: Context, basket: BasketSummary?): String {
         val items = basket?.items.orEmpty()
         return when {

@@ -62,7 +62,7 @@
     <string name="history_filter_date_range_format">%1$s – %2$s</string>
     <string name="history_filter_date_picker_title">날짜 범위 선택</string>
     <string name="history_filter_button">필터</string>
-    <string name="history_filter_button_count">필터 (%1$d)</string>
+    <string name="history_filter_button_count">필터 · %1$d</string>
     <string name="history_filter_reset">초기화</string>
     <string name="history_filter_status">상태</string>
     <string name="history_filter_date">날짜</string>

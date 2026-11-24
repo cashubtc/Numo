@@ -43,7 +43,7 @@
     <!-- Transaction detail: tip label -->
     <string name="transaction_detail_tip_added_label">Added tip</string>
     <string name="transaction_detail_tip_added_with_percentage">Added tip (%1$d%%)</string>
-    <string name="transaction_detail_tip_value" translatable="false">%1$s (%2$d%%)</string>
+    <string name="transaction_detail_tip_value" translatable="false">%1$s · %2$d%%</string>
 
     <!-- History sharing -->
     <string name="history_share_title">Share transaction</string>
@@ -82,7 +82,7 @@
     <string name="history_filter_date_range_format">%1$s – %2$s</string>
     <string name="history_filter_date_picker_title">Select date range</string>
     <string name="history_filter_button">Filter</string>
-    <string name="history_filter_button_count">Filter (%1$d)</string>
+    <string name="history_filter_button_count">Filter · %1$d</string>
     <string name="history_filter_reset">Reset</string>
     <string name="history_filter_status">Status</string>
     <string name="history_filter_date">Date</string>

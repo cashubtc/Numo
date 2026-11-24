@@ -66,8 +66,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/space_xs"
-                    android:text=","
+                    android:layout_marginHorizontal="@dimen/space_xs"
+                    android:text="•"
                     android:textAppearance="@style/Text.RowSubtitle" />
 
                 <TextView

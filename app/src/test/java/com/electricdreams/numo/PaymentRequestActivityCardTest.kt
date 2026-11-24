@@ -135,8 +135,7 @@ class PaymentRequestActivityCardTest {
             )
         )
 
-        val reference: StripeTerminalManager.CardPaymentReference =
-            ReflectionHelpers.callInstanceMethod(activity, "savedCardPaymentReference")
+        val reference = call("savedCardPaymentReference") as StripeTerminalManager.CardPaymentReference
 
         assertEquals("pi_resume", reference.paymentIntentId)
         assertEquals("pi_resume_secret_test", reference.clientSecret)

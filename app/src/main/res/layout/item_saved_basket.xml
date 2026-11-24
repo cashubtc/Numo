@@ -79,7 +79,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xs"
                     android:textAppearance="@style/Text.Caption"
-                    tools:text="6 items, Updated 5 min ago" />
+                    tools:text="6 items • Updated 5 min ago" />
 
             </LinearLayout>
 

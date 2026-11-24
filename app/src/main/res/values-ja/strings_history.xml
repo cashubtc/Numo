@@ -62,7 +62,7 @@
     <string name="history_filter_date_range_format">%1$s – %2$s</string>
     <string name="history_filter_date_picker_title">日付範囲を選択</string>
     <string name="history_filter_button">フィルター</string>
-    <string name="history_filter_button_count">フィルター (%1$d)</string>
+    <string name="history_filter_button_count">フィルター · %1$d</string>
     <string name="history_filter_reset">リセット</string>
     <string name="history_filter_status">ステータス</string>
     <string name="history_filter_date">日付</string>

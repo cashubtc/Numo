@@ -29,18 +29,4 @@
     <string name="developer_settings_simulate_stripe_reader">Stripe カードリーダーをシミュレート</string>
     <string name="card_payment_simulation_requires_test_key">シミュレーションには Stripe のサンドボックスキー（rk_test_…）が必要です。</string>
     <string name="card_payment_debug_reader_unsupported">実際のカードを読み取るにはリリースビルドが必要です。サンドボックスでテストするには、開発者設定でカードリーダーのシミュレーションを有効にしてください。</string>
-    <string name="stripe_tutorial_title">Stripe セットアップ</string>
-    <string name="stripe_tutorial_entry_title">セットアップチュートリアル</string>
-    <string name="stripe_tutorial_entry_subtitle">Stripeアカウントを接続する3つのステップ</string>
-    <string name="stripe_tutorial_progress">%1$d / %2$d</string>
-    <string name="stripe_tutorial_cancel">キャンセル</string>
-    <string name="stripe_tutorial_back">戻る</string>
-    <string name="stripe_tutorial_next">次へ</string>
-    <string name="stripe_tutorial_done">完了</string>
-    <string name="stripe_tutorial_key_title">制限付きキーを作成</string>
-    <string name="stripe_tutorial_key_body">Developers → API keys → Create restricted key.\nTerminal Connection Tokens を Write に設定し、端末ごとに異なるキーを使用します。</string>
-    <string name="stripe_tutorial_location_title">店舗のロケーションを追加</string>
-    <string name="stripe_tutorial_location_body">Terminal → Locations → Create location.\n店舗の住所を入力し、tml_… IDをコピーします。</string>
-    <string name="stripe_tutorial_connect_title">Numoを接続</string>
-    <string name="stripe_tutorial_connect_body">キーとロケーションIDを入力。\n接続をテストして、カード決済を有効にします。</string>
 </resources>
