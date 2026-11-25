@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="64dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:topBarSettingsStyle="true"
+            app:topBarTitle="@string/stripe_card_settings_title" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toTopOf="@id/get_started_button"
+            app:layout_constraintTop_toBottomOf="@id/top_bar">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/settings_page_margin"
+                android:paddingBottom="24dp">
+
+                <!-- Connected: who the device is connected to leads the page -->
+                <LinearLayout
+                    android:id="@+id/account_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <FrameLayout
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/bg_connect_tile_clip"
+                        android:clipToOutline="true"
+                        android:importantForAccessibility="noHideDescendants">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_stripe_mark" />
+
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_l"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/account_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:accessibilityHeading="true"
+                            android:textAppearance="@style/Text.Heading1"
+                            android:textSize="22sp" />
+
+                        <TextView
+                            android:id="@+id/account_subtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textAppearance="@style/Text.SettingsCaption" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Only when something needs the merchant: one card per problem -->
+                <LinearLayout
+                    android:id="@+id/status_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/attention_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                </LinearLayout>
+
+                <!-- Not set up: connect Numo to Stripe, and what that gives you -->
+                <LinearLayout
+                    android:id="@+id/intro_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_3xl"
+                        android:gravity="center_vertical"
+                        android:importantForAccessibility="noHideDescendants"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:background="@drawable/bg_connect_tile_clip"
+                            android:clipToOutline="true">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_stripe_mark" />
+
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:id="@+id/intro_dots"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="0.3"
+                                android:background="@drawable/bg_connect_dot" />
+
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="0.6"
+                                android:background="@drawable/bg_connect_dot" />
+
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="1"
+                                android:background="@drawable/bg_connect_dot" />
+
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="0.6"
+                                android:background="@drawable/bg_connect_dot" />
+
+                            <View
+                                android:layout_width="5dp"
+                                android:layout_height="5dp"
+                                android:layout_marginHorizontal="3dp"
+                                android:alpha="0.3"
+                                android:background="@drawable/bg_connect_dot" />
+
+                        </LinearLayout>
+
+                        <FrameLayout
+                            android:id="@+id/intro_numo_tile"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:background="@drawable/bg_connect_tile_numo"
+                            android:clipToOutline="true">
+
+                            <!-- The launcher foreground carries its own safe-zone padding -->
+                            <ImageView
+                                android:layout_width="96dp"
+                                android:layout_height="96dp"
+                                android:layout_gravity="center"
+                                android:src="@mipmap/ic_launcher_foreground" />
+
+                        </FrameLayout>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:accessibilityHeading="true"
+                        android:gravity="center"
+                        android:text="@string/stripe_card_headline_intro"
+                        android:textAppearance="@style/Text.Heading1" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:gravity="center"
+                        android:text="@string/stripe_card_body_intro"
+                        android:textAppearance="@style/Text.SettingsBody" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="@dimen/space_l"
+                                android:background="@drawable/bg_connect_tile"
+                                android:importantForAccessibility="no"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_card"
+                                app:tint="@color/color_text_primary" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_intro_tap"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="@dimen/space_l"
+                                android:background="@drawable/bg_connect_tile"
+                                android:importantForAccessibility="no"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_bank"
+                                app:tint="@color/color_text_primary" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_intro_money"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/space_s">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginEnd="@dimen/space_l"
+                                android:background="@drawable/bg_connect_tile"
+                                android:importantForAccessibility="no"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_key"
+                                app:tint="@color/color_text_primary" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_intro_key"
+                                android:textAppearance="@style/Text.SettingsBody"
+                                android:textColor="@color/color_text_primary" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Set up: pause switch, account, check, disconnect -->
+                <LinearLayout
+                    android:id="@+id/configured_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/Widget.Numo.SettingsSectionTitle"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:text="@string/stripe_card_section_payments" />
+
+                    <LinearLayout style="@style/Widget.Numo.SettingsGroup">
+
+                        <LinearLayout
+                            android:id="@+id/enable_toggle_row"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?attr/selectableItemBackground"
+                            android:gravity="center_vertical"
+                            android:minHeight="@dimen/settings_detail_row_height"
+                            android:orientation="horizontal"
+                            android:screenReaderFocusable="true">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stripe_card_enable_title"
+                                android:textAppearance="@style/Text.RowTitle" />
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/stripe_card_enable_switch"
+                                android:saveEnabled="false"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:contentDescription="@string/stripe_card_enable_title"
+                                android:minHeight="48dp" />
+
+                        </LinearLayout>
+
+                        <com.electricdreams.numo.ui.components.SettingsRowView
+                            android:id="@+id/status_row"
+                            style="@style/Widget.Numo.SettingsRow"
+                            app:rowShowChevron="false"
+                            app:rowTitle="@string/stripe_card_status_row_title" />
+
+                        <!-- Opens the full setup check -->
+                        <com.electricdreams.numo.ui.components.SettingsRowView
+                            android:id="@+id/check_row"
+                            style="@style/Widget.Numo.SettingsRow"
+                            app:rowTitle="@string/stripe_card_last_checked_row_title" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/Widget.Numo.SettingsSectionTitle"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:text="@string/stripe_card_section_account" />
+
+                    <LinearLayout style="@style/Widget.Numo.SettingsGroup">
+
+                        <com.electricdreams.numo.ui.components.SettingsRowView
+                            android:id="@+id/key_row"
+                            style="@style/Widget.Numo.SettingsRow"
+                            app:rowTitle="@string/stripe_card_key_row_title" />
+
+                        <com.electricdreams.numo.ui.components.SettingsRowView
+                            android:id="@+id/location_row"
+                            style="@style/Widget.Numo.SettingsRow"
+                            app:rowTitle="@string/stripe_card_location_row_title" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/disconnect_row"
+                    style="@style/Widget.Numo.Button.Tertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_l"
+                    android:visibility="gone"
+                    android:minHeight="48dp"
+                    android:paddingHorizontal="0dp"
+                    android:text="@string/stripe_card_disconnect_title"
+                    android:textColor="@color/color_error" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <!-- Drawn over the top edge of the content while the quick checks run, so nothing moves -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/check_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="invisible"
+            app:indicatorColor="@color/color_text_secondary"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            app:minHideDelay="400"
+            app:showDelay="300"
+            app:trackColor="@android:color/transparent"
+            app:trackThickness="2dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/get_started_button"
+            style="@style/Widget.Numo.Button.Dialog.Confirm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+            android:layout_marginBottom="@dimen/space_l"
+            android:minHeight="56dp"
+            android:text="@string/stripe_card_get_started"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

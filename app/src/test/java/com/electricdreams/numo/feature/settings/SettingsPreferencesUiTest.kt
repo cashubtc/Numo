@@ -10,6 +10,7 @@ import com.google.android.material.radiobutton.MaterialRadioButton
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -17,10 +18,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+import com.electricdreams.numo.BuildConfig
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.payment.DefaultPaymentMethodManager
 import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
+import com.electricdreams.numo.payment.card.StripeCardConfig
+import com.electricdreams.numo.payment.card.StripeTerminalManager
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -48,16 +52,24 @@ class SettingsPreferencesUiTest {
 
     @Test
     fun `payment choices restore the saved option and persist row taps`() {
-        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.LIGHTNING)
+        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.CARD)
         ActivityScenario.launch(DefaultPaymentMethodSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                val lightning = activity.findViewById<MaterialRadioButton>(R.id.radio_lightning)
-                val cashu = activity.findViewById<MaterialRadioButton>(R.id.radio_cashu)
-                assertTrue(lightning.isChecked)
-                cashu.performClick()
-                assertTrue(cashu.isChecked)
-                assertFalse(lightning.isChecked)
-                assertEquals(PaymentTab.CASHU,
+                val card = activity.findViewById<MaterialRadioButton>(R.id.radio_card)
+                val unified = activity.findViewById<MaterialRadioButton>(R.id.radio_unified)
+                assertTrue(card.isChecked)
+                assertEquals(2,
+                    activity.findViewById<android.widget.RadioGroup>(
+                        R.id.payment_method_radio_group).childCount)
+
+                unified.performClick()
+                assertTrue(unified.isChecked)
+                assertFalse(card.isChecked)
+                assertEquals(PaymentTab.UNIFIED,
+                    DefaultPaymentMethodManager.getInstance(activity).getDefaultPaymentMethod())
+
+                card.performClick()
+                assertEquals(PaymentTab.CARD,
                     DefaultPaymentMethodManager.getInstance(activity).getDefaultPaymentMethod())
             }
         }
@@ -135,5 +147,46 @@ class SettingsPreferencesUiTest {
                 assertFalse(DeveloperPrefs.isLightningInvoiceDelayed(activity))
             }
         }
+    }
+
+    @Test
+    fun `Stripe reader defaults for the build type and uses the saved developer switch`() {
+        val config = StripeCardConfig("rk_test_example", "tml_example")
+        DeveloperPrefs.setDeveloperModeEnabled(context, true)
+        ActivityScenario.launch(DeveloperSettingsActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val toggle = activity.findViewById<MaterialSwitch>(R.id.simulate_stripe_reader_switch)
+                assertEquals(BuildConfig.DEBUG, toggle.isChecked)
+                assertEquals(BuildConfig.DEBUG,
+                    StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+
+                activity.findViewById<android.view.View>(R.id.simulate_stripe_reader_item).performClick()
+                assertEquals(!BuildConfig.DEBUG, toggle.isChecked)
+            }
+            scenario.recreate()
+            scenario.onActivity { activity ->
+                val toggle = activity.findViewById<MaterialSwitch>(R.id.simulate_stripe_reader_switch)
+                assertEquals(!BuildConfig.DEBUG, toggle.isChecked)
+                assertEquals(!BuildConfig.DEBUG,
+                    StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+
+                toggle.performClick()
+                assertEquals(BuildConfig.DEBUG,
+                    StripeTerminalManager.readerDiscoveryConfig(activity, config).isSimulated)
+            }
+        }
+    }
+
+    @Test
+    fun `simulated Stripe reader rejects live credentials before discovery`() {
+        val config = StripeCardConfig("rk_live_example", "tml_example")
+        DeveloperPrefs.setDeveloperModeEnabled(context, true)
+        DeveloperPrefs.setStripeReaderSimulated(context, true)
+        val failure = assertThrows(StripeTerminalManager.CardPaymentException::class.java) {
+            StripeTerminalManager.readerDiscoveryConfig(context, config)
+        }
+        assertEquals(StripeTerminalManager.FailureReason.SIMULATION_REQUIRES_TEST_KEY, failure.reason)
+        DeveloperPrefs.setDeveloperModeEnabled(context, false)
+        assertFalse(StripeTerminalManager.readerDiscoveryConfig(context, config).isSimulated)
     }
 }

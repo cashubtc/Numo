@@ -3,12 +3,14 @@ package com.electricdreams.numo
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.ComponentName
 import android.nfc.NfcAdapter
 import android.nfc.cardemulation.CardEmulation
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import com.electricdreams.numo.util.getVibrator
 import com.electricdreams.numo.util.vibrateCompat
 import android.os.Handler
@@ -26,9 +28,17 @@ import com.electricdreams.numo.core.util.NetworkUtils
 import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
 import com.electricdreams.numo.ui.offline.OfflineStripController
 import com.electricdreams.numo.ui.offline.OfflineStripView
+import android.Manifest
+import android.content.pm.PackageManager
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.material.button.MaterialButton
+import com.stripe.stripeterminal.external.models.PaymentIntent
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
+import com.stripe.stripeterminal.external.models.TerminalException
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -60,6 +70,9 @@ import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.payment.PaymentTabManager
 import com.electricdreams.numo.payment.PaymentWebhookDispatcher
+import com.electricdreams.numo.payment.card.CardAmountResolver
+import com.electricdreams.numo.payment.card.StripeCardSettings
+import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
@@ -74,6 +87,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -119,6 +133,26 @@ class PaymentRequestActivity : AppCompatActivity() {
     
     // Tip-related views
     private lateinit var tipInfoText: TextView
+
+    // Card (Stripe Tap to Pay) views and state
+    private lateinit var cardTab: android.widget.LinearLayout
+    private lateinit var cardContainer: View
+    private lateinit var cardStatusText: TextView
+    private lateinit var cardProgress: ProgressBar
+    private lateinit var cardActionButton: MaterialButton
+    private var cardAmount: CardAmountResolver.CardAmount? = null
+    private var cardJob: Job? = null
+    private var cardPaymentReviewRequired = false
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        if (grants[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
+            startCardPayment()
+        } else {
+            showCardIdle(getString(R.string.card_payment_status_location_required), showAction = true)
+        }
+    }
 
     // HCE mode for deciding which payload to emulate
     private enum class HceMode { UNIFIED, CASHU, LIGHTNING }
@@ -282,6 +316,12 @@ class PaymentRequestActivity : AppCompatActivity() {
         cashuLoadingSpinner = findViewById(R.id.cashu_loading_spinner)
         lightningLogoCard = findViewById(R.id.lightning_logo_card)
         cashuLogoCard = findViewById(R.id.cashu_logo_card)
+        cardTab = findViewById(R.id.card_tab)
+        cardContainer = findViewById(R.id.card_container)
+        cardStatusText = findViewById(R.id.card_status_text)
+        cardProgress = findViewById(R.id.card_progress)
+        cardActionButton = findViewById(R.id.card_action_button)
+        cardActionButton.setOnClickListener { startCardPayment() }
 
         // NFC Animation views
         nfcAnimationContainer = findViewById(R.id.nfc_animation_container)
@@ -318,17 +358,23 @@ class PaymentRequestActivity : AppCompatActivity() {
             cashuQrImageView = cashuQrImageView,
             lightningQrImageView = lightningQrImageView,
             resources = resources,
-            theme = theme
+            theme = theme,
+            cardTab = cardTab,
+            cardTabText = findViewById(R.id.card_tab_text),
+            cardTabIcon = findViewById(R.id.card_tab_icon),
+            cardContainer = cardContainer,
         )
 
         // Set up tabs with listener
         tabManager.setup(object : PaymentTabManager.TabSelectionListener {
             override fun onTabSelected(tab: PaymentTabManager.PaymentTab) {
                 Log.d(TAG, "onTabSelected() called. tab=$tab, lightningStarted=$lightningStarted, lightningInvoice=$lightningInvoice")
+                if (tab != PaymentTabManager.PaymentTab.CARD) exitCardMode()
                 when (tab) {
                     PaymentTabManager.PaymentTab.UNIFIED -> setHceToUnified()
                     PaymentTabManager.PaymentTab.LIGHTNING -> setHceToLightning()
                     PaymentTabManager.PaymentTab.CASHU -> setHceToCashu()
+                    PaymentTabManager.PaymentTab.CARD -> enterCardMode()
                 }
                 updatePaymentMethodStatus()
             }
@@ -395,6 +441,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 PaymentTabManager.PaymentTab.LIGHTNING -> lightningHandler?.currentInvoice ?: lightningInvoice
                 PaymentTabManager.PaymentTab.CASHU -> nostrHandler?.paymentRequest ?: btcPayCashuPR ?: hcePaymentRequest
                 PaymentTabManager.PaymentTab.UNIFIED -> unifiedPaymentRequest()
+                PaymentTabManager.PaymentTab.CARD -> null
             }
             if (toShare != null) {
                 sharePaymentRequest(toShare)
@@ -414,6 +461,9 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Initialize all payment modes (NDEF, Nostr, Lightning)
         initializePaymentRequest()
+
+        // Offer card payments when the merchant has set up Stripe on a supported phone
+        setupCardPayments()
 
 
     }
@@ -978,37 +1028,34 @@ class PaymentRequestActivity : AppCompatActivity() {
      * that reassures the merchant.
      */
     private fun observeConnectivityForPayment() {
-        val contactlessIcon = findViewById<ImageView>(R.id.contactless_icon)
-        val instructionText = findViewById<TextView>(R.id.instruction_text)
-        val iconGap = resources.getDimensionPixelSize(R.dimen.space_m)
-        val offlinePill = findViewById<View>(R.id.offline_pill)
-        offlinePill.setOnClickListener {
-            OfflineExplainerActivity.start(this, paymentOnScreen = confirmsAfterReconnect())
-        }
-        ViewCompat.replaceAccessibilityAction(
-            offlinePill,
-            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
-            getString(R.string.offline_strip_action_details),
-            null
-        )
+        val online = ConnectivityMonitor.getInstance(this).isOnline
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    ConnectivityMonitor.getInstance(this@PaymentRequestActivity).isOnline.collect { online ->
-                        contactlessIcon.visibility = if (online) View.VISIBLE else View.GONE
-                        instructionText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                            marginStart = if (online) iconGap else 0
+                    combine(online, OfflineStripController.nfcOff) { connected, nfcOff ->
+                        connected && !nfcOff
+                    }.collect { canTap ->
+                        if (tabManager.getCurrentTab() != PaymentTabManager.PaymentTab.CARD) {
+                            showScanInstruction(canTap)
                         }
-                        instructionText.setText(
-                            if (online) R.string.payment_request_instruction_scan_or_tap
-                            else R.string.payment_request_instruction_scan
-                        )
                         refreshWaitingStatus()
                     }
                 }
                 launch { OfflineStripController.stripMode.collect(::renderOfflinePill) }
             }
         }
+    }
+
+    private fun showScanInstruction(canTap: Boolean) {
+        val instruction = findViewById<TextView>(R.id.instruction_text) ?: return
+        findViewById<ImageView>(R.id.contactless_icon).visibility = if (canTap) View.VISIBLE else View.GONE
+        instruction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            marginStart = if (canTap) resources.getDimensionPixelSize(R.dimen.space_m) else 0
+        }
+        instruction.setText(
+            if (canTap) R.string.payment_request_instruction_scan_or_tap
+            else R.string.payment_request_instruction_scan
+        )
     }
 
     private fun refreshWaitingStatus() {
@@ -1044,6 +1091,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         val text = findViewById<TextView>(R.id.offline_pill_text)
         pill.animate().cancel()
         if (mode == null) {
+            pill.isClickable = false
+            pill.isFocusable = false
             if (pill.visibility != View.VISIBLE) return
             pill.animate().alpha(0f).scaleX(PILL_HIDDEN_SCALE).scaleY(PILL_HIDDEN_SCALE)
                 .setDuration(PILL_OUT_MS)
@@ -1051,15 +1100,26 @@ class PaymentRequestActivity : AppCompatActivity() {
                 .start()
             return
         }
-        val offline = mode == OfflineStripView.Mode.OFFLINE
-        val color = ContextCompat.getColor(
-            this,
-            if (offline) R.color.color_warning else R.color.color_success_green
+        text.setText(mode.title)
+        text.setTextColor(ContextCompat.getColor(this, mode.color))
+        pill.setOnClickListener {
+            when (mode) {
+                OfflineStripView.Mode.OFFLINE ->
+                    OfflineExplainerActivity.start(this, paymentOnScreen = confirmsAfterReconnect())
+                OfflineStripView.Mode.NFC_OFF -> try {
+                    startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+                } catch (e: ActivityNotFoundException) {
+                    Log.w(TAG, "Could not open NFC settings", e)
+                }
+                OfflineStripView.Mode.BACK_ONLINE -> Unit
+            }
+        }
+        pill.isClickable = mode.action != null
+        pill.isFocusable = mode.action != null
+        ViewCompat.replaceAccessibilityAction(
+            pill, AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
+            mode.action?.let(::getString), null,
         )
-        text.setText(if (offline) R.string.offline_strip_title else R.string.offline_strip_back_online_title)
-        text.setTextColor(color)
-        pill.isClickable = offline
-        pill.isFocusable = offline
         if (pill.visibility != View.VISIBLE) {
             pill.alpha = 0f
             pill.scaleX = PILL_HIDDEN_SCALE
@@ -1407,6 +1467,10 @@ class PaymentRequestActivity : AppCompatActivity() {
                     PaymentTabManager.PaymentTab.CASHU -> {
                         setHceToCashu()
                     }
+                    PaymentTabManager.PaymentTab.CARD -> {
+                        // The phone reads the card itself; never emulate a payment tag meanwhile.
+                        hceService.clearPaymentRequest()
+                    }
                 }
 
                 // Set up callback for when a token is received or an error occurs
@@ -1566,6 +1630,348 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcSetupRunnable?.let { nfcSetupHandler.postDelayed(it, 1000) }
     }
 
+    // ============================================================
+    // Card payments (Stripe Tap to Pay)
+    // ============================================================
+
+    /** Shows the Card tab when Stripe is configured, the device qualifies, and the unit is sats. */
+    private fun setupCardPayments() {
+        val reviewRequired = pendingPaymentId?.let { paymentId ->
+            PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)?.cardPaymentReviewRequired
+        } == true
+        setCardPaymentReviewRequired(reviewRequired, persist = false)
+        val available = paymentUnit.equals("sat", ignoreCase = true) &&
+            StripeTerminalManager.isDeviceSupported(this) &&
+            StripeCardSettings.getInstance(this).isReady()
+        if (!available) {
+            tabManager.setCardTabAvailable(false)
+            return
+        }
+
+        resolveCardAmount()
+        tabManager.setCardTabAvailable(true)
+        if (reviewRequired) {
+            tabManager.selectTab(PaymentTabManager.PaymentTab.CARD)
+        } else {
+            tabManager.selectDefaultPaymentMethod()
+        }
+    }
+
+    /**
+     * Fixes the card charge for this checkout. Retried on each attempt because a sats-priced
+     * sale needs the bitcoin price, which may still be loading when the screen opens.
+     */
+    private fun resolveCardAmount(): CardAmountResolver.CardAmount? {
+        cardAmount?.let { return it }
+        val currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
+        val enteredAmount = Amount.parse(formattedAmountString, Amount.Currency.fromCode(currencyCode))
+        cardAmount = CardAmountResolver.resolve(
+            enteredAmount = enteredAmount,
+            amountSats = paymentAmount,
+            currencyCode = currencyCode,
+            btcPrice = bitcoinPriceWorker?.getCurrentPrice() ?: 0.0,
+        )
+        cardActionButton.text = cardAmount?.let {
+            getString(R.string.card_payment_action_charge, formatCardAmount(it))
+        } ?: getString(R.string.card_payment_action_retry)
+        return cardAmount
+    }
+
+    private fun formatCardAmount(amount: CardAmountResolver.CardAmount): String = try {
+        val currency = java.util.Currency.getInstance(amount.currency.uppercase(java.util.Locale.US))
+        val digits = currency.defaultFractionDigits.coerceAtLeast(0)
+        java.text.NumberFormat.getCurrencyInstance().apply {
+            this.currency = currency
+            minimumFractionDigits = digits
+            maximumFractionDigits = digits
+        }.format(java.math.BigDecimal.valueOf(amount.minorUnits).movePointLeft(digits))
+    } catch (e: IllegalArgumentException) {
+        "${amount.minorUnits} ${amount.currency.uppercase(java.util.Locale.US)}"
+    }
+
+    private fun enterCardMode() {
+        // While the phone acts as a card reader it must not also offer a Cashu/Lightning tag.
+        NdefHostCardEmulationService.getInstance()?.clearPaymentRequest()
+        findViewById<TextView>(R.id.instruction_text)?.setText(R.string.payment_request_instruction_card)
+        // There is no payment request to share for a card payment.
+        shareButton.visibility = View.INVISIBLE
+        if (cardPaymentReviewRequired) {
+            startCardPayment()
+        } else {
+            resolveCardAmount()
+            showCardIdle(message = null, showAction = true)
+        }
+    }
+
+    private fun exitCardMode() {
+        if (!::cardContainer.isInitialized) return
+        cancelCardCollection()
+        shareButton.visibility = View.VISIBLE
+        val canTap = ConnectivityMonitor.getInstance(this).isOnlineNow() && !OfflineStripController.nfcOff.value
+        showScanInstruction(canTap)
+    }
+
+    /**
+     * Stops card collection unless Stripe is already charging the card. A charge in flight is
+     * left to finish so that it is recorded rather than lost.
+     */
+    private fun cancelCardCollection() {
+        val job = cardJob ?: return
+        if (StripeTerminalManager.isCharging) {
+            Log.w(TAG, "Card is being charged; letting it finish so the payment is recorded")
+            return
+        }
+        job.cancel()
+        cardJob = null
+    }
+
+    private fun savedCardPaymentReference(): StripeTerminalManager.CardPaymentReference? {
+        val paymentId = pendingPaymentId ?: return null
+        val entry = PaymentsHistoryActivity.getPaymentEntryById(this, paymentId) ?: return null
+        val clientSecret = entry.cardPaymentClientSecret ?: return null
+        return StripeTerminalManager.CardPaymentReference(
+            paymentIntentId = entry.cardPaymentIntentId,
+            clientSecret = clientSecret,
+        )
+    }
+
+    private fun setCardPaymentReviewRequired(reviewRequired: Boolean, persist: Boolean = true) {
+        cardPaymentReviewRequired = reviewRequired
+        if (::unifiedTab.isInitialized) {
+            unifiedTab.isEnabled = !reviewRequired
+            unifiedTab.alpha = if (reviewRequired) 0.35f else 1f
+        }
+        if (!persist) return
+        val paymentId = pendingPaymentId ?: return
+        val saved = PaymentsHistoryActivity.updatePendingCardPaymentReview(
+            context = this,
+            paymentId = paymentId,
+            reviewRequired = reviewRequired,
+        )
+        if (!saved) Log.w(TAG, "Could not save card payment review state for $paymentId")
+    }
+
+    private fun persistCardPaymentIntent(paymentIntent: PaymentIntent) {
+        val paymentId = pendingPaymentId
+        val clientSecret = paymentIntent.clientSecret
+        val saved = paymentId != null && clientSecret != null &&
+            PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
+                context = this,
+                paymentId = paymentId,
+                paymentIntentId = paymentIntent.id,
+                clientSecret = clientSecret,
+            )
+        if (!saved) {
+            throw StripeTerminalManager.CardPaymentException(
+                "Could not save the card payment attempt for recovery",
+                isCancellation = false,
+            )
+        }
+    }
+
+    private fun startCardPayment() {
+        if (hasTerminalOutcome || cardJob?.isActive == true) return
+        if (tabManager.getCurrentTab() != PaymentTabManager.PaymentTab.CARD) return
+
+        val amount = resolveCardAmount() ?: run {
+            val currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
+            showCardIdle(
+                getString(R.string.card_payment_status_amount_unavailable, currencyCode),
+                showAction = true,
+            )
+            return
+        }
+        val config = StripeCardSettings.getInstance(this).loadConfig() ?: run {
+            showCardIdle(getString(R.string.card_payment_status_not_configured), showAction = false)
+            return
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                )
+            )
+            return
+        }
+
+        // Runs outside lifecycleScope: a charge Stripe is confirming must still be recorded
+        // if this screen closes. cancelCardCollection() stops it until that point.
+        cardJob = StripeTerminalManager.paymentScope.launchPaymentOperation {
+            showCardBusy(getString(R.string.card_payment_status_preparing))
+            try {
+                StripeTerminalManager.ensureReaderConnected(this@PaymentRequestActivity, config)
+                showCardBusy(getString(R.string.card_payment_status_waiting))
+                val paymentIntent = StripeTerminalManager.collectPayment(
+                    context = this@PaymentRequestActivity,
+                    amount = amount,
+                    description = getString(R.string.app_name),
+                    metadata = buildMap {
+                        pendingPaymentId?.let { put("numo_payment_id", it) }
+                        put("numo_amount_sats", paymentAmount.toString())
+                    },
+                    previous = savedCardPaymentReference(),
+                    onPaymentIntent = ::persistCardPaymentIntent,
+                )
+                val chargedAmount = CardAmountResolver.CardAmount(
+                    minorUnits = paymentIntent.amount,
+                    currency = paymentIntent.currency ?: amount.currency,
+                )
+                setCardPaymentReviewRequired(false)
+                onCardPaymentCharged(paymentIntent.id.orEmpty(), chargedAmount)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: StripeTerminalManager.CardPaymentException) {
+                Log.w(TAG, "Card payment did not complete: ${e.message}", e)
+                setCardPaymentReviewRequired(e.isUnresolved)
+                val currency = amount.currency.uppercase(java.util.Locale.US)
+                when (e.reason) {
+                    // Setup problems: retrying would fail the same way, so offer no retry.
+                    StripeTerminalManager.FailureReason.AMOUNT_TOO_SMALL -> showCardIdle(
+                        getString(R.string.card_payment_status_amount_too_small, formatCardAmount(amount)),
+                        showAction = false,
+                    )
+                    StripeTerminalManager.FailureReason.CURRENCY_NOT_SUPPORTED -> showCardIdle(
+                        getString(R.string.card_payment_status_currency_not_supported, currency),
+                        showAction = false,
+                    )
+                    StripeTerminalManager.FailureReason.SIMULATION_REQUIRES_TEST_KEY -> showCardIdle(
+                        getString(R.string.card_payment_simulation_requires_test_key),
+                        showAction = false,
+                    )
+                    StripeTerminalManager.FailureReason.OTHER -> showCardIdle(
+                        when {
+                            e.isUnresolved -> getString(R.string.card_payment_status_unresolved)
+                            e.isCancellation -> getString(R.string.card_payment_status_cancelled)
+                            else -> getString(R.string.card_payment_status_failed, e.message.orEmpty())
+                        },
+                        showAction = true,
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Card reader error", e)
+                setCardPaymentReviewRequired(savedCardPaymentReference() != null)
+                if (e is TerminalException && e.errorCode == TerminalErrorCode.TAP_TO_PAY_DEBUG_NOT_SUPPORTED) {
+                    showCardIdle(getString(R.string.card_payment_debug_reader_unsupported), showAction = false)
+                } else {
+                    val reason = (e as? TerminalException)?.errorMessage ?: e.message ?: e.javaClass.simpleName
+                    showCardIdle(getString(R.string.card_payment_status_failed, reason), showAction = true)
+                }
+            }
+        }
+    }
+
+    private fun showCardBusy(message: String) {
+        cardStatusText.text = message
+        cardStatusText.visibility = View.VISIBLE
+        cardProgress.visibility = View.VISIBLE
+        cardActionButton.visibility = View.GONE
+    }
+
+    private fun showCardIdle(message: String?, showAction: Boolean) {
+        cardStatusText.text = message
+        cardStatusText.visibility = if (message == null) View.GONE else View.VISIBLE
+        cardProgress.visibility = View.GONE
+        cardActionButton.visibility = if (showAction && !hasTerminalOutcome) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * Handles a card Stripe has charged. Normally this completes checkout. If checkout was
+     * already closed or paid another way, the charge is still recorded or reported.
+     */
+    private fun onCardPaymentCharged(paymentIntentId: String) {
+        onCardPaymentCharged(paymentIntentId, cardAmount)
+    }
+
+    private fun onCardPaymentCharged(
+        paymentIntentId: String,
+        chargedAmount: CardAmountResolver.CardAmount?,
+    ) {
+        if (hasTerminalOutcome || isDestroyed) {
+            recordLateCardPayment(paymentIntentId, chargedAmount)
+        } else {
+            handleCardPaymentSuccess(paymentIntentId, chargedAmount)
+        }
+    }
+
+    /**
+     * Records a card charge that completed after this checkout ended. If the sale is still
+     * pending it is completed as a card payment; if it was already paid, the merchant is told
+     * to refund the extra charge.
+     */
+    private fun recordLateCardPayment(
+        paymentIntentId: String,
+        chargedAmount: CardAmountResolver.CardAmount?,
+    ) {
+        val context = applicationContext
+        val paymentId = pendingPaymentId
+        val stillPending = paymentId != null &&
+            PaymentsHistoryActivity.getPaymentEntryById(context, paymentId)?.isPending() == true
+        if (paymentId != null && stillPending) {
+            Log.w(TAG, "Recording card payment $paymentIntentId that completed after checkout closed")
+            PaymentsHistoryActivity.completePendingPayment(
+                context = context,
+                paymentId = paymentId,
+                token = "",
+                paymentType = PaymentHistoryEntry.TYPE_CARD,
+                mintUrl = null,
+                paymentRequest = paymentIntentId,
+                cardAmountMinorUnits = chargedAmount?.minorUnits,
+                cardCurrency = chargedAmount?.currency,
+            )
+            dispatchPaymentReceivedWebhook()
+            markBasketAsPaid()
+            Toast.makeText(context, R.string.card_payment_completed_late, Toast.LENGTH_LONG).show()
+        } else {
+            Log.e(TAG, "Card payment $paymentIntentId succeeded after this sale was already settled")
+            Toast.makeText(context, R.string.card_payment_also_charged, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /** Records a captured card payment. Stripe holds the funds; nothing enters the Cashu wallet. */
+    private fun handleCardPaymentSuccess(paymentIntentId: String) {
+        handleCardPaymentSuccess(paymentIntentId, cardAmount)
+    }
+
+    private fun handleCardPaymentSuccess(
+        paymentIntentId: String,
+        chargedAmount: CardAmountResolver.CardAmount?,
+    ) {
+        if (!beginTerminalOutcome("card_success")) return
+
+        Log.d(TAG, "Card payment succeeded: $paymentIntentId")
+        cancelNfcSafetyTimeout()
+
+        statusText.visibility = View.VISIBLE
+        statusText.text = getString(R.string.payment_request_status_success)
+
+        pendingPaymentId?.let { paymentId ->
+            PaymentsHistoryActivity.completePendingPayment(
+                context = this,
+                paymentId = paymentId,
+                token = "",
+                paymentType = PaymentHistoryEntry.TYPE_CARD,
+                mintUrl = null,
+                paymentRequest = paymentIntentId,
+                cardAmountMinorUnits = chargedAmount?.minorUnits,
+                cardCurrency = chargedAmount?.currency,
+            )
+        }
+
+        dispatchPaymentReceivedWebhook()
+
+        val resultIntent = Intent().apply {
+            putExtra(RESULT_EXTRA_TOKEN, "")
+            putExtra(RESULT_EXTRA_AMOUNT, paymentAmount)
+        }
+        setResult(Activity.RESULT_OK, resultIntent)
+
+        // Stripe's Tap to Pay screen already plays its approval tone, so skip ours.
+        showPaymentSuccess("", paymentAmount, playSound = false)
+    }
+
     private fun handlePaymentSuccess(token: String) {
         // Only process the first terminal outcome (success or failure). Late
         // callbacks from Nostr/HCE after we've already completed this payment
@@ -1707,6 +2113,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         arkoorJob?.cancel()
         lightningHandler?.cancel()
         quoteSockets?.close()
+        cancelCardCollection()
 
         return true
     }
@@ -1786,6 +2193,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         quoteSockets?.close()
         quoteSockets = null
 
+        cancelCardCollection()
+
         // Clean up HCE service
         clearHceService()
 
@@ -1799,6 +2208,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        cancelCardCollection()
         nfcSetupRunnable?.let { nfcSetupHandler.removeCallbacks(it) }
         cancelNfcSafetyTimeout()
         btcPayPollingJob?.cancel()
@@ -1902,7 +2312,12 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Unified success handler for all payment types.
      * Always renders the native success overlay so NFC and non-NFC success paths stay consistent.
      */
-    private fun showPaymentSuccess(token: String, amount: Long, receivedMintUrl: String? = null) {
+    private fun showPaymentSuccess(
+        token: String,
+        amount: Long,
+        receivedMintUrl: String? = null,
+        playSound: Boolean = true,
+    ) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) {
             nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
             Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
@@ -1918,7 +2333,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         pendingNfcSuccessToken = token
         pendingNfcSuccessMintUrl = receivedMintUrl
         pendingNfcSuccessAmount = amount
-        showNfcAnimationSuccess(formattedAmountString)
+        showNfcAnimationSuccess(formattedAmountString, playSound)
     }
 
     // ============================================================
@@ -2085,7 +2500,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationTimeoutRunnable = null
     }
 
-    private fun showNfcAnimationSuccess(amountText: String) {
+    private fun showNfcAnimationSuccess(amountText: String, playSound: Boolean = true) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
 
         animationResultLabelText.animate().cancel()
@@ -2104,16 +2519,17 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationView.showSuccess(amountText)
 
         // Play success sound and vibration
-        playNfcSuccessFeedback()
+        playNfcSuccessFeedback(playSound)
     }
 
-    private fun playNfcSuccessFeedback() {
-        // Play success sound
-        try {
-            val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
-            mediaPlayer?.setOnCompletionListener { it.release() }
-            mediaPlayer?.start()
-        } catch (_: Exception) {}
+    private fun playNfcSuccessFeedback(playSound: Boolean) {
+        if (playSound) {
+            try {
+                val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
+                mediaPlayer?.setOnCompletionListener { it.release() }
+                mediaPlayer?.start()
+            } catch (_: Exception) {}
+        }
         
         // Vibrate
         val vibrator = getVibrator()

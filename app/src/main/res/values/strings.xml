@@ -336,9 +336,9 @@
     <string name="nfc_dialog_content_description_cashu">Cashu</string>
     <string name="nfc_dialog_subtitle_or_scan_qr">or scan QR code</string>
     <string name="nfc_dialog_waiting_message">Waiting for NFC...</string>
-    <string name="nfc_enable_title">Enable NFC</string>
-    <string name="nfc_enable_message">NFC is required for tap to pay. Please enable it in settings.</string>
-    <string name="nfc_enable_button">Settings</string>
+    <string name="nfc_off_strip_title">NFC is off</string>
+    <string name="nfc_off_strip_subtitle">Tap payments need NFC</string>
+    <string name="nfc_off_strip_action">Open NFC settings</string>
     <string name="common_cancel">Cancel</string>
 
     
@@ -797,13 +797,10 @@
     <string name="settings_item_withdrawals_title">Withdrawals</string>
     <string name="settings_item_withdrawals_subtitle">Auto-withdraw settings and history</string>
     <string name="settings_item_default_payment_method_title">Default Payment</string>
-    <string name="settings_item_default_payment_method_subtitle">Unified</string>
     <string name="default_payment_method_explainer_title">Quick Settings</string>
-    <string name="default_payment_method_explainer_body">You can quickly change the default payment method directly from the payment screen by long-pressing on any of the Unified, Cashu, or Lightning tabs.</string>
-    <string name="default_payment_method_section_options">Default QR code</string>
-    <string name="default_payment_method_option_unified">Unified (Cashu + Lightning)</string>
-    <string name="default_payment_method_option_cashu">Cashu</string>
-    <string name="default_payment_method_option_lightning">Lightning</string>
+    <string name="default_payment_method_explainer_body">You can change the default payment method directly from checkout by long-pressing the Bitcoin or Card tab.</string>
+    <string name="default_payment_method_section_options">Default payment method</string>
+    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
 
     
     <string name="manual_withdraw_section_title">Manual Withdraw</string>
@@ -981,7 +978,7 @@
     <string name="pin_reset_recovery_phrase">Recovery Phrase</string>
     <string name="pin_reset_paste_clipboard">Paste from Clipboard</string>
     <string name="pin_reset_button">Reset PIN</string>
-    <string name="payment_request_tab_unified">Unified</string>
+    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_method_set">%1$s set as default payment method</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>

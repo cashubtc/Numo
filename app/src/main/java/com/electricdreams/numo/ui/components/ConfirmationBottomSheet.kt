@@ -87,7 +87,13 @@ class ConfirmationBottomSheet : BottomSheetDialogFragment() {
         }
 
         if (cfg.isDestructive) {
-            binding.confirmButton.setBackgroundResource(R.drawable.bg_button_destructive)
+            // A background drawable would be tinted over by the button's own tint.
+            binding.confirmButton.backgroundTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.color_error)
+            // White in both themes; the default label turns dark in dark theme.
+            binding.confirmButton.setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.color_text_on_dark)
+            )
         }
 
         binding.closeButton.setOnClickListener {

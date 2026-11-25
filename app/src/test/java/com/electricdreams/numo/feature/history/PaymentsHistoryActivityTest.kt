@@ -5,15 +5,19 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
@@ -85,6 +89,43 @@ class PaymentsHistoryActivityTest {
         assertTrue(entry.isCompleted())
         assertEquals(token, entry.token)
         assertEquals(mintUrl, entry.mintUrl)
+    }
+
+    @Test
+    fun `card attempt and exact charge survive history updates and completion`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context, 1_000L, "sat", 1_000L, 50_000.0, null, "1,000 sat",
+        )
+
+        assertTrue(
+            PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
+                context, id, "pi_recover", "pi_recover_secret_test",
+            )
+        )
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context, id, "lnbc1unused", "ln-quote", "https://mint.example",
+        )
+        PaymentsHistoryActivity.updatePendingWithNostrInfo(context, id, "nprofile", "secret")
+
+        val restored = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+        assertEquals("pi_recover", restored?.cardPaymentIntentId)
+        assertEquals("pi_recover_secret_test", restored?.cardPaymentClientSecret)
+
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context,
+            paymentId = id,
+            token = "",
+            paymentType = PaymentHistoryEntry.TYPE_CARD,
+            mintUrl = null,
+            paymentRequest = "pi_recover",
+            cardAmountMinorUnits = 1_250,
+            cardCurrency = "usd",
+        )
+
+        val completed = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+        assertEquals("pi_recover", completed?.getPaymentReference())
+        assertEquals(1_250L, completed?.cardAmountMinorUnits)
+        assertEquals("usd", completed?.cardCurrency)
     }
 
     @Test
@@ -382,6 +423,41 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `pending card attempt without bitcoin resume data reopens checkout`() {
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null,
+        )
+        PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
+            context, paymentId, "pi_resume", "pi_resume_secret_test",
+        )
+        val monitor = mock<ConnectivityMonitor>()
+        whenever(monitor.isOnlineNow()).thenReturn(true)
+        ReflectionHelpers.setStaticField(ConnectivityMonitor::class.java, "instance", monitor)
+        val activity = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup().get()
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter as PaymentsHistoryAdapter
+        val holder = adapter.createViewHolder(recyclerView, 1)
+            as PaymentsHistoryAdapter.TransactionViewHolder
+        adapter.bindViewHolder(holder, 1)
+
+        holder.mainContent.performClick()
+        ReflectionHelpers.setStaticField(ConnectivityMonitor::class.java, "instance", null)
+
+        val started = org.robolectric.Shadows.shadowOf(activity).nextStartedActivity
+        assertEquals(
+            com.electricdreams.numo.PaymentRequestActivity::class.java.name,
+            started?.component?.className,
+        )
+        assertEquals(
+            paymentId,
+            started?.getStringExtra(
+                com.electricdreams.numo.PaymentRequestActivity.EXTRA_RESUME_PAYMENT_ID,
+            ),
+        )
+    }
+
+    @Test
     fun `completed payment is tappable and shows details`() {
         val paymentId = PaymentsHistoryActivity.addPendingPayment(
             context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
@@ -526,6 +602,28 @@ class PaymentsHistoryActivityTest {
             .putString("history", com.google.gson.Gson().toJson(listOf(entry))).apply()
         val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
         assertTrue(PaymentsHistoryActivity.getPaymentHistory(context).single().isPending())
+        controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun `old card attempts stay pending until stripe status is checked`() {
+        val entry = PaymentHistoryEntry(
+            token = "", amount = 330L, enteredAmount = 330L,
+            date = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L),
+            rawStatus = PaymentHistoryEntry.STATUS_PENDING,
+            cardPaymentIntentId = "pi_resume",
+            cardPaymentClientSecret = "pi_resume_secret_test",
+            cardPaymentReviewRequired = true,
+        )
+        context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE).edit()
+            .putString("history", com.google.gson.Gson().toJson(listOf(entry))).apply()
+
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+
+        val restored = PaymentsHistoryActivity.getPaymentHistory(context).single()
+        assertTrue(restored.isPending())
+        assertTrue(restored.cardPaymentReviewRequired)
+        assertEquals("pi_resume_secret_test", restored.cardPaymentClientSecret)
         controller.pause().stop().destroy()
     }
 

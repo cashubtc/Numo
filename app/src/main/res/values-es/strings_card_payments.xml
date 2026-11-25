@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_card_payments_title">¿Quieres aceptar tarjetas con Stripe?</string>
+    <string name="onboarding_card_payments_body">Tus clientes pueden pagar acercando su tarjeta o su teléfono. También puedes conectar Stripe más tarde desde Ajustes.</string>
+    <string name="onboarding_card_payments_skip">Ahora no</string>
+    <string name="stripe_card_get_started">Conectar Stripe</string>
+
+    <string name="stripe_card_settings_title">Pagos con tarjeta</string>
+    <string name="settings_stripe_card_subtitle">Acepta tarjetas con Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_unsupported">Requiere Android 13 o superior con NFC</string>
+    <string name="stripe_card_enable_title">Aceptar pagos con tarjeta</string>
+    <string name="stripe_card_section_account">Cuenta de Stripe</string>
+    <string name="stripe_card_invalid_key">Introduce una clave restringida que empiece por rk_live_ o rk_test_. No se aceptan claves secretas (sk_…).</string>
+    <string name="stripe_card_save_failed">No se pudo guardar la clave de forma segura en este dispositivo</string>
+    <string name="stripe_card_removed">Clave de Stripe eliminada</string>
+    <string name="payment_request_tab_card">Tarjeta</string>
+    <string name="payment_request_instruction_card">Pago con tarjeta</string>
+    <string name="card_payment_status_preparing">Preparando el lector de tarjetas…</string>
+    <string name="card_payment_status_waiting">Esperando la tarjeta…</string>
+    <string name="card_payment_status_cancelled">Pago con tarjeta cancelado</string>
+    <string name="card_payment_status_failed">Error en el pago con tarjeta: %1$s</string>
+    <string name="card_payment_status_unresolved">No se pudo confirmar el pago con tarjeta. Toca el botón para comprobar su estado; la tarjeta no se cobrará dos veces.</string>
+    <string name="card_payment_status_amount_too_small">%1$s está por debajo del pago mínimo con tarjeta de Stripe. Cobra esta venta con bitcoin.</string>
+    <string name="card_payment_status_currency_not_supported">Tu cuenta de Stripe no puede aceptar pagos con tarjeta en %1$s. Configura la moneda de Numo con la moneda de tu cuenta de Stripe.</string>
+    <string name="card_payment_completed_late">Un pago con tarjeta se completó después de cerrar el cobro. Se ha añadido a tu historial de pagos.</string>
+    <string name="card_payment_also_charged">También se cobró la tarjeta por una venta que ya estaba pagada. Reembólsalo en tu Stripe Dashboard.</string>
+    <string name="card_payment_status_amount_unavailable">Importe con tarjeta no disponible: el precio de bitcoin en %1$s aún no se ha cargado</string>
+    <string name="card_payment_status_location_required">Stripe requiere el permiso de ubicación para los pagos con tarjeta</string>
+    <string name="card_payment_status_not_configured">Los pagos con tarjeta no están configurados</string>
+    <string name="card_payment_action_charge">Cobrar %1$s</string>
+    <string name="card_payment_action_retry">Reintentar</string>
+    <string name="transaction_detail_payment_type_card_value">Tarjeta (Stripe)</string>
+    <string name="default_payment_method_option_card">Tarjeta</string>
+    <string name="developer_settings_simulate_stripe_reader">Simular el lector de tarjetas de Stripe</string>
+    <string name="card_payment_simulation_requires_test_key">El lector simulado requiere una clave de prueba de Stripe (rk_test_…).</string>
+    <string name="card_payment_debug_reader_unsupported">Stripe requiere una versión de producción para leer tarjetas físicas. Para hacer pruebas, activa el lector simulado en los ajustes de desarrollador.</string>
+</resources>

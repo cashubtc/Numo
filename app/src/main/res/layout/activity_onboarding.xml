@@ -671,7 +671,15 @@
     </FrameLayout>
 
     <!-- ======================== -->
-    <!-- STEP 7: SUCCESS          -->
+    <!-- STEP 7: CARD PAYMENTS    -->
+    <!-- ======================== -->
+    <include
+        android:id="@+id/card_payments_container"
+        layout="@layout/onboarding_card_payments"
+        android:visibility="gone" />
+
+    <!-- ======================== -->
+    <!-- STEP 8: SUCCESS          -->
     <!-- ======================== -->
     <FrameLayout
         android:id="@+id/success_container"

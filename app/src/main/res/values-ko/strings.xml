@@ -285,9 +285,9 @@
     <string name="nfc_dialog_content_description_cashu">카슈</string>
     <string name="nfc_dialog_subtitle_or_scan_qr">또는 QR 코드를 스캔하세요</string>
     <string name="nfc_dialog_waiting_message">NFC를 기다리는 중...</string>
-    <string name="nfc_enable_title">NFC 활성화</string>
-    <string name="nfc_enable_message">탭하여 결제하려면 NFC가 필요합니다. 설정에서 활성화해 주세요.</string>
-    <string name="nfc_enable_button">설정</string>
+    <string name="nfc_off_strip_title">NFC가 꺼져 있음</string>
+    <string name="nfc_off_strip_subtitle">탭 결제에는 NFC가 필요합니다</string>
+    <string name="nfc_off_strip_action">NFC 설정 열기</string>
     <string name="common_cancel">취소</string>
 
     
@@ -885,7 +885,7 @@
     <string name="pin_reset_recovery_phrase">회복 문구</string>
     <string name="pin_reset_paste_clipboard">클립보드에서 붙여넣기</string>
     <string name="pin_reset_button">PIN 재설정</string>
-    <string name="payment_request_tab_unified">통합</string>
+    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">%1$d 토요일 결제</string>
     <string name="payment_request_lightning_description">%1$d sats의 Numo POS 결제</string>
     <string name="onboarding_status_generating_seed">시드 구문 생성 중…</string>
@@ -897,13 +897,10 @@
     <string name="onboarding_fetching_searching_backup">백업 검색 중…</string>
     <string name="onboarding_fetching_checking_relays">민트 설정에 대한 Nostr 릴레이 확인 중</string>
     <string name="settings_item_default_payment_method_title">기본 결제 수단</string>
-    <string name="settings_item_default_payment_method_subtitle">통합</string>
     <string name="default_payment_method_explainer_title">빠른 설정</string>
-    <string name="default_payment_method_explainer_body">결제 화면에서 통합, Cashu 또는 Lightning 탭 중 하나를 길게 누르면 기본 결제 수단을 빠르게 변경할 수 있습니다.</string>
-    <string name="default_payment_method_section_options">기본 QR 코드</string>
-    <string name="default_payment_method_option_unified">통합 (Cashu + Lightning)</string>
-    <string name="default_payment_method_option_cashu">Cashu</string>
-    <string name="default_payment_method_option_lightning">Lightning</string>
+    <string name="default_payment_method_explainer_body">결제 화면에서 Bitcoin 또는 카드 탭을 길게 누르면 기본 결제 수단을 빠르게 변경할 수 있습니다.</string>
+    <string name="default_payment_method_section_options">기본 결제 수단</string>
+    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
     <string name="payment_request_default_method_set">%1$s(이)가 기본 결제 수단으로 설정되었습니다</string>
     <!-- Insights Screen -->
     <string name="insights_open">매출</string>

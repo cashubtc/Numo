@@ -235,9 +235,9 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="nfc_dialog_content_description_cashu">Cashu</string>
     <string name="nfc_dialog_subtitle_or_scan_qr">ou escaneie o código QR</string>
     <string name="nfc_dialog_waiting_message">Aguardando NFC...</string>
-    <string name="nfc_enable_title">Ativar NFC</string>
-    <string name="nfc_enable_message">O NFC é necessário para pagamento por aproximação. Ative-o nas configurações.</string>
-    <string name="nfc_enable_button">Configurações</string>
+    <string name="nfc_off_strip_title">NFC desativado</string>
+    <string name="nfc_off_strip_subtitle">Pagamentos por aproximação precisam de NFC</string>
+    <string name="nfc_off_strip_action">Abrir configurações de NFC</string>
     <string name="common_cancel">Cancelar</string>
     <string name="dialog_title_enter_pin">Insira o PIN</string>
     <string name="dialog_pin_hint">PIN</string>
@@ -707,7 +707,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="pin_reset_recovery_phrase">Frase de recuperação</string>
     <string name="pin_reset_paste_clipboard">Colar da área de transferência</string>
     <string name="pin_reset_button">Redefinir PIN</string>
-    <string name="payment_request_tab_unified">Unificado</string>
+    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">Pagamento de %1$d sats</string>
     <string name="payment_request_lightning_description">Pagamento Numo POS de %1$d sats</string>
     <string name="onboarding_add_mint_url_hint">Insira a URL do mint</string>
@@ -736,13 +736,10 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="onboarding_mints_add_different_button">+ Novo Mint</string>
     <string name="onboarding_mints_scan_row_title">Escanear Código QR</string>
     <string name="settings_item_default_payment_method_title">Pagamento padrão</string>
-    <string name="settings_item_default_payment_method_subtitle">Unificado</string>
     <string name="default_payment_method_explainer_title">Configurações rápidas</string>
-    <string name="default_payment_method_explainer_body">Você pode alterar rapidamente o método de pagamento padrão diretamente na tela de pagamento mantendo pressionada qualquer uma das abas Unificado, Cashu ou Lightning.</string>
-    <string name="default_payment_method_section_options">CÓDIGO QR PADRÃO</string>
-    <string name="default_payment_method_option_unified">Unificado (Cashu + Lightning)</string>
-    <string name="default_payment_method_option_cashu">Cashu</string>
-    <string name="default_payment_method_option_lightning">Lightning</string>
+    <string name="default_payment_method_explainer_body">Você pode alterar o método de pagamento padrão diretamente no checkout mantendo pressionada a aba Bitcoin ou Cartão.</string>
+    <string name="default_payment_method_section_options">MÉTODO DE PAGAMENTO PADRÃO</string>
+    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
     <string name="payment_request_default_method_set">%1$s definido como método de pagamento padrão</string>
     <!-- Tela de Estatísticas / Vendas -->
     <string name="insights_open">Vendas</string>

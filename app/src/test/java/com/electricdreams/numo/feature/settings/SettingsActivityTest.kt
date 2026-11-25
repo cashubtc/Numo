@@ -80,7 +80,7 @@ class SettingsActivityTest {
             assertEquals(View.VISIBLE, binding.btcpaySettingsItem.visibility)
             assertEquals(View.VISIBLE, binding.webhooksSettingsItem.visibility)
             assertEquals(View.GONE, binding.checkoutSection.visibility)
-            binding.settingsSearch.setText("unified")
+            binding.settingsSearch.setText("bitcoin")
             assertEquals(View.VISIBLE, binding.defaultPaymentMethodSettingsItem.visibility)
         }
     }
@@ -135,10 +135,10 @@ class SettingsActivityTest {
             val binding = bind(activity)
             controller.pause()
             DeveloperPrefs.setDeveloperModeEnabled(activity, true)
-            DefaultPaymentMethodManager.getInstance(activity).setDefaultPaymentMethod(PaymentTab.CASHU)
+            DefaultPaymentMethodManager.getInstance(activity).setDefaultPaymentMethod(PaymentTab.CARD)
             controller.resume()
             assertEquals(View.VISIBLE, binding.developerSection.visibility)
-            assertEquals(activity.getString(R.string.default_payment_method_option_cashu),
+            assertEquals(activity.getString(R.string.default_payment_method_option_card),
                 binding.defaultPaymentMethodSettingsItem.findViewById<TextView>(R.id.row_subtitle).text)
             binding.settingsSearch.setText("debugging")
             assertEquals(View.VISIBLE, binding.developerSettingsItem.visibility)

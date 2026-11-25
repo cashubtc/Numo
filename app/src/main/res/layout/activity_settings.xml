@@ -159,6 +159,13 @@
                         app:rowSubtitle="@string/settings_btcpay_disabled" />
 
                     <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/stripe_card_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_card"
+                        app:rowTitle="@string/stripe_card_settings_title"
+                        app:rowSubtitle="@string/settings_stripe_card_subtitle" />
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
                         android:id="@+id/webhooks_settings_item"
                         style="@style/Widget.Numo.SettingsRow"
                         app:rowIcon="@drawable/ic_link"

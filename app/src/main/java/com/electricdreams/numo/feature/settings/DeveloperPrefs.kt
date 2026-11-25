@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.electricdreams.numo.BuildConfig
 import com.electricdreams.numo.core.dev.ErrorLogCollector
 
 /**
@@ -12,6 +13,7 @@ object DeveloperPrefs {
     private const val PREFS_NAME = "developer_prefs"
     private const val KEY_DEVELOPER_MODE_ENABLED = "developer_mode_enabled"
     private const val KEY_DELAY_LIGHTNING_INVOICE = "delay_lightning_invoice"
+    private const val KEY_SIMULATE_STRIPE_READER = "simulate_stripe_reader"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -32,5 +34,13 @@ object DeveloperPrefs {
 
     fun setLightningInvoiceDelayed(context: Context, delayed: Boolean) {
         getPrefs(context).edit().putBoolean(KEY_DELAY_LIGHTNING_INVOICE, delayed).apply()
+    }
+
+    fun isStripeReaderSimulated(context: Context): Boolean =
+        isDeveloperModeEnabled(context) &&
+            getPrefs(context).getBoolean(KEY_SIMULATE_STRIPE_READER, BuildConfig.DEBUG)
+
+    fun setStripeReaderSimulated(context: Context, simulated: Boolean) {
+        getPrefs(context).edit().putBoolean(KEY_SIMULATE_STRIPE_READER, simulated).apply()
     }
 }

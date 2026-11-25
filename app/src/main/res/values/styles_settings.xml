@@ -91,6 +91,13 @@
         <item name="boxCornerRadiusBottomStart">@dimen/radius_input</item>
         <item name="boxCornerRadiusBottomEnd">@dimen/radius_input</item>
     </style>
+    <style name="Widget.Numo.SettingsCountryDropdown" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxBackgroundColor">@color/settings_background</item>
+        <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/radius_input</item>
+    </style>
     <style name="Text.SettingsInput" parent="Text.Body">
         <item name="fontFamily">sans-serif</item>
         <item name="android:fontFamily">sans-serif</item>

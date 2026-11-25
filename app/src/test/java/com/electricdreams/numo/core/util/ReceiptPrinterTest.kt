@@ -136,6 +136,32 @@ class ReceiptPrinterTest {
     }
 
     @Test
+    fun `card receipts name Stripe and show the exact fiat charge`() {
+        val data = ReceiptPrinter.ReceiptData(
+            basket = null,
+            paymentType = "card",
+            paymentDate = Date(),
+            transactionId = "pi_card_receipt",
+            mintUrl = null,
+            bitcoinPrice = 80_000.0,
+            totalSatoshis = 14_570,
+            enteredAmount = 1_250,
+            enteredCurrency = "USD",
+            cardAmountMinorUnits = 1_250,
+            cardCurrency = "usd",
+        )
+
+        val text = printer.generateTextReceipt(data)
+        assertTrue(text.lines().any { it.startsWith("Payment:") && it.endsWith("Card (Stripe)") })
+        assertTrue(text.lines().any { it.startsWith("Paid:") && it.endsWith("$12.50") })
+        assertTrue(text.lines().none { it.startsWith("Paid:") && it.contains("sat") })
+
+        val html = printer.generateHtmlReceipt(data)
+        assertTrue(html.contains("<span>Card (Stripe)</span>"))
+        assertTrue(html.contains("<span>Paid:</span>\n        <span>$12.50</span>"))
+    }
+
+    @Test
     fun testHtmlGeneration() {
         val item = Item(name = "HTML Item", price = 5.00)
         val basketItem = BasketItem(item = item, quantity = 1)

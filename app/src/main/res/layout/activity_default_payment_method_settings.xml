@@ -61,13 +61,8 @@
                         style="@style/Widget.Numo.SettingsChoice" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/radio_cashu"
-                        android:text="@string/default_payment_method_option_cashu"
-                        style="@style/Widget.Numo.SettingsChoice" />
-
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/radio_lightning"
-                        android:text="@string/default_payment_method_option_lightning"
+                        android:id="@+id/radio_card"
+                        android:text="@string/default_payment_method_option_card"
                         style="@style/Widget.Numo.SettingsChoice" />
 
                 </RadioGroup>

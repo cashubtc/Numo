@@ -83,6 +83,33 @@ class ActivityCsvExportHelperTest {
     }
 
     @Test
+    fun `Card completion exports its Stripe PaymentIntent instead of the unused Lightning invoice`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context, 330, "sat", 330, null, null, "330 sat",
+        )
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context, id, "lnbc1unused", "ln-quote", "https://mint.example",
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context,
+            paymentId = id,
+            token = "",
+            paymentType = PaymentHistoryEntry.TYPE_CARD,
+            mintUrl = null,
+            paymentRequest = "pi_card_export",
+        )
+
+        val stream = ByteArrayOutputStream()
+        assertTrue(ActivityCsvExportHelper.exportActivityToCsv(context, stream))
+        val lines = stream.toString("UTF-8").trim().lines()
+        val headers = splitCsvLine(lines[0])
+        val row = splitCsvLine(lines[1])
+
+        assertEquals("Card", row[headers.indexOf("Payment Method")])
+        assertEquals("pi_card_export", row[headers.indexOf("Invoice/Cashu Request")])
+    }
+
+    @Test
     fun `export to CSV includes Items column with item names and quantities`() {
         // Create checkout items
         val item1 = CheckoutBasketItem(

@@ -47,7 +47,7 @@ data class PaymentHistoryEntry(
     @SerializedName("status")
     private val rawStatus: String? = "completed",
 
-    /** Payment type: "cashu", "lightning", "arkoor", or null for pending/unknown */
+    /** Payment type: "cashu", "lightning", "arkoor", "card", or null for pending/unknown */
     @SerializedName("paymentType")
     val paymentType: String? = null,
 
@@ -112,6 +112,24 @@ data class PaymentHistoryEntry(
     /** BTCPay Server invoice ID - for resuming BTCPay pending payments */
     @SerializedName("btcPayInvoiceId")
     val btcPayInvoiceId: String? = null,
+
+    /** Stripe attempt to retrieve before retrying, including after process recreation. */
+    @SerializedName("cardPaymentIntentId")
+    val cardPaymentIntentId: String? = null,
+
+    @SerializedName("cardPaymentClientSecret")
+    val cardPaymentClientSecret: String? = null,
+
+    /** Uncertain card outcome that must be checked before another payment method is offered. */
+    @SerializedName("cardPaymentReviewRequired")
+    val cardPaymentReviewRequired: Boolean = false,
+
+    /** Exact amount and currency confirmed by Stripe, for receipts and reconciliation. */
+    @SerializedName("cardAmountMinorUnits")
+    val cardAmountMinorUnits: Long? = null,
+
+    @SerializedName("cardCurrency")
+    val cardCurrency: String? = null,
 
     /** User-assigned label for this transaction */
     @SerializedName("label")
@@ -197,7 +215,7 @@ data class PaymentHistoryEntry(
     /** The request for the method that actually paid, for details and CSV export. */
     fun getPaymentReference(): String? = when (paymentType) {
         TYPE_ARKOOR -> arkoorAddress ?: lightningInvoice
-        TYPE_CASHU -> paymentRequest ?: lightningInvoice
+        TYPE_CASHU, TYPE_CARD -> paymentRequest ?: lightningInvoice
         else -> lightningInvoice
     }
 
@@ -251,6 +269,9 @@ data class PaymentHistoryEntry(
         const val TYPE_CASHU = "cashu"
         const val TYPE_ARKOOR = "arkoor"
         const val TYPE_LIGHTNING = "lightning"
+
+        /** Card payment collected with Stripe Tap to Pay; paymentRequest holds the PaymentIntent ID. */
+        const val TYPE_CARD = "card"
 
         /**
          * Simple DTO for recording swap-to-Lightning-mint metadata on a
