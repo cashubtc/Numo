@@ -77,7 +77,7 @@ class OnboardingRenderTest {
                 scenario.onActivity { activity ->
                     val tour = activity.findViewById<OnboardingTourView>(R.id.welcome_tour)
                     val root = activity.findViewById<View>(android.R.id.content)
-                    for (page in 0..4) {
+                    for (page in 0..3) {
                         tour.restorePlaybackState(Bundle().apply { putInt("tour_page", page) })
                         layout(root)
                         val action = activity.findViewById<View>(R.id.accept_button)
@@ -88,7 +88,7 @@ class OnboardingRenderTest {
                         save(draw(root), "page-$page-font-$fontScale")
                     }
                     if (previews && fontScale == 1f) {
-                        tour.restorePlaybackState(Bundle().apply { putInt("tour_page", 2) })
+                        tour.restorePlaybackState(Bundle().apply { putInt("tour_page", 1) })
                         layout(root)
                         val scene = descendants(root).filterIsInstance<OnboardingSceneView>()
                             .first { it.page == 1 }

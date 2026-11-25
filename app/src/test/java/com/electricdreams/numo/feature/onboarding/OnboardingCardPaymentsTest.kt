@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -41,36 +42,69 @@ class OnboardingCardPaymentsTest {
     }
 
     @Test
-    fun `connect Stripe is visible on launch and opens setup before wallet creation`() {
+    fun `mint setup leads to a dedicated screen with Connect Stripe above Not now`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                val connect = activity.findViewById<View>(R.id.connect_stripe_button)
+                val connect = activity.findViewById<TextView>(R.id.connect_stripe_button)
+                assertFalse(connect.isShown)
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "onWalletReady")
+                val skip = activity.findViewById<TextView>(R.id.skip_stripe_button)
+                val actions = connect.parent as ViewGroup
                 assertTrue(connect.isShown)
+                assertTrue(skip.isShown)
+                assertFalse(activity.findViewById<View>(R.id.welcome_tour).isShown)
+                assertEquals(
+                    activity.getColor(R.color.color_text_on_dark),
+                    activity.findViewById<TextView>(R.id.card_payments_title).currentTextColor,
+                )
+                assertEquals(
+                    activity.getColor(R.color.onboarding_tour_secondary),
+                    activity.findViewById<TextView>(R.id.card_payments_body).currentTextColor,
+                )
+                assertEquals(activity.getString(R.string.stripe_card_get_started), connect.text)
+                assertEquals(activity.getString(R.string.onboarding_card_payments_skip), skip.text)
+                assertTrue(actions.indexOfChild(connect) < actions.indexOfChild(skip))
                 connect.performClick()
                 assertEquals(
                     StripeCardSetupActivity::class.java.name,
                     shadowOf(activity).nextStartedActivity.component?.className,
                 )
                 assertFalse(activity.isFinishing)
-                assertFalse(OnboardingActivity.isOnboardingComplete(activity))
+                assertTrue(activity.findViewById<View>(R.id.card_payments_container).isShown)
+                assertTrue(OnboardingActivity.isOnboardingComplete(activity))
+            }
+            scenario.onActivity { StripeCardSettings.getInstance(it).hasPassedCheck = true }
+            scenario.recreate()
+            scenario.onActivity { activity ->
+                assertTrue(activity.findViewById<View>(R.id.success_container).isShown)
             }
         }
     }
 
     @Test
-    fun `the second welcome slide offers Stripe even without NFC and can be skipped`() {
+    fun `the card offer and restored balance summary survive recreation and skipping`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                val tour = activity.findViewById<OnboardingTourView>(R.id.welcome_tour)
-                tour.advancePage()
-                val next = activity.findViewById<TextView>(R.id.accept_button)
-                assertEquals(activity.getString(R.string.onboarding_card_payments_skip), next.text)
+                ReflectionHelpers.setField(activity, "isRestoreFlow", true)
+                ReflectionHelpers.getField<MutableMap<String, Pair<Long, Long>>>(
+                    activity, "balanceChanges",
+                )["https://example.test"] = 20L to 80L
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "onWalletReady")
+            }
+            scenario.recreate()
+            scenario.onActivity { activity ->
                 assertTrue(activity.findViewById<View>(R.id.connect_stripe_button).isShown)
-                next.performClick()
-                assertTrue(activity.findViewById<View>(R.id.create_wallet_button).isShown)
-                assertTrue(activity.findViewById<View>(R.id.restore_wallet_button).isShown)
+                activity.findViewById<View>(R.id.skip_stripe_button).performClick()
                 assertNull(shadowOf(activity).nextStartedActivity)
                 assertFalse(StripeCardSettings.getInstance(activity).isEnabled)
+            }
+            scenario.recreate()
+            scenario.onActivity { activity ->
+                assertTrue(activity.findViewById<View>(R.id.success_container).isShown)
+                assertEquals(
+                    activity.getString(R.string.onboarding_success_restored_recovered, 60L),
+                    activity.findViewById<TextView>(R.id.success_subtitle).text,
+                )
             }
         }
     }
@@ -83,6 +117,7 @@ class OnboardingCardPaymentsTest {
             .apply()
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "onWalletReady")
                 val connect = activity.findViewById<View>(R.id.connect_stripe_button)
                 val shadow = shadowOf(activity)
                 connect.performClick()
@@ -90,6 +125,7 @@ class OnboardingCardPaymentsTest {
                 assertEquals(PinEntryActivity::class.java.name, pin.component?.className)
                 shadow.receiveResult(pin, Activity.RESULT_CANCELED, null)
                 assertFalse(activity.isFinishing)
+                assertTrue(connect.isShown)
                 assertNull(shadow.nextStartedActivity)
 
                 connect.performClick()

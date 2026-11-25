@@ -45,15 +45,15 @@ class OnboardingTourTest {
     }
 
     @Test
-    fun `all five pages are available with motion disabled and get started stays accessible`() {
+    fun `all four pages are available with motion disabled and get started stays accessible`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val tour = activity.findViewById<OnboardingTourView>(R.id.welcome_tour)
-                for (page in 0..4) {
+                for (page in 0..3) {
                     assertEquals(page, tour.currentPage)
                     assertFalse(tour.isPlaybackRunning)
                     assertTrue(activity.findViewById<View>(R.id.accept_button).isShown)
-                    if (page < 4) tour.advancePage()
+                    if (page < 3) tour.advancePage()
                 }
                 tour.advancePage()
                 assertEquals(0, tour.currentPage)
@@ -114,7 +114,7 @@ class OnboardingTourTest {
 
     @Test
     fun `get started enters existing setup from any scene without completing onboarding`() {
-        for (page in 0..4) {
+        for (page in 0..3) {
             ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
                 scenario.onActivity { activity ->
                     val tour = activity.findViewById<OnboardingTourView>(R.id.welcome_tour)
@@ -193,7 +193,7 @@ class OnboardingTourTest {
                 Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
                 tour.setActive(true)
                 assertTrue(tour.isPlaybackRunning)
-                for (expectedPage in listOf(1, 2, 3, 4, 0, 1)) {
+                for (expectedPage in listOf(1, 2, 3, 0, 1)) {
                     ReflectionHelpers.getField<ValueAnimator>(tour, "clock").end()
                     assertEquals(expectedPage, tour.currentPage)
                     assertTrue(tour.isPlaybackRunning)

@@ -49,14 +49,6 @@
                 app:cornerRadius="30dp"
                 app:elevation="0dp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/connect_stripe_button"
-                style="@style/Widget.Numo.Button.Onboarding.Tertiary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/stripe_card_get_started" />
-
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/terms_text"
                 android:layout_width="match_parent"

@@ -60,6 +60,8 @@ import com.electricdreams.numo.feature.pin.requirePinProtection
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.feature.settings.StripeCardSetupActivity
 import com.electricdreams.numo.nostr.NostrMintBackup
+import com.electricdreams.numo.payment.card.StripeCardSettings
+import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
@@ -83,18 +85,20 @@ import kotlin.coroutines.resume
  * Onboarding Activity - First-time user experience.
  * 
  * Flow:
- * 1. Welcome tour with Terms of Service and optional Stripe card setup
+ * 1. Welcome tour with Terms of Service
  * 2. Create new wallet OR Restore from seed phrase
  * 3. For new wallet: Generate seed phrase and add default mints
  *    For restore: Enter seed phrase → Fetch backup from Nostr → Add mints → Restore balances
  * 4. Review mints screen
- * 5. Success screen → Enter wallet
+ * 5. Optional Stripe card setup → Success screen → Enter wallet
  */
 class OnboardingActivity : AppCompatActivity() {
 
     companion object {
         private const val PREFS_NAME = "OnboardingPrefs"
         private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
+        private const val STATE_CARD_OFFER_PENDING = "card_offer_pending"
+        private const val STATE_RESTORED_BALANCES = "restored_balances"
 
         fun isOnboardingComplete(context: Context): Boolean {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -116,6 +120,7 @@ class OnboardingActivity : AppCompatActivity() {
         GENERATING_WALLET,   // New wallet flow only
         REVIEW_MINTS,
         RESTORING,           // Restore flow only
+        CARD_PAYMENTS,
         SUCCESS
     }
 
@@ -194,7 +199,9 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var restoringStatus: TextView
     private lateinit var mintProgressContainer: LinearLayout
 
-    // Step 7: Success
+    private lateinit var cardPaymentsContainer: View
+
+    // Success
     private lateinit var successContainer: FrameLayout
     private lateinit var successTitle: TextView
     private lateinit var successSubtitle: TextView
@@ -225,7 +232,7 @@ class OnboardingActivity : AppCompatActivity() {
     private val verifyStripePin = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == RESULT_OK) {
+        if (result.resultCode == RESULT_OK && currentStep == OnboardingStep.CARD_PAYMENTS) {
             PinProtectionHelper.markVerified()
             openStripeSetup()
         }
@@ -239,9 +246,12 @@ class OnboardingActivity : AppCompatActivity() {
 
         // Preview protects an existing setup; unfinished onboarding always follows the real flow.
         val onboardingComplete = isOnboardingComplete(this)
+        val readyWalletState = savedInstanceState?.takeIf {
+            onboardingComplete && it.containsKey(STATE_CARD_OFFER_PENDING)
+        }
         previewOnly = BuildConfig.DEBUG && onboardingComplete &&
             intent.getBooleanExtra("preview_onboarding", false)
-        if (onboardingComplete && !previewOnly) {
+        if (onboardingComplete && !previewOnly && readyWalletState == null) {
             val intent = Intent(this, ModernPOSActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
@@ -256,8 +266,12 @@ class OnboardingActivity : AppCompatActivity() {
         setupWindow()
         initViews()
         setupListeners()
-        showStep(OnboardingStep.WELCOME)
-        savedInstanceState?.let { welcomeTour.restorePlaybackState(it) }
+        if (readyWalletState == null) {
+            showStep(OnboardingStep.WELCOME)
+            savedInstanceState?.let { welcomeTour.restorePlaybackState(it) }
+        } else {
+            restoreReadyWallet(readyWalletState)
+        }
     }
 
     private fun setupWindow() {
@@ -399,6 +413,11 @@ class OnboardingActivity : AppCompatActivity() {
         restoringContainer = findViewById(R.id.restoring_container)
         restoringStatus = findViewById(R.id.restoring_status)
         mintProgressContainer = findViewById(R.id.mint_progress_container)
+
+        cardPaymentsContainer = findViewById(R.id.card_payments_container)
+        if (!StripeTerminalManager.isDeviceSupported(this)) {
+            findViewById<TextView>(R.id.card_payments_body).setText(R.string.settings_stripe_card_unsupported)
+        }
 
         // Success
         successContainer = findViewById(R.id.success_container)
@@ -574,11 +593,6 @@ class OnboardingActivity : AppCompatActivity() {
         acceptButton.setOnClickListener {
             if (previewOnly) finish() else showStep(OnboardingStep.CHOOSE_PATH)
         }
-        findViewById<View>(R.id.connect_stripe_button).setOnClickListener {
-            if (requirePinProtection(onVerified = ::openStripeSetup)) {
-                verifyStripePin.launch(Intent(this, PinEntryActivity::class.java))
-            }
-        }
 
         // Choose Path
         createWalletButton.setOnClickListener {
@@ -630,6 +644,13 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<View>(R.id.connect_stripe_button).setOnClickListener {
+            if (requirePinProtection(onVerified = ::openStripeSetup)) {
+                verifyStripePin.launch(Intent(this, PinEntryActivity::class.java))
+            }
+        }
+        findViewById<View>(R.id.skip_stripe_button).setOnClickListener { showSuccessScreen() }
+
         // Success
         enterWalletButton.setOnClickListener {
             completeOnboarding()
@@ -673,6 +694,7 @@ class OnboardingActivity : AppCompatActivity() {
         fetchingContainer.visibility = View.GONE
         reviewMintsContainer.visibility = View.GONE
         restoringContainer.visibility = View.GONE
+        cardPaymentsContainer.visibility = View.GONE
         successContainer.visibility = View.GONE
 
         // Show appropriate container with animation
@@ -684,6 +706,7 @@ class OnboardingActivity : AppCompatActivity() {
             OnboardingStep.FETCHING_BACKUP -> fetchingContainer
             OnboardingStep.REVIEW_MINTS -> reviewMintsContainer
             OnboardingStep.RESTORING -> restoringContainer
+            OnboardingStep.CARD_PAYMENTS -> cardPaymentsContainer
             OnboardingStep.SUCCESS -> successContainer
         }
 
@@ -975,6 +998,9 @@ class OnboardingActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (currentStep == OnboardingStep.CARD_PAYMENTS && StripeCardSettings.getInstance(this).hasPassedCheck) {
+            showSuccessScreen()
+        }
         if (::welcomeTour.isInitialized) {
             welcomeTour.setActive(currentStep == OnboardingStep.WELCOME)
         }
@@ -982,7 +1008,31 @@ class OnboardingActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         if (::welcomeTour.isInitialized) welcomeTour.savePlaybackState(outState)
+        if (currentStep == OnboardingStep.CARD_PAYMENTS || currentStep == OnboardingStep.SUCCESS) {
+            outState.putBoolean(STATE_CARD_OFFER_PENDING, currentStep == OnboardingStep.CARD_PAYMENTS)
+            if (isRestoreFlow) {
+                val balances = Bundle()
+                for ((mint, amounts) in balanceChanges) {
+                    balances.putLongArray(mint, longArrayOf(amounts.first, amounts.second))
+                }
+                outState.putBundle(STATE_RESTORED_BALANCES, balances)
+            }
+        }
         super.onSaveInstanceState(outState)
+    }
+
+    private fun restoreReadyWallet(state: Bundle) {
+        state.getBundle(STATE_RESTORED_BALANCES)?.let { balances ->
+            isRestoreFlow = true
+            for (mint in balances.keySet()) {
+                balances.getLongArray(mint)?.let { balanceChanges[mint] = it[0] to it[1] }
+            }
+        }
+        if (state.getBoolean(STATE_CARD_OFFER_PENDING)) {
+            showStep(OnboardingStep.CARD_PAYMENTS)
+        } else {
+            showSuccessScreen()
+        }
     }
 
     // === New Wallet Flow ===
@@ -1054,7 +1104,7 @@ class OnboardingActivity : AppCompatActivity() {
                 delay(300)
 
                 withContext(Dispatchers.Main) {
-                    showSuccessScreen(isRestore = false)
+                    onWalletReady()
                 }
 
             } catch (e: Throwable) {
@@ -1238,7 +1288,7 @@ class OnboardingActivity : AppCompatActivity() {
                 balanceChanges.putAll(results.filterKeys { selectedMints.contains(it) })
 
                 withContext(Dispatchers.Main) {
-                    showSuccessScreen(isRestore = true)
+                    onWalletReady()
                 }
 
             } catch (e: Throwable) {
@@ -1642,12 +1692,16 @@ class OnboardingActivity : AppCompatActivity() {
         }
     }
 
-    // === Success Screen ===
+    private fun onWalletReady() {
+        // The wallet and mints are already saved when the merchant leaves for Stripe.
+        setOnboardingComplete(this, true)
+        showStep(OnboardingStep.CARD_PAYMENTS)
+    }
 
-    private fun showSuccessScreen(isRestore: Boolean) {
+    private fun showSuccessScreen() {
         showStep(OnboardingStep.SUCCESS)
 
-        if (isRestore) {
+        if (isRestoreFlow) {
             val totalRecovered = balanceChanges.values.sumOf { maxOf(0L, it.second - it.first) }
             val totalBalance = balanceChanges.values.sumOf { it.second }
 
@@ -1744,8 +1798,6 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun completeOnboarding() {
-        setOnboardingComplete(this, true)
-
         // Initialize CashuWalletManager if not already done
         CashuWalletManager.init(this)
 
@@ -1780,6 +1832,7 @@ class OnboardingActivity : AppCompatActivity() {
                     showStep(OnboardingStep.CHOOSE_PATH)
                 }
             }
+            OnboardingStep.CARD_PAYMENTS -> showSuccessScreen()
             // Don't allow back during loading states
             OnboardingStep.GENERATING_WALLET,
             OnboardingStep.FETCHING_BACKUP,

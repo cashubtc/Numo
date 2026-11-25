@@ -13,16 +13,6 @@
         android:paddingHorizontal="24dp"
         android:paddingBottom="16dp">
 
-        <ImageView
-            android:id="@+id/stripe_mark"
-            android:layout_width="88dp"
-            android:layout_height="88dp"
-            android:background="@drawable/bg_connect_tile_clip"
-            android:clipToOutline="true"
-            android:importantForAccessibility="no"
-            android:src="@drawable/ic_stripe_mark"
-            android:visibility="gone" />
-
         <com.electricdreams.numo.feature.onboarding.OnboardingSceneView
             android:id="@+id/tour_scene"
             android:layout_width="match_parent"

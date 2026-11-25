@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/numo_navy"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:paddingTop="24dp">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="54dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_numo_wordmark_white" />
+    </FrameLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="16dp">
+
+            <ImageView
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:background="@drawable/bg_connect_tile_clip"
+                android:clipToOutline="true"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_stripe_mark" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/card_payments_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:accessibilityHeading="true"
+                android:breakStrategy="balanced"
+                android:gravity="center"
+                android:hyphenationFrequency="none"
+                android:text="@string/onboarding_card_payments_title"
+                android:textAppearance="@style/Text.Onboarding.Headline"
+                android:textColor="@color/color_text_on_dark" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/card_payments_body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:breakStrategy="balanced"
+                android:gravity="center"
+                android:hyphenationFrequency="none"
+                android:maxWidth="360dp"
+                android:text="@string/onboarding_card_payments_body"
+                android:textAppearance="@style/Text.Onboarding.Body"
+                android:textColor="@color/onboarding_tour_secondary" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="32dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/connect_stripe_button"
+            style="@style/Widget.Numo.Button.Onboarding.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
+            android:text="@string/stripe_card_get_started" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/skip_stripe_button"
+            style="@style/Widget.Numo.Button.Onboarding.Tertiary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/onboarding_card_payments_skip" />
+    </LinearLayout>
+</LinearLayout>
