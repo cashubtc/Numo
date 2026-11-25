@@ -1012,6 +1012,17 @@
     <string name="offline_status_updating">更新中…</string>
     <string name="offline_row_content_description">%1$s、%2$s</string>
     <string name="offline_row_content_description_outdated">%1$s、古い情報。%2$s</string>
+    <string name="mint_strip_title">ミントに接続できません</string>
+    <string name="mint_strip_subtitle">新しい請求は失敗する可能性があります</string>
+    <string name="mint_strip_reconnected_title">ミントに接続しました</string>
+    <string name="mint_strip_reconnected_subtitle">新しい請求を再び作成できます</string>
+    <string name="mint_strip_action_details">引き続き使える機能を見る</string>
+    <string name="mint_explainer_title">ミントに接続できません。</string>
+    <string name="mint_explainer_subtitle">端末はネットワークに接続されていますが、%1$s が応答しません。このネットワークでインターネットが使えるか確認するか、しばらくしてからもう一度お試しください。</string>
+    <string name="mint_explainer_reconnected_title">ミントに再接続しました。</string>
+    <string name="mint_explainer_group_needs_mint">ミントが必要</string>
+    <string name="mint_explainer_group_still_works">引き続き使える</string>
+    <string name="mint_status_confirms_later">ミントが応答すると確認されます</string>
     <string name="payment_request_arkoor_address">Arkアドレス</string>
     <string name="payment_request_arkoor_waiting">表示された金額をこのArkアドレスに送信してください</string>
     <string name="payment_request_arkoor_retrying">ミントに再接続中…</string>

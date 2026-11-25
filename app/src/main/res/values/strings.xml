@@ -1119,6 +1119,17 @@
     <string name="offline_status_updating">Updating…</string>
     <string name="offline_row_content_description">%1$s, %2$s</string>
     <string name="offline_row_content_description_outdated">%1$s, outdated. %2$s</string>
+    <string name="mint_strip_title">Can\'t reach mint</string>
+    <string name="mint_strip_subtitle">New charges may fail</string>
+    <string name="mint_strip_reconnected_title">Mint connected</string>
+    <string name="mint_strip_reconnected_subtitle">New charges work again</string>
+    <string name="mint_strip_action_details">See what still works</string>
+    <string name="mint_explainer_title">Can\'t reach your mint.</string>
+    <string name="mint_explainer_subtitle">Your phone is connected, but %1$s isn\'t responding. Check that this network has internet, or try again shortly.</string>
+    <string name="mint_explainer_reconnected_title">Your mint is back.</string>
+    <string name="mint_explainer_group_needs_mint">Needs your mint</string>
+    <string name="mint_explainer_group_still_works">Still works</string>
+    <string name="mint_status_confirms_later">Confirms once your mint responds</string>
     <string name="payment_request_arkoor" translatable="false">Arkoor</string>
     <string name="payment_request_arkoor_address">Ark address</string>
     <string name="payment_request_arkoor_waiting">Send the amount shown to this Ark address</string>

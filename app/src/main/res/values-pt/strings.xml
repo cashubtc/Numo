@@ -852,6 +852,17 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="offline_status_updating">Atualizando…</string>
     <string name="offline_row_content_description">%1$s, %2$s</string>
     <string name="offline_row_content_description_outdated">%1$s, desatualizado. %2$s</string>
+    <string name="mint_strip_title">Mint inacessível</string>
+    <string name="mint_strip_subtitle">Novas cobranças podem falhar</string>
+    <string name="mint_strip_reconnected_title">Mint conectado</string>
+    <string name="mint_strip_reconnected_subtitle">Novas cobranças funcionam de novo</string>
+    <string name="mint_strip_action_details">Ver o que continua funcionando</string>
+    <string name="mint_explainer_title">Não foi possível acessar seu mint.</string>
+    <string name="mint_explainer_subtitle">Seu telefone está conectado, mas %1$s não responde. Verifique se esta rede tem internet ou tente de novo em instantes.</string>
+    <string name="mint_explainer_reconnected_title">Seu mint voltou.</string>
+    <string name="mint_explainer_group_needs_mint">Precisa do seu mint</string>
+    <string name="mint_explainer_group_still_works">Continua funcionando</string>
+    <string name="mint_status_confirms_later">Será confirmado quando seu mint responder</string>
     <string name="payment_request_arkoor_address">Endereço Ark</string>
     <string name="payment_request_arkoor_waiting">Envie o valor exibido para este endereço Ark</string>
     <string name="payment_request_arkoor_retrying">Reconectando à mint…</string>

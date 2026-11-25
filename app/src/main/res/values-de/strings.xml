@@ -1112,6 +1112,17 @@
     <string name="offline_status_updating">Wird aktualisiert…</string>
     <string name="offline_row_content_description">%1$s, %2$s</string>
     <string name="offline_row_content_description_outdated">%1$s, veraltet. %2$s</string>
+    <string name="mint_strip_title">Mint nicht erreichbar</string>
+    <string name="mint_strip_subtitle">Neue Zahlungen können fehlschlagen</string>
+    <string name="mint_strip_reconnected_title">Mint verbunden</string>
+    <string name="mint_strip_reconnected_subtitle">Neue Zahlungen funktionieren wieder</string>
+    <string name="mint_strip_action_details">Zeigen, was weiterhin funktioniert</string>
+    <string name="mint_explainer_title">Dein Mint ist nicht erreichbar.</string>
+    <string name="mint_explainer_subtitle">Dein Handy ist verbunden, aber %1$s antwortet nicht. Prüfe, ob dieses Netzwerk Internet hat, oder versuche es gleich noch einmal.</string>
+    <string name="mint_explainer_reconnected_title">Dein Mint ist wieder da.</string>
+    <string name="mint_explainer_group_needs_mint">Braucht deinen Mint</string>
+    <string name="mint_explainer_group_still_works">Funktioniert weiterhin</string>
+    <string name="mint_status_confirms_later">Wird bestätigt, sobald dein Mint antwortet</string>
     <string name="payment_request_arkoor_address">Ark-Adresse</string>
     <string name="payment_request_arkoor_waiting">Sende den angezeigten Betrag an diese Ark-Adresse</string>
     <string name="payment_request_arkoor_retrying">Verbindung zur Mint wird wiederhergestellt…</string>

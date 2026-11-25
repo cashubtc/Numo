@@ -7,6 +7,8 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
@@ -24,7 +26,39 @@ import kotlin.math.ceil
 @SuppressLint("ViewConstructor")
 class OfflineStripView(context: Context) : FrameLayout(context) {
 
-    enum class Mode { OFFLINE, BACK_ONLINE }
+    /** A problem ([isProblem]) explains itself on tap; its recovery is only a brief notice. */
+    enum class Mode(
+        @StringRes val title: Int,
+        @StringRes val subtitle: Int,
+        /** TalkBack's label for the tap, or null when the mode leads nowhere. */
+        @StringRes val action: Int?,
+    ) {
+        OFFLINE(
+            R.string.offline_strip_title,
+            R.string.offline_strip_subtitle,
+            R.string.offline_strip_action_details,
+        ),
+        BACK_ONLINE(
+            R.string.offline_strip_back_online_title,
+            R.string.offline_strip_back_online_subtitle,
+            null,
+        ),
+        MINT_UNREACHABLE(
+            R.string.mint_strip_title,
+            R.string.mint_strip_subtitle,
+            R.string.mint_strip_action_details,
+        ),
+        MINT_RECONNECTED(
+            R.string.mint_strip_reconnected_title,
+            R.string.mint_strip_reconnected_subtitle,
+            null,
+        );
+
+        val isProblem: Boolean get() = action != null
+
+        @get:ColorRes
+        val color: Int get() = if (isProblem) R.color.color_warning else R.color.color_success_green
+    }
 
     private val binding = ViewOfflineStripBinding.inflate(LayoutInflater.from(context), this)
     private val cornerRadius = resources.getDimension(R.dimen.offline_strip_corner_radius)
@@ -109,18 +143,9 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
     }
 
     private fun applyMode(mode: Mode) {
-        val offline = mode == Mode.OFFLINE
-        val color = ContextCompat.getColor(
-            context,
-            if (offline) R.color.color_warning else R.color.color_success_green
-        )
-        binding.stripTitle.setText(
-            if (offline) R.string.offline_strip_title else R.string.offline_strip_back_online_title
-        )
-        binding.stripSubtitle.setText(
-            if (offline) R.string.offline_strip_subtitle
-            else R.string.offline_strip_back_online_subtitle
-        )
+        val color = ContextCompat.getColor(context, mode.color)
+        binding.stripTitle.setText(mode.title)
+        binding.stripSubtitle.setText(mode.subtitle)
         binding.stripTitle.setTextColor(color)
         binding.stripSubtitle.setTextColor(color)
         // TalkBack announces a pane when it appears and when its title changes
@@ -133,13 +158,13 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
             )
         )
 
-        // Only the offline state leads anywhere; "Back online" is purely informational.
-        binding.stripContent.isClickable = offline
-        binding.stripContent.isFocusable = offline
+        // Only a problem leads anywhere; the recovery notices are purely informational.
+        binding.stripContent.isClickable = mode.isProblem
+        binding.stripContent.isFocusable = mode.isProblem
         ViewCompat.replaceAccessibilityAction(
             binding.stripContent,
             AccessibilityActionCompat.ACTION_CLICK,
-            if (offline) context.getString(R.string.offline_strip_action_details) else null,
+            mode.action?.let(context::getString),
             null
         )
     }
