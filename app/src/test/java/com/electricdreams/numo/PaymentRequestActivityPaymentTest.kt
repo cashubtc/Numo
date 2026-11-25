@@ -105,8 +105,8 @@ class PaymentRequestActivityPaymentTest {
     }
 
     @Test
-    fun `sat checkout with fiat input shows exact sats`() {
-        assertLocalCheckoutAmount("sat", 1_000L, "$1.00", "1,000 sat")
+    fun `sat checkout with fiat input keeps the fiat amount above exact sats`() {
+        assertLocalCheckoutAmount("sat", 1_000L, "$1.00", "$1.00", expectedSats = "1,000 sat")
     }
 
     @Test
@@ -118,14 +118,18 @@ class PaymentRequestActivityPaymentTest {
     @Test
     fun `resumed sat checkout uses sats for every payment option after preference changes`() {
         activity.intent = resumeIntent("sat", 1_000L)
-        assertLocalCheckoutAmount("usd", 1_000L, "$1.00", "1,000 sat", expectedUnit = "sat")
+        assertLocalCheckoutAmount(
+            "usd", 1_000L, "$1.00", "$1.00", expectedUnit = "sat", expectedSats = "1,000 sat",
+        )
     }
 
     @Test
     fun `old arkoor resume intent without unit still uses sats`() {
         activity.intent = Intent().putExtra(PaymentRequestActivity.EXTRA_ARKOOR_QUOTE_ID, "saved-quote")
         ReflectionHelpers.setField(activity, "resumeArkoorQuoteId", "saved-quote")
-        assertLocalCheckoutAmount("usd", 1_000L, "$1.00", "1,000 sat", expectedUnit = "sat")
+        assertLocalCheckoutAmount(
+            "usd", 1_000L, "$1.00", "$1.00", expectedUnit = "sat", expectedSats = "1,000 sat",
+        )
     }
 
     @Test
@@ -271,7 +275,7 @@ class PaymentRequestActivityPaymentTest {
 
     private fun assertLocalCheckoutAmount(
         unit: String, amount: Long, formatted: String, expected: String,
-        expectedUnit: String = unit,
+        expectedUnit: String = unit, expectedSats: String? = null,
     ) {
         val mintManager = mock<MintManager>()
         whenever(mintManager.getPreferredUnit()).thenReturn(unit)
@@ -285,6 +289,10 @@ class PaymentRequestActivityPaymentTest {
         ReflectionHelpers.setField(activity, "largeAmountDisplay", amountDisplay)
         ReflectionHelpers.setField(activity, "convertedAmountDisplay", convertedDisplay)
         ReflectionHelpers.setField(activity, "tabManager", mock<PaymentTabManager>())
+        // onCreate renders the amounts before the checkout starts.
+        PaymentRequestActivity::class.java.getDeclaredMethod(
+            "updateConvertedAmount", String::class.java,
+        ).apply { isAccessible = true }.invoke(activity, formatted)
 
         // Exercise checkout initialization while keeping payment services offline.
         mockConstruction(LightningMintHandler::class.java) { _, constructor ->
@@ -300,7 +308,12 @@ class PaymentRequestActivityPaymentTest {
         }
 
         assertEquals(expected, amountDisplay.text.toString())
-        assertEquals(View.GONE, convertedDisplay.visibility)
+        if (expectedSats == null) {
+            assertEquals(View.GONE, convertedDisplay.visibility)
+        } else {
+            assertEquals(View.VISIBLE, convertedDisplay.visibility)
+            assertEquals(expectedSats, convertedDisplay.text.toString())
+        }
     }
 
     private fun resumeIntent(unit: String, amount: Long): Intent {

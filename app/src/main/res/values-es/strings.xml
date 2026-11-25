@@ -784,7 +784,6 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="payment_request_arkoor_address">Dirección Ark</string>
     <string name="payment_request_arkoor_waiting">Envía el importe mostrado a esta dirección Ark</string>
     <string name="payment_request_arkoor_retrying">Reconectando con la mint…</string>
-    <string name="payment_request_arkoor_failed">Error en el pago Arkoor: %1$s</string>
     <string name="payment_request_arkoor_requires_mint">Selecciona una mint Arkoor y usa sats como unidad base.</string>
 
     <!-- Sales screen -->
