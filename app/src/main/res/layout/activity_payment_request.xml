@@ -11,7 +11,7 @@
         android:id="@+id/close_button"
         android:layout_width="@dimen/icon_size_large"
         android:layout_height="@dimen/icon_size_large"
-        android:layout_marginStart="@dimen/space_l"
+        android:layout_marginStart="@dimen/space_m"
         android:layout_marginTop="@dimen/space_l"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_close"
@@ -24,7 +24,7 @@
         android:id="@+id/share_button"
         android:layout_width="@dimen/icon_size_large"
         android:layout_height="@dimen/icon_size_large"
-        android:layout_marginEnd="@dimen/space_l"
+        android:layout_marginEnd="@dimen/space_m"
         android:layout_marginTop="@dimen/space_l"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_share"
@@ -61,93 +61,24 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- Pay Label -->
-    <TextView
-        android:id="@+id/pay_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_xs"
-        android:text="@string/payment_request_pay_label"
-        android:textColor="@color/color_text_secondary"
-        android:textSize="18sp"
-        android:textStyle="normal"
-        app:layout_constraintBottom_toTopOf="@id/large_amount_display"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/close_button" />
-
-    <!-- Large Amount Display -->
-    <TextView
-        android:id="@+id/large_amount_display"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_xs"
-        android:text="₿ 0"
-        android:textColor="@color/color_text_primary"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        android:maxLines="1"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="24sp"
-        app:autoSizeMaxTextSize="48sp"
-        app:autoSizeStepGranularity="2sp"
-        app:layout_constraintBottom_toTopOf="@id/converted_amount_display"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pay_label" />
-
-    <!-- Converted Amount Display -->
-    <TextView
-        android:id="@+id/converted_amount_display"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_xl"
-        android:text=""
-        android:textColor="@color/color_text_secondary"
-        android:textSize="16sp"
-        android:textStyle="normal"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/large_amount_display" />
-
-    <!-- Tip Info Text (shown when tip was added) -->
-    <TextView
-        android:id="@+id/tip_info_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s"
-        android:text=""
-        android:textColor="@color/color_success_green"
-        android:textSize="14sp"
-        android:textStyle="normal"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/qr_card"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/converted_amount_display" />
-
-    <!-- QR Code Card -->
+    <!-- QR code: the first thing a customer needs, so it leads the screen at full width. It is
+         anchored from the top only, so nothing below can move it while it is being scanned. -->
     <FrameLayout
         android:id="@+id/qr_card"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/space_l"
-        android:layout_marginHorizontal="@dimen/space_2xl"
-        android:background="@drawable/bg_qr_card"
+        android:layout_marginTop="@dimen/space_m"
+        android:layout_marginHorizontal="@dimen/space_xl"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tip_info_text"
-        app:layout_constraintBottom_toTopOf="@id/icons_container"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="0.5">
+        app:layout_constraintTop_toBottomOf="@id/close_button"
+        app:layout_constraintWidth_max="@dimen/payment_qr_max_size">
 
         <FrameLayout
             android:id="@+id/lightning_qr_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="@dimen/space_xl">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/lightning_qr"
@@ -190,7 +121,6 @@
             android:id="@+id/cashu_qr_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="@dimen/space_xl"
             android:visibility="visible">
 
             <ImageView
@@ -232,7 +162,6 @@
             android:id="@+id/unified_qr_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="@dimen/space_xl"
             android:visibility="invisible">
 
             <ImageView
@@ -255,57 +184,84 @@
     </FrameLayout>
 
 
-    <!-- Icons and Instruction -->
-    <LinearLayout
-        android:id="@+id/icons_container"
+    <!-- Amount and instructions: one caption block beneath the QR, in two type sizes -->
+    <TextView
+        android:id="@+id/large_amount_display"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_l"
-        android:orientation="horizontal"
+        android:layout_marginHorizontal="@dimen/space_xl"
+        android:layout_marginTop="@dimen/space_xl"
+        android:fontFamily="@font/inter_semi_bold"
         android:gravity="center"
+        android:letterSpacing="-0.03"
+        android:maxLines="1"
+        android:text="₿ 0"
+        android:textColor="@color/color_text_primary"
+        android:textSize="40sp"
+        app:autoSizeMaxTextSize="40sp"
+        app:autoSizeMinTextSize="24sp"
+        app:autoSizeStepGranularity="2sp"
+        app:autoSizeTextType="uniform"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/qr_card">
+        app:layout_constraintTop_toBottomOf="@id/qr_card" />
 
-        <ImageView
-            android:id="@+id/contactless_icon"
-            android:layout_width="@dimen/icon_size_small"
-            android:layout_height="@dimen/icon_size_small"
-            android:importantForAccessibility="no"
-            android:src="@drawable/contactless"
-            android:rotation="270"
-            app:tint="@color/color_text_primary" />
+    <TextView
+        android:id="@+id/converted_amount_display"
+        style="@style/Text.PaymentCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/large_amount_display" />
 
-        <TextView
-            android:id="@+id/instruction_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space_m"
-            android:text="@string/payment_request_instruction_scan_or_tap"
-            android:textColor="@color/color_text_primary"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:gravity="center" />
-    </LinearLayout>
+    <!-- Tip Info Text (shown when tip was added) -->
+    <TextView
+        android:id="@+id/tip_info_text"
+        style="@style/Text.PaymentCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@color/color_success_green"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/converted_amount_display" />
+
+    <TextView
+        android:id="@+id/instruction_text"
+        style="@style/Text.PaymentCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/space_xl"
+        android:layout_marginTop="@dimen/space_s"
+        app:fontFamily="@font/inter_medium"
+        android:gravity="center"
+        android:text="@string/payment_request_instruction_scan_or_tap"
+        android:textColor="@color/color_text_primary"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tip_info_text" />
 
     <!-- Status Text (Hidden) -->
     <TextView
         android:id="@+id/payment_status_text"
+        style="@style/Text.PaymentCaption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:accessibilityLiveRegion="polite"
-        android:layout_marginHorizontal="@dimen/space_2xl"
-        android:layout_marginTop="@dimen/space_s"
+        android:layout_marginHorizontal="@dimen/space_xl"
         android:breakStrategy="balanced"
         android:gravity="center"
         app:layout_constrainedWidth="true"
         android:text="@string/payment_request_status_waiting_for_payment"
-        android:textColor="@color/color_text_secondary"
-        android:textSize="14sp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/icons_container" />
+        app:layout_constraintTop_toBottomOf="@id/instruction_text" />
 
 
     <!-- Card payment (Stripe Tap to Pay). Shown only when card payments are set up.
@@ -314,7 +270,7 @@
         android:id="@+id/card_message_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/space_2xl"
+        android:layout_marginHorizontal="@dimen/space_xl"
         android:layout_marginBottom="@dimen/space_m"
         android:accessibilityLiveRegion="polite"
         android:breakStrategy="balanced"
@@ -334,7 +290,7 @@
         style="@style/Widget.Numo.Button.CardPay"
         android:layout_width="0dp"
         android:layout_height="@dimen/button_height"
-        android:layout_marginHorizontal="@dimen/space_2xl"
+        android:layout_marginHorizontal="@dimen/space_xl"
         android:layout_marginBottom="@dimen/space_xl"
         android:text="@string/card_payment_button"
         android:visibility="gone"

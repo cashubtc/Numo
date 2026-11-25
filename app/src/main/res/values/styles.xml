@@ -85,6 +85,15 @@
     </style>
 
     <!-- Button: Primary/secondary action labels -->
+    <!-- The checkout screen's single small size: instruction, status, conversion and tip lines -->
+    <style name="Text.PaymentCaption">
+        <item name="fontFamily">@font/inter_regular</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineSpacingExtra">2sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
     <style name="Text.Button">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">16sp</item>

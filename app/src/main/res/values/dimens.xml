@@ -111,6 +111,9 @@
     <!-- Offline mode -->
     <dimen name="offline_strip_corner_radius">@dimen/radius_xl</dimen>
     <dimen name="offline_pill_height">32dp</dimen>
+
+    <!-- Keeps the checkout QR from outgrowing the screen on wide devices -->
+    <dimen name="payment_qr_max_size">400dp</dimen>
     <dimen name="offline_hero_frame_size">72dp</dimen>
     <dimen name="offline_hero_icon_size">64dp</dimen>
     <dimen name="offline_hero_badge_size">28dp</dimen>

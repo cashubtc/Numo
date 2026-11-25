@@ -2,7 +2,6 @@ package com.electricdreams.numo
 
 import android.provider.Settings
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
@@ -102,14 +101,12 @@ class PaymentRequestActivityOfflineStatusTest {
         val controller = Robolectric.buildActivity(PaymentRequestActivity::class.java).create().start()
         val checkout = controller.get()
         val instruction = checkout.findViewById<TextView>(R.id.instruction_text)
-        val contactless = checkout.findViewById<ImageView>(R.id.contactless_icon)
         val pill = checkout.findViewById<View>(R.id.offline_pill)
         try {
             nfcOff.value = true
             strip.value = OfflineStripView.Mode.NFC_OFF
             shadowOf(checkout.mainLooper).idle()
             assertEquals(activity.getString(R.string.payment_request_instruction_scan), instruction.text)
-            assertEquals(View.GONE, contactless.visibility)
             pill.performClick()
             assertEquals(Settings.ACTION_NFC_SETTINGS, shadowOf(checkout).nextStartedActivity.action)
 
@@ -117,7 +114,6 @@ class PaymentRequestActivityOfflineStatusTest {
             strip.value = null
             shadowOf(checkout.mainLooper).idle()
             assertEquals(activity.getString(R.string.payment_request_instruction_scan_or_tap), instruction.text)
-            assertEquals(View.VISIBLE, contactless.visibility)
         } finally {
             controller.stop().destroy()
             nfcOff.value = false

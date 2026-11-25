@@ -48,7 +48,6 @@ import androidx.core.view.doOnLayout
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -1024,10 +1023,6 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun showScanInstruction(canTap: Boolean) {
         val instruction = findViewById<TextView>(R.id.instruction_text) ?: return
-        findViewById<ImageView>(R.id.contactless_icon).visibility = if (canTap) View.VISIBLE else View.GONE
-        instruction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            marginStart = if (canTap) resources.getDimensionPixelSize(R.dimen.space_m) else 0
-        }
         instruction.setText(
             if (canTap) R.string.payment_request_instruction_scan_or_tap
             else R.string.payment_request_instruction_scan
