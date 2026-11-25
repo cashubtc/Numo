@@ -184,6 +184,18 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
     }
 
     companion object {
+        /**
+         * The most height the strip takes below the status bar at [width], whichever message it
+         * shows. Lets a screen leave that room free up front instead of reflowing when it appears.
+         */
+        fun tallestContentHeight(context: Context, width: Int): Int {
+            val strip = OfflineStripView(context)
+            return Mode.values().maxOf { mode ->
+                strip.applyMode(mode)
+                strip.measureContentHeight(width)
+            }
+        }
+
         /** Share of the reveal over which the strip fades in: just enough that the status bar
          *  doesn't pop, short enough that the strip lands with the dimmed Charge button. */
         private const val FADE_PORTION = 0.15f

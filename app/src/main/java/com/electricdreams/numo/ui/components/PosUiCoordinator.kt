@@ -301,6 +301,7 @@ class PosUiCoordinator(
             keypadManager.handleKeypadInput(label, satoshiInput, fiatInput, amountDisplayManager.isUsdInputMode)
             amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.DIGIT_ENTRY)
         }
+        PosKeypadSizer(activity).attach()
 
         // Initialize payment handlers
         paymentMethodHandler = PaymentMethodHandler(activity)
