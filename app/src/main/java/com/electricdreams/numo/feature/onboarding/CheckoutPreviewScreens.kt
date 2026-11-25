@@ -119,7 +119,7 @@ internal class CheckoutPreviewScreens(context: Context) {
             visibility = View.VISIBLE
             setImageBitmap(previewQr())
         }
-        binding.paymentStatusText.visibility = View.VISIBLE
+        binding.paymentStatusText.visibility = View.GONE
         binding.nfcAnimationContainer.visibility = View.GONE
         return render(binding.root)
     }

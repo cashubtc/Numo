@@ -684,8 +684,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun initializePaymentRequest() {
-        statusText.visibility = View.VISIBLE
-        statusText.text = getString(R.string.payment_request_status_preparing)
+        statusText.text = ""
+        statusText.visibility = View.GONE
 
         // Create the payment service (BTCPay or Local)
         paymentService = PaymentServiceFactory.create(this)
@@ -780,6 +780,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             }.onFailure { error ->
                 Log.e(TAG, "BTCPay createPayment failed: ${error.message}", error)
                 cashuLoadingSpinner.visibility = View.GONE
+                statusText.visibility = View.VISIBLE
                 statusText.text = getString(R.string.payment_request_status_error_generic, error.message ?: "Unknown error")
             }
         }
@@ -1014,6 +1015,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                             Log.w(TAG, "Arkoor quote check or issuance will retry", error)
                             withContext(Dispatchers.Main) {
                                 if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED) {
+                                    statusText.visibility = View.VISIBLE
                                     statusText.setText(R.string.payment_request_arkoor_retrying)
                                 }
                             }
@@ -1067,20 +1069,23 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun refreshWaitingStatus() {
         // Preserve errors and results while updating either checkout's waiting line.
         val current = statusText.text.toString()
-        if (current == getString(R.string.payment_request_status_waiting_for_payment) ||
-            current == getString(R.string.payment_request_offline_note) ||
-            (isDualQuoteCheckout && current == paymentMethodsLabel())) {
+        if (current.isEmpty() ||
+            current == getString(R.string.payment_request_status_waiting_for_payment) ||
+            current == getString(R.string.payment_request_offline_note)) {
             if (isDualQuoteCheckout) updatePaymentMethodStatus() else showWaitingStatus()
         }
     }
 
-    /** "Waiting for payment...", or the offline reassurance while there's no connection. */
+    /** Keeps the status line hidden while online; shows the offline reassurance when disconnected. */
     private fun showWaitingStatus() {
         val offline = !NetworkUtils.isNetworkAvailable(this)
-        statusText.text = getString(
-            if (offline && confirmsAfterReconnect()) R.string.payment_request_offline_note
-            else R.string.payment_request_status_waiting_for_payment
-        )
+        if (offline && confirmsAfterReconnect()) {
+            statusText.text = getString(R.string.payment_request_offline_note)
+            statusText.visibility = View.VISIBLE
+        } else {
+            statusText.text = ""
+            statusText.visibility = View.GONE
+        }
     }
 
     /**
@@ -1291,24 +1296,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         ).toUri()
     }
 
+    /**
+     * The QR screen names no protocols and, as on main, hides Arkoor's raw errors, so the only
+     * line that can show here is the offline reassurance.
+     */
     private fun updatePaymentMethodStatus() {
         if (hasTerminalOutcome || !isDualQuoteCheckout) return
-        statusText.visibility = View.VISIBLE
-        if (!NetworkUtils.isNetworkAvailable(this) && confirmsAfterReconnect()) {
-            showWaitingStatus()
-        } else if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED &&
-            unifiedPaymentRequest() != null) {
-            statusText.text = paymentMethodsLabel()
-        } else {
-            showWaitingStatus()
-        }
+        showWaitingStatus()
     }
-
-    private fun paymentMethodsLabel(): String = listOfNotNull(
-        "Cashu".takeIf { nostrHandler?.paymentRequestBech32 != null || hcePaymentRequest != null },
-        "Lightning".takeIf { lightningInvoice != null },
-        getString(R.string.payment_request_arkoor).takeIf { arkoorAddress != null },
-    ).joinToString(" · ")
 
     private fun updateUnifiedQrCode() {
         if (hasTerminalOutcome) return
@@ -1366,6 +1361,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     updateUnifiedQrCode()
                 } catch (e: Exception) {
                     Log.e(TAG, "Error generating Cashu QR bitmap: ${e.message}", e)
+                    statusText.visibility = View.VISIBLE
                     statusText.text = getString(R.string.payment_request_status_error_qr)
                 }
             }
@@ -2807,11 +2803,13 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationTimeoutRunnable = null
     }
 
-    @JvmOverloads
+    private fun showNfcAnimationSuccess(amountText: String, playSound: Boolean = true) =
+        showNfcAnimationSuccess(amountText, playSound, direct = false)
+
     private fun showNfcAnimationSuccess(
         amountText: String,
-        playSound: Boolean = true,
-        direct: Boolean = false,
+        playSound: Boolean,
+        direct: Boolean,
     ) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
         keepOverlayShown()
@@ -2853,8 +2851,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         vibrator?.vibrateCompat(longArrayOf(0, 50, 100, 50), -1)
     }
 
-    @JvmOverloads
-    private fun showNfcAnimationError(message: String, direct: Boolean = false) {
+    private fun showNfcAnimationError(message: String) =
+        showNfcAnimationError(message, direct = false)
+
+    private fun showNfcAnimationError(message: String, direct: Boolean) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
         keepOverlayShown()
 
