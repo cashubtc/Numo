@@ -282,6 +282,8 @@
 
     <!-- Card payment on the checkout screen: a quiet outlined pill beneath the QR code -->
     <style name="Widget.Numo.Button.CardPay" parent="Widget.Button.Secondary.Outlined">
+        <item name="android:fontFamily">@font/inter_semi_bold</item>
+        <item name="fontFamily">@font/inter_semi_bold</item>
         <item name="android:textColor">@color/color_text_primary</item>
         <item name="android:textSize">@dimen/text_button</item>
         <item name="android:minHeight">@dimen/button_height</item>
@@ -462,7 +464,8 @@
     <style name="Widget.Numo.Button.OnColor" parent="Widget.Numo.Button">
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">@dimen/text_button</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@font/inter_semi_bold</item>
+        <item name="fontFamily">@font/inter_semi_bold</item>
         <item name="android:letterSpacing">0</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="elevation">0dp</item>

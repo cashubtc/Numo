@@ -25,6 +25,7 @@
     <string name="card_payment_status_location_required">Stripe 카드 결제에는 위치 권한이 필요합니다</string>
     <string name="card_payment_status_not_configured">카드 결제가 설정되지 않았습니다</string>
     <string name="card_payment_button">카드로 결제</string>
+    <string name="card_payment_button_preparing">카드 리더 시작 중…</string>
     <string name="card_payment_action_check">카드 결제 확인</string>
     <string name="transaction_detail_payment_type_card_value">카드 (Stripe)</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe 카드 리더 시뮬레이션</string>

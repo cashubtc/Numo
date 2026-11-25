@@ -41,14 +41,24 @@ public class NdefHostCardEmulationService extends HostApduService {
     
     // Singleton instance for access from activities
     private static NdefHostCardEmulationService instance;
+    private static ReadyListener pendingReadyListener;
     
     // NFC reading state tracking
     private boolean isNfcReading = false;
+    private boolean isAcceptingPayments = false;
     private AutoCloseable updateOperation;
     private boolean isNfcWriting = false; // Tracks if payer actually started writing
     private Handler nfcTimeoutHandler;
     private Runnable nfcTimeoutRunnable;
-    private static final long NFC_TIMEOUT_MS = 3500; // 3.5 seconds
+    private static final long NFC_IDLE_TIMEOUT_MS = 8000; // Allow biometric / wallet approval pauses
+    private static final long NFC_WRITING_TIMEOUT_MS = 3500; // Detect phone lifted mid-write promptly
+
+    /**
+     * Listener invoked on the main thread as soon as the HCE service instance is ready.
+     */
+    public interface ReadyListener {
+        void onServiceReady(NdefHostCardEmulationService service);
+    }
     
     /**
      * Callback interface for Cashu payments
@@ -67,6 +77,28 @@ public class NdefHostCardEmulationService extends HostApduService {
         Log.i(TAG, "getInstance called, instance: " + (instance != null ? "available" : "null"));
         return instance;
     }
+
+    /**
+     * Invokes {@code listener} immediately if the service is already running, or as soon as
+     * {@link #onCreate()} completes. Replaces blind startup delays.
+     */
+    public static void runWhenReady(ReadyListener listener) {
+        NdefHostCardEmulationService current = instance;
+        if (current != null) {
+            listener.onServiceReady(current);
+        } else {
+            pendingReadyListener = listener;
+        }
+    }
+
+    /**
+     * Cancels a previously registered readiness callback if it has not fired yet.
+     */
+    public static void clearReadyListener(ReadyListener listener) {
+        if (pendingReadyListener == listener) {
+            pendingReadyListener = null;
+        }
+    }
     
     @Override
     public void onCreate() {
@@ -78,7 +110,7 @@ public class NdefHostCardEmulationService extends HostApduService {
         nfcTimeoutRunnable = new Runnable() {
             @Override
             public void run() {
-                Log.i(TAG, "NFC reading timeout - no APDU received for " + NFC_TIMEOUT_MS + "ms");
+                Log.i(TAG, "NFC reading timeout - no APDU received (writing=" + isNfcWriting + ")");
                 stopNfcReading(false);
             }
         };
@@ -126,9 +158,14 @@ public class NdefHostCardEmulationService extends HostApduService {
                 }
             });
             
-            // Set the instance
+            // Set the instance and notify any waiting checkout screen immediately
             instance = this;
             Log.i(TAG, "NdefHostCardEmulationService initialization complete");
+            ReadyListener listener = pendingReadyListener;
+            pendingReadyListener = null;
+            if (listener != null) {
+                listener.onServiceReady(this);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error creating HCE service: " + e.getMessage(), e);
         }
@@ -177,11 +214,9 @@ public class NdefHostCardEmulationService extends HostApduService {
                 Log.i(TAG, "Command: " + description);
             }
             
-            // Start or reset NFC reading indicator for any APDU command when a payment is expected
-            if (paymentCallback != null) {
-                startOrResetNfcReading();
-                
-                // Track if the payer started writing data (UPDATE BINARY)
+            // Start or reset NFC reading indicator only while actively expecting a payment
+            if (paymentCallback != null && isAcceptingPayments) {
+                // Track if the payer started writing data (UPDATE BINARY) before scheduling timeout
                 if (commandApdu != null && commandApdu.length >= 2) {
                     // UPDATE BINARY header is 00 D6
                     if (commandApdu[0] == (byte)0x00 && commandApdu[1] == (byte)0xD6) {
@@ -191,6 +226,7 @@ public class NdefHostCardEmulationService extends HostApduService {
                         }
                     }
                 }
+                startOrResetNfcReading();
             }
             
             // Try to process with the NDEF processor
@@ -244,6 +280,7 @@ public class NdefHostCardEmulationService extends HostApduService {
     public void setPaymentRequest(String paymentRequest, long amount) {
         Log.i(TAG, "Setting payment request: " + paymentRequest + " for amount: " + amount);
         this.expectedAmount = amount;
+        this.isAcceptingPayments = true;
         if (ndefProcessor != null) {
             ndefProcessor.setMessageToSend(paymentRequest);
             ndefProcessor.setWriteMode(true); // Enable write mode to send payment request
@@ -269,6 +306,7 @@ public class NdefHostCardEmulationService extends HostApduService {
     public void clearPaymentRequest() {
         Log.i(TAG, "Clearing payment request");
         this.expectedAmount = 0;
+        this.isAcceptingPayments = false;
         
         // Stop NFC reading if active
         stopNfcReading(true); // Don't trigger failure UI on manual clear
@@ -411,10 +449,11 @@ public class NdefHostCardEmulationService extends HostApduService {
             }
         }
         
-        // Reset the timeout - cancel any pending timeout and schedule a new one
-        Log.d(TAG, "Resetting NFC reading timeout timer (" + NFC_TIMEOUT_MS + "ms)");
+        // Reset the timeout - longer while awaiting customer wallet approval, tighter mid-write
+        long timeoutMs = isNfcWriting ? NFC_WRITING_TIMEOUT_MS : NFC_IDLE_TIMEOUT_MS;
+        Log.d(TAG, "Resetting NFC reading timeout timer (" + timeoutMs + "ms)");
         nfcTimeoutHandler.removeCallbacks(nfcTimeoutRunnable);
-        nfcTimeoutHandler.postDelayed(nfcTimeoutRunnable, NFC_TIMEOUT_MS);
+        nfcTimeoutHandler.postDelayed(nfcTimeoutRunnable, timeoutMs);
     }
     
     /**

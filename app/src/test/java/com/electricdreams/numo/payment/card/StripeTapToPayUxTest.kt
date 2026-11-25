@@ -24,7 +24,7 @@ class StripeTapToPayUxTest {
 
         assertFalse(style.dark)
         assertEquals(color(R.color.color_primary_green), style.primary)
-        assertEquals(color(R.color.color_success_green), style.success)
+        assertEquals(color(R.color.color_nfc_success), style.success)
         assertEquals(color(R.color.color_error), style.error)
     }
 

@@ -110,6 +110,7 @@ internal class CheckoutPreviewScreens(context: Context) {
                 R.string.onboarding_tour_sats, satFormat.format(OnboardingAmounts.sats(prices.last())),
             )
         }
+        binding.unifiedQrContainer.visibility = View.GONE
         binding.lightningQrContainer.visibility = View.GONE
         binding.cashuLoadingSpinner.visibility = View.GONE
         binding.cashuQrContainer.visibility = View.VISIBLE

@@ -334,7 +334,7 @@ object StripeTerminalManager {
         return TapScreenStyle(
             dark = nightMode == Configuration.UI_MODE_NIGHT_YES,
             primary = ContextCompat.getColor(context, R.color.color_primary_green),
-            success = ContextCompat.getColor(context, R.color.color_success_green),
+            success = ContextCompat.getColor(context, R.color.color_nfc_success),
             error = ContextCompat.getColor(context, R.color.color_error),
         )
     }
@@ -371,6 +371,7 @@ object StripeTerminalManager {
         metadata: Map<String, String>,
         previous: CardPaymentReference? = null,
         onPaymentIntent: (PaymentIntent) -> Unit = {},
+        onCollectionStarting: () -> Unit = {},
         onCharging: () -> Unit = {},
     ): PaymentIntent {
         val terminal = ensureInitialized(context)
@@ -396,9 +397,13 @@ object StripeTerminalManager {
                     current = createPaymentIntent(terminal, amount, description, metadata)
                     intent = current
                     onPaymentIntent(current)
+                    onCollectionStarting()
                     current = collectPaymentMethod(terminal, current)
                 }
-                RetryStep.COLLECT -> current = collectPaymentMethod(terminal, current)
+                RetryStep.COLLECT -> {
+                    onCollectionStarting()
+                    current = collectPaymentMethod(terminal, current)
+                }
                 RetryStep.CONFIRM -> Unit
             }
             intent = current
