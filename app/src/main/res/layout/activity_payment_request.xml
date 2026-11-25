@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     android:background="@color/color_bg_white">
 
+    <!-- Caps the QR height on compact POS displays without anchoring it to dynamic text below,
+         so status / error height changes never shift the QR while a customer is scanning it. -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/qr_bottom_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.54" />
+
     <!-- Top Bar -->
     <ImageButton
         android:id="@+id/close_button"
@@ -61,24 +70,31 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- QR code: the first thing a customer needs, so it leads the screen at full width. It is
-         anchored from the top only, so nothing below can move it while it is being scanned. -->
+    <!-- QR code: leads the screen at full width in light mode and inside a rounded white quiet
+         zone in dark mode. Top-biased against a fixed height guideline so nothing below can
+         shift it while it is being scanned, yet compact POS screens never collide at the foot. -->
     <FrameLayout
         android:id="@+id/qr_card"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/space_m"
         android:layout_marginHorizontal="@dimen/space_xl"
+        android:background="@drawable/bg_qr_surface"
+        android:padding="@dimen/payment_qr_surface_padding"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@id/qr_bottom_guideline"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/close_button"
+        app:layout_constraintVertical_bias="0"
         app:layout_constraintWidth_max="@dimen/payment_qr_max_size">
 
         <FrameLayout
             android:id="@+id/lightning_qr_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="invisible">
 
             <ImageView
                 android:id="@+id/lightning_qr"
@@ -121,7 +137,7 @@
             android:id="@+id/cashu_qr_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible">
+            android:visibility="invisible">
 
             <ImageView
                 android:id="@+id/payment_request_qr"
@@ -130,7 +146,7 @@
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
                 android:visibility="invisible" />
-                
+
             <!-- Loading spinner for Cashu payment request generation -->
             <ProgressBar
                 android:id="@+id/cashu_loading_spinner"
@@ -148,7 +164,8 @@
                 android:layout_gravity="center"
                 app:cardBackgroundColor="@color/color_bg_white"
                 app:cardCornerRadius="@dimen/radius_m"
-                app:cardElevation="0dp">
+                app:cardElevation="0dp"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -157,12 +174,12 @@
                     android:src="@drawable/cashu" />
             </androidx.cardview.widget.CardView>
         </FrameLayout>
-        
+
         <FrameLayout
             android:id="@+id/unified_qr_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="invisible">
+            android:visibility="visible">
 
             <ImageView
                 android:id="@+id/unified_qr"
@@ -182,7 +199,6 @@
                 android:visibility="visible" />
         </FrameLayout>
     </FrameLayout>
-
 
     <!-- Amount and instructions: one caption block beneath the QR, in two type sizes -->
     <TextView
@@ -263,7 +279,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/instruction_text" />
 
-
     <!-- Card payment (Stripe Tap to Pay). Shown only when card payments are set up.
          Both views are pinned to the bottom so nothing above can move them. -->
     <TextView
@@ -275,6 +290,7 @@
         android:accessibilityLiveRegion="polite"
         android:breakStrategy="balanced"
         android:ellipsize="end"
+        android:fontFamily="@font/inter_regular"
         android:gravity="bottom|center_horizontal"
         android:maxLines="4"
         android:minLines="2"
@@ -299,13 +315,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-
-    <!-- NFC Animation Overlay (Native View) - ONLY for NFC payments -->
+    <!-- Tap & Payment Result Overlay (Native View) -->
     <FrameLayout
         android:id="@+id/nfc_animation_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/color_nfc_idle"
+        android:background="@android:color/transparent"
         android:clickable="true"
         android:focusable="true"
         android:fitsSystemWindows="false"
@@ -321,41 +336,67 @@
             android:layout_height="match_parent"
             android:background="@android:color/transparent" />
 
+        <!-- Dedicated waiting / processing hint top-anchored below the disc so changing from
+             1 line to 2 lines or crossfading into the result never shifts or blinks. -->
         <TextView
-            android:id="@+id/animation_result_amount"
-            android:accessibilityLiveRegion="polite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:layout_marginStart="@dimen/space_xl"
-            android:layout_marginEnd="@dimen/space_xl"
-            android:fontFamily="sans-serif-medium"
-            android:fontFeatureSettings="tnum"
-            android:gravity="center"
-            android:letterSpacing="-0.02"
-            android:maxLines="1"
-            android:textAlignment="center"
-            android:translationY="-180dp"
-            android:textColor="@android:color/white"
-            android:textSize="56sp"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/animation_result_label"
+            android:id="@+id/animation_waiting_hint"
             android:accessibilityLiveRegion="polite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
+            android:layout_gravity="top|center_horizontal"
             android:layout_marginStart="@dimen/space_2xl"
             android:layout_marginEnd="@dimen/space_2xl"
+            android:breakStrategy="balanced"
+            android:fontFamily="@font/inter_semi_bold"
             android:gravity="center"
             android:maxLines="3"
             android:textAlignment="center"
-            android:translationY="-120dp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/color_text_primary"
             android:textSize="18sp"
-            android:fontFamily="sans-serif-medium"
             android:visibility="gone" />
+
+        <!-- Dedicated result headline stack top-anchored below the result circle -->
+        <LinearLayout
+            android:id="@+id/animation_result_text_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginStart="@dimen/space_xl"
+            android:layout_marginEnd="@dimen/space_xl"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/animation_result_amount"
+                android:accessibilityLiveRegion="polite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter_semi_bold"
+                android:fontFeatureSettings="tnum"
+                android:gravity="center"
+                android:letterSpacing="-0.03"
+                android:maxLines="1"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="56sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/animation_result_label"
+                android:accessibilityLiveRegion="polite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xs"
+                android:breakStrategy="balanced"
+                android:fontFamily="@font/inter_medium"
+                android:gravity="center"
+                android:maxLines="3"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <!-- The amount stays in view while waiting, where the card tap screen shows its total -->
         <LinearLayout

@@ -25,6 +25,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -141,6 +143,7 @@ class PaymentRequestActivityCardTest {
     fun `card attempt that ends without a charge explains why and offers the card again`() {
         call("showCardBusy")
         assertFalse(cardButton.isEnabled)
+        assertEquals(activity.getString(R.string.card_payment_button_preparing), cardButton.text.toString())
         assertTrue(ReflectionHelpers.getField(activity, "isCardCollecting"))
 
         showCardIdle(activity.getString(R.string.card_payment_status_cancelled), needsStatusCheck = false)
@@ -156,15 +159,52 @@ class PaymentRequestActivityCardTest {
         // Leaving the overlay re-applies insets to the screen's root view.
         activity.window.setContentView(FrameLayout(activity).apply { id = R.id.payment_request_root })
         val overlay: View = ReflectionHelpers.getField(activity, "nfcAnimationContainer")
+        val animationView: NfcPaymentAnimationView = ReflectionHelpers.getField(activity, "nfcAnimationView")
         overlay.visibility = View.GONE
 
         call("showCardConfirming")
         assertEquals(View.VISIBLE, overlay.visibility)
+        verify(animationView).startProcessingDirectly(animateIn = true)
+        verify(animationView, never()).startReading(false)
 
         showCardIdle(activity.getString(R.string.card_payment_status_unresolved), needsStatusCheck = true)
         // The waiting screen fades out over checkout before it goes.
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
         assertEquals(View.GONE, overlay.visibility)
+    }
+
+    @Test
+    fun `pausing while Stripe launches parks a neutral cover behind Stripe and clears it on cancel`() {
+        activity.window.setContentView(FrameLayout(activity).apply { id = R.id.payment_request_root })
+        val overlay: View = ReflectionHelpers.getField(activity, "nfcAnimationContainer")
+        val animationView: NfcPaymentAnimationView = ReflectionHelpers.getField(activity, "nfcAnimationView")
+        overlay.visibility = View.GONE
+
+        call("showCardBusy")
+        call("onCardCollectionStarting")
+        call("maybeParkCardSurfaceCoverOnPause")
+
+        assertEquals(View.VISIBLE, overlay.visibility)
+        assertTrue(ReflectionHelpers.getField(activity, "isCardSurfaceCovered"))
+        verify(animationView).showSurfaceCover()
+
+        showCardIdle(activity.getString(R.string.card_payment_status_cancelled), needsStatusCheck = false)
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+        assertFalse(ReflectionHelpers.getField(activity, "isCardSurfaceCovered"))
+        assertEquals(View.GONE, overlay.visibility)
+    }
+
+    @Test
+    fun `pausing during normal checkout does not park the card surface cover`() {
+        val overlay: View = ReflectionHelpers.getField(activity, "nfcAnimationContainer")
+        val animationView: NfcPaymentAnimationView = ReflectionHelpers.getField(activity, "nfcAnimationView")
+        overlay.visibility = View.GONE
+
+        call("maybeParkCardSurfaceCoverOnPause")
+
+        assertEquals(View.GONE, overlay.visibility)
+        assertFalse(ReflectionHelpers.getField(activity, "isCardSurfaceCovered"))
+        verify(animationView, never()).showSurfaceCover()
     }
 
     @Test

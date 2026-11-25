@@ -357,6 +357,7 @@
     <string name="nfc_payment_error_unexpected">Something went wrong. Try again — no funds were transferred.</string>
     <string name="nfc_payment_hint_keep_close">Keep phone close</string>
     <string name="nfc_payment_hint_processing">Processing payment...\nYou can lift your phone</string>
+    <string name="nfc_payment_hint_tap_lost">Tap lost — hold phone steady and try again</string>
 
     
     <string name="common_ok">OK</string>

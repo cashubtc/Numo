@@ -28,20 +28,26 @@ import androidx.core.graphics.withScale
 import androidx.core.graphics.withTranslation
 import com.electricdreams.numo.R
 import com.electricdreams.numo.ui.util.isAnimationEnabled
+import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sin
 
 /**
- * Full-screen animation for a bitcoin payment made by tapping a phone.
+ * Full-screen canvas animation for tap-to-pay waiting, processing, and payment results.
  *
  * While waiting it mirrors the card tap screen that Stripe draws, so both ways of tapping
  * look alike: a disc holding the contactless waves inside a faint ring, with pulses spreading
- * out from behind it. Once a payment arrives the disc fills and grows into the ring, as
- * Stripe's does when it reads a card, and the pulses stop asking for a tap. The result's
- * colour then spreads from the disc, which becomes the result circle, so nothing moves.
+ * out from behind it. Once a payment arrives the disc fills and grows into the ring while a
+ * calm orbiting arc runs around its rim so long network swaps or card confirmations stay
+ * visibly alive. The result's colour then spreads from the disc, which becomes the result
+ * circle, so nothing moves.
+ *
+ * Non-NFC completions (QR / Lightning / Arkoor) enter the result state directly without ever
+ * flashing the contactless waiting disc or pulses.
  */
 class NfcPaymentAnimationView @JvmOverloads constructor(
     context: Context,
@@ -49,8 +55,9 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
 
-    private enum class State {
+    internal enum class State {
         IDLE,
+        SURFACE_COVER,
         READING,
         PROCESSING,
         RESULT_TRANSITION,
@@ -62,10 +69,9 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         ERROR,
     }
 
-    private val colorIdle = ContextCompat.getColor(context, R.color.color_nfc_idle)
     private val colorSurface = ContextCompat.getColor(context, R.color.color_tap_screen_bg)
 
-    /** The colour Stripe's tap screen is given as its primary: the ring and the pulses. */
+    /** The colour Stripe's tap screen is given as its primary: the ring, pulses, and orbit rim. */
     private val colorForeground = ContextCompat.getColor(context, R.color.color_primary_green)
     private val colorSymbol = ContextCompat.getColor(context, R.color.color_tap_symbol)
     private val colorSymbolActive = ContextCompat.getColor(context, R.color.color_tap_symbol_active)
@@ -83,6 +89,14 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
     }
     private val discPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val discOutlinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val orbitTrackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+    }
+    private val orbitArcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+    }
     private val wavePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
@@ -95,36 +109,51 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
     /** Starts fast and settles gently: for things arriving on screen. */
     private val enterInterpolator = PathInterpolator(0.23f, 1f, 0.32f, 1f)
+    private val iconDrawInterpolator = PathInterpolator(0.2f, 0f, 0f, 1f)
 
-    private var state = State.IDLE
+    internal var currentState: State = State.IDLE
+        private set
     private var resultType: ResultType? = null
 
-    private var currentBackgroundColor = colorIdle
+    private var currentBackgroundColor = Color.TRANSPARENT
 
     /** 0..1 looping, one set of pulses per loop, leaving the disc one after another. */
     private var burstPhase = 0f
 
     /** 1 while the pulses ask for a tap, 0 once a payment has been read. */
-    private var pulseAlpha = 0f
+    internal var pulseAlpha = 0f
+        private set
 
     /** 0 while reading, 1 once the payment is being processed: the disc grows into its ring. */
-    private var processingProgress = 0f
+    internal var processingProgress = 0f
+        private set
 
-    /** 1 while waiting, 0 once the result has taken over. */
-    private var waitAlpha = 0f
+    /** 0..1 looping rotation phase for the subtle orbiting rim arc while processing. */
+    private var orbitPhase = 0f
 
-    /** 0 = waiting disc, 1 = white result circle. */
+    /** 0..1 visibility of the orbiting rim arc during processing. */
+    internal var orbitAlpha = 0f
+        private set
+
+    /** 1 while waiting/processing, 0 once the result has taken over. */
+    internal var waitAlpha = 0f
+        private set
+
+    /** 0 = waiting/processing disc, 1 = white result circle. */
     private var morph = 0f
 
     /** How far the disc had grown into its ring when the result arrived. */
     private var grownAtResult = 0f
 
-    /** 0..1: the result's colour spreading from the disc to the screen's corners. */
+    /** 0..1: the result's colour spreading from the disc/centre to the screen's corners. */
     private var floodProgress = 0f
-    private var resultIconProgress = 0f
+    private var floodStartFromCenter = false
+    internal var resultIconProgress = 0f
+        private set
 
     /** 0..1 as the disc settles into place when the screen first appears. */
     private var enterProgress = 1f
+    private var activeEnterScale = ENTER_SCALE
 
     private var centerX = 0f
 
@@ -141,6 +170,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         get() = discRadius
 
     private val waveBounds = RectF()
+    private val orbitBounds = RectF()
     private val checkPath = Path()
     private val checkPathMeasure = PathMeasure()
     private val checkPathSegment = Path()
@@ -153,11 +183,14 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
     private var enterAnimator: ValueAnimator? = null
     private var pulseFadeAnimator: ValueAnimator? = null
     private var processingAnimator: ValueAnimator? = null
+    private var orbitAnimator: ValueAnimator? = null
+    private var orbitFadeAnimator: ValueAnimator? = null
     private var transitionAnimator: AnimatorSet? = null
 
     private var onResultDisplayedListener: ((Boolean) -> Unit)? = null
+    private var onGeometryChangedListener: (() -> Unit)? = null
 
-    /** Bottom edge of the disc, in this view's coordinates, for placing text below it. */
+    /** Bottom edge of the disc (including the orbiting rim halo), in this view's coordinates. */
     val discBottom: Float
         get() = centerY + discRadius
 
@@ -165,24 +198,57 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         onResultDisplayedListener = listener
     }
 
+    fun setOnGeometryChangedListener(listener: (() -> Unit)?) {
+        onGeometryChangedListener = listener
+    }
+
+    /**
+     * Covers checkout with the matching tap surface colour without drawing a disc or pulses.
+     * Used behind Stripe's Tap to Pay Activity so checkout never flashes while Stripe closes.
+     */
+    fun showSurfaceCover() {
+        cancelAnimations()
+        currentState = State.SURFACE_COVER
+        resultType = null
+        currentBackgroundColor = colorSurface
+        burstPhase = 0f
+        pulseAlpha = 0f
+        processingProgress = 0f
+        orbitPhase = 0f
+        orbitAlpha = 0f
+        waitAlpha = 0f
+        morph = 0f
+        grownAtResult = 0f
+        floodProgress = 0f
+        floodStartFromCenter = false
+        resultIconProgress = 0f
+        enterProgress = 1f
+        activeEnterScale = ENTER_SCALE
+        invalidate()
+    }
+
     /** Starts waiting for a tap. With [animateIn] the disc settles into place as it appears. */
     fun startReading(animateIn: Boolean = false) {
         cancelAnimations()
 
         val animate = context.isAnimationEnabled()
-        state = State.READING
+        currentState = State.READING
         resultType = null
         currentBackgroundColor = colorSurface
         burstPhase = 0f
         // With animations switched off the pulses would freeze mid-flight, so they stay away.
         pulseAlpha = if (animate) 1f else 0f
         processingProgress = 0f
+        orbitPhase = 0f
+        orbitAlpha = 0f
         waitAlpha = 1f
         morph = 0f
         grownAtResult = 0f
         floodProgress = 0f
+        floodStartFromCenter = false
         resultIconProgress = 0f
         enterProgress = 1f
+        activeEnterScale = ENTER_SCALE
 
         if (animate) {
             burstAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -198,28 +264,45 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         }
 
         if (animate && animateIn) {
-            enterProgress = 0f
-            enterAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-                duration = ENTER_MS
-                interpolator = enterInterpolator
-                addUpdateListener { animator ->
-                    enterProgress = animator.animatedValue as Float
-                    invalidate()
-                }
-                start()
-            }
+            startEnterSettle(ENTER_SCALE, ENTER_MS)
         }
 
         invalidate()
     }
 
+    /**
+     * Transitions from waiting into processing: the disc fills and grows into its ring, the
+     * tap pulses fade away, and a subtle orbiting rim arc fades in around the disc perimeter.
+     */
     fun startProcessing() {
-        if (state != State.READING) return
+        if (currentState == State.PROCESSING ||
+            currentState == State.RESULT_TRANSITION ||
+            currentState == State.RESULT
+        ) {
+            return
+        }
+        if (currentState != State.READING) {
+            startProcessingDirectly(animateIn = true)
+            return
+        }
 
-        state = State.PROCESSING
+        val animate = context.isAnimationEnabled()
+        currentState = State.PROCESSING
+
+        if (!animate) {
+            burstAnimator?.cancel()
+            burstAnimator = null
+            processingProgress = 1f
+            pulseAlpha = 0f
+            orbitAlpha = 1f
+            invalidate()
+            return
+        }
+
+        processingAnimator?.cancel()
         processingAnimator = ValueAnimator.ofFloat(processingProgress, 1f).apply {
             duration = PROCESSING_GROW_MS
-            interpolator = DecelerateInterpolator()
+            interpolator = enterInterpolator
             addUpdateListener { animator ->
                 processingProgress = animator.animatedValue as Float
                 invalidate()
@@ -228,6 +311,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         }
 
         // The payment has been read, so the pulses stop asking for a tap. The glow stays.
+        pulseFadeAnimator?.cancel()
         pulseFadeAnimator = ValueAnimator.ofFloat(pulseAlpha, 0f).apply {
             duration = PULSE_FADE_OUT_MS
             addUpdateListener { animator ->
@@ -236,69 +320,191 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
             }
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    // Nothing moves any more, so there is nothing left to redraw each frame.
-                    if (pulseAlpha <= 0f) burstAnimator?.cancel()
+                    if (pulseAlpha <= 0f) {
+                        burstAnimator?.cancel()
+                        burstAnimator = null
+                    }
                 }
             })
             start()
         }
+
+        startOrbitRim(fadeDelayMs = ORBIT_FADE_IN_DELAY_MS)
+    }
+
+    /**
+     * Enters processing immediately with the disc already filled and grown into its ring,
+     * with zero waiting pulses. Used when Stripe's tap screen hands off confirmation to Numo,
+     * or when an NFC token lands without an active waiting overlay.
+     */
+    fun startProcessingDirectly(animateIn: Boolean = true) {
+        cancelAnimations()
+
+        val animate = context.isAnimationEnabled()
+        currentState = State.PROCESSING
+        resultType = null
+        currentBackgroundColor = colorSurface
+        burstPhase = 0f
+        pulseAlpha = 0f
+        processingProgress = 1f
+        orbitPhase = 0f
+        orbitAlpha = if (animate && animateIn) 0f else 1f
+        waitAlpha = 1f
+        morph = 0f
+        grownAtResult = 0f
+        floodProgress = 0f
+        floodStartFromCenter = false
+        resultIconProgress = 0f
+        enterProgress = 1f
+        activeEnterScale = ENTER_SCALE
+
+        if (animate) {
+            if (animateIn) {
+                startEnterSettle(ENTER_SCALE, ENTER_MS)
+            }
+            startOrbitRim(fadeDelayMs = 0L)
+        }
+
+        invalidate()
     }
 
     fun showSuccess(_amountText: String) {
-        startResultTransition(ResultType.SUCCESS)
+        startResultTransition(ResultType.SUCCESS, direct = false)
+    }
+
+    fun showSuccessDirect(_amountText: String) {
+        startResultTransition(ResultType.SUCCESS, direct = true)
     }
 
     fun showError(_message: String) {
-        startResultTransition(ResultType.ERROR)
+        startResultTransition(ResultType.ERROR, direct = false)
+    }
+
+    fun showErrorDirect(_message: String) {
+        startResultTransition(ResultType.ERROR, direct = true)
     }
 
     fun reset() {
         cancelAnimations()
-        state = State.IDLE
+        currentState = State.IDLE
         resultType = null
-        currentBackgroundColor = colorIdle
+        currentBackgroundColor = Color.TRANSPARENT
         burstPhase = 0f
         pulseAlpha = 0f
         processingProgress = 0f
+        orbitPhase = 0f
+        orbitAlpha = 0f
         waitAlpha = 0f
         morph = 0f
         grownAtResult = 0f
         floodProgress = 0f
+        floodStartFromCenter = false
         resultIconProgress = 0f
         enterProgress = 1f
+        activeEnterScale = ENTER_SCALE
         invalidate()
     }
 
-    private fun startResultTransition(target: ResultType) {
-        if (state == State.IDLE) {
-            startReading()
+    private fun startEnterSettle(startScale: Float, durationMs: Long) {
+        activeEnterScale = startScale
+        enterProgress = 0f
+        enterAnimator?.cancel()
+        enterAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = durationMs
+            interpolator = enterInterpolator
+            addUpdateListener { animator ->
+                enterProgress = animator.animatedValue as Float
+                invalidate()
+            }
+            start()
+        }
+    }
+
+    private fun startOrbitRim(fadeDelayMs: Long) {
+        orbitAnimator?.cancel()
+        orbitAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = ORBIT_PERIOD_MS
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            addUpdateListener { animator ->
+                orbitPhase = animator.animatedValue as Float
+                invalidate()
+            }
+            start()
         }
 
+        orbitFadeAnimator?.cancel()
+        if (orbitAlpha >= 1f) return
+        orbitFadeAnimator = ValueAnimator.ofFloat(orbitAlpha, 1f).apply {
+            duration = ORBIT_FADE_IN_MS
+            startDelay = fadeDelayMs
+            interpolator = enterInterpolator
+            addUpdateListener { animator ->
+                orbitAlpha = animator.animatedValue as Float
+                invalidate()
+            }
+            start()
+        }
+    }
+
+    private fun startResultTransition(target: ResultType, direct: Boolean) {
         if (resultType != null) {
             return
         }
 
-        state = State.RESULT_TRANSITION
-        resultType = target
-
+        // Entering result from IDLE or SURFACE_COVER is always direct so QR/Lightning/Arkoor
+        // completions never flash the contactless waiting disc or pulses.
+        val isDirect = direct || currentState == State.IDLE || currentState == State.SURFACE_COVER
         val targetColor = when (target) {
             ResultType.SUCCESS -> colorSuccess
             ResultType.ERROR -> colorError
         }
+
+        cancelAnimations()
+        resultType = target
         floodPaint.color = targetColor
 
-        transitionAnimator?.cancel()
-        burstAnimator?.cancel()
-        enterAnimator?.cancel()
-        pulseFadeAnimator?.cancel()
-        processingAnimator?.cancel()
-        enterProgress = 1f
-        // The disc carries on from wherever it had grown to, so a quick payment does not stall it.
-        grownAtResult = processingProgress
+        if (!context.isAnimationEnabled()) {
+            currentState = State.RESULT
+            currentBackgroundColor = targetColor
+            waitAlpha = 0f
+            pulseAlpha = 0f
+            orbitAlpha = 0f
+            morph = 1f
+            grownAtResult = 1f
+            floodProgress = 0f
+            floodStartFromCenter = false
+            resultIconProgress = 1f
+            enterProgress = 1f
+            invalidate()
+            onResultDisplayedListener?.invoke(target == ResultType.SUCCESS)
+            return
+        }
+
+        currentState = State.RESULT_TRANSITION
+        currentBackgroundColor = colorSurface
+        floodStartFromCenter = isDirect
+
+        if (isDirect) {
+            waitAlpha = 0f
+            pulseAlpha = 0f
+            orbitAlpha = 0f
+            morph = 1f
+            grownAtResult = 1f
+            activeEnterScale = DIRECT_ENTER_SCALE
+            enterProgress = 0f
+        } else {
+            // The disc carries on from wherever it had grown to, so a quick payment does not stall it.
+            grownAtResult = processingProgress
+            activeEnterScale = ENTER_SCALE
+            enterProgress = 1f
+        }
+
+        val animators = mutableListOf<Animator>()
 
         // The result belongs to the disc, so its colour starts there and spreads outwards.
-        val floodAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = FLOOD_MS
+        animators += ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = if (isDirect) DIRECT_FLOOD_MS else FLOOD_MS
             interpolator = enterInterpolator
             addUpdateListener { animator ->
                 floodProgress = animator.animatedValue as Float
@@ -306,27 +512,40 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
             }
         }
 
-        val waitFadeAnimator = ValueAnimator.ofFloat(waitAlpha, 0f).apply {
-            duration = 200L
-            addUpdateListener { animator ->
-                waitAlpha = animator.animatedValue as Float
-                invalidate()
+        if (isDirect) {
+            animators += ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = DIRECT_CIRCLE_ENTER_MS
+                interpolator = enterInterpolator
+                addUpdateListener { animator ->
+                    enterProgress = animator.animatedValue as Float
+                    invalidate()
+                }
+            }
+        } else {
+            // Waiting layers (waves, glow, shadow, orbiting rim) finish fading out BEFORE the
+            // result icon begins drawing, so waves and checkmark never overlap inside the disc.
+            animators += ValueAnimator.ofFloat(waitAlpha, 0f).apply {
+                duration = WAIT_FADE_OUT_MS
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { animator ->
+                    waitAlpha = animator.animatedValue as Float
+                    invalidate()
+                }
+            }
+            animators += ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = MORPH_MS
+                interpolator = DecelerateInterpolator(1.6f)
+                addUpdateListener { animator ->
+                    morph = animator.animatedValue as Float
+                    invalidate()
+                }
             }
         }
 
-        val morphAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 300L
-            interpolator = DecelerateInterpolator(1.6f)
-            addUpdateListener { animator ->
-                morph = animator.animatedValue as Float
-                invalidate()
-            }
-        }
-
-        val iconAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 450L
-            startDelay = 150L
-            interpolator = DecelerateInterpolator(1.5f)
+        animators += ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = if (isDirect) DIRECT_ICON_DRAW_MS else RESULT_ICON_DRAW_MS
+            startDelay = if (isDirect) DIRECT_ICON_DELAY_MS else RESULT_ICON_DELAY_MS
+            interpolator = iconDrawInterpolator
             addUpdateListener { animator ->
                 resultIconProgress = animator.animatedValue as Float
                 invalidate()
@@ -335,8 +554,8 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
         // The result's buttons arrive while the check is still drawing, not after it.
         var cancelled = false
-        val actionsCue = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = RESULT_ACTIONS_CUE_MS
+        animators += ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = if (isDirect) DIRECT_ACTIONS_CUE_MS else RESULT_ACTIONS_CUE_MS
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     if (cancelled) return
@@ -346,7 +565,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         }
 
         transitionAnimator = AnimatorSet().apply {
-            playTogether(floodAnimator, waitFadeAnimator, morphAnimator, iconAnimator, actionsCue)
+            playTogether(animators)
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationCancel(animation: Animator) {
                     cancelled = true
@@ -354,9 +573,12 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
                 override fun onAnimationEnd(animation: Animator) {
                     if (cancelled) return
-                    state = State.RESULT
+                    currentState = State.RESULT
                     currentBackgroundColor = targetColor
+                    waitAlpha = 0f
+                    orbitAlpha = 0f
                     floodProgress = 0f
+                    enterProgress = 1f
                     invalidate()
                 }
             })
@@ -369,11 +591,15 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         enterAnimator?.cancel()
         pulseFadeAnimator?.cancel()
         processingAnimator?.cancel()
+        orbitAnimator?.cancel()
+        orbitFadeAnimator?.cancel()
         transitionAnimator?.cancel()
         burstAnimator = null
         enterAnimator = null
         pulseFadeAnimator = null
         processingAnimator = null
+        orbitAnimator = null
+        orbitFadeAnimator = null
         transitionAnimator = null
     }
 
@@ -389,6 +615,17 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         resultIconPaint.strokeWidth = discRadius * RESULT_ICON_STROKE
         resultIconPaint.color = colorSuccess
 
+        val orbitStroke = discRadius * ORBIT_STROKE
+        orbitTrackPaint.strokeWidth = orbitStroke
+        orbitArcPaint.strokeWidth = orbitStroke
+        val orbitRadius = discRadius * ORBIT_RADIUS_FACTOR
+        orbitBounds.set(
+            centerX - orbitRadius,
+            centerY - orbitRadius,
+            centerX + orbitRadius,
+            centerY + orbitRadius,
+        )
+
         // A steady glow behind the pulses, strongest at the centre and gone at its edge.
         glowPaint.shader = RadialGradient(
             centerX,
@@ -401,6 +638,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
         rebuildShadow()
         rebuildCheckPath()
+        onGeometryChangedListener?.invoke()
     }
 
     /** Blurs a disc the size of the ring once; drawing scales it to the disc's current size. */
@@ -439,14 +677,18 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (state == State.IDLE) {
+        if (currentState == State.IDLE) {
             return
         }
 
         backgroundPaint.color = currentBackgroundColor
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), backgroundPaint)
 
-        val active = state == State.PROCESSING || processingProgress > 0f
+        if (currentState == State.SURFACE_COVER) {
+            return
+        }
+
+        val active = currentState == State.PROCESSING || processingProgress > 0f
 
         if (waitAlpha > 0f) {
             glowPaint.alpha = alphaOf(waitAlpha)
@@ -455,16 +697,17 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         }
 
         if (floodProgress > 0f) {
+            val startRadius = if (floodStartFromCenter) 0f else discRadius
             canvas.drawCircle(
                 centerX,
                 centerY,
-                discRadius + (floodMaxRadius - discRadius) * floodProgress,
+                startRadius + (floodMaxRadius - startRadius) * floodProgress,
                 floodPaint,
             )
         }
 
-        // The disc, its ring and its symbol settle into place together when the screen appears.
-        val settle = ENTER_SCALE + (1f - ENTER_SCALE) * enterProgress
+        // The disc, its ring, its orbit rim, and its symbol settle into place together.
+        val settle = activeEnterScale + (1f - activeEnterScale) * enterProgress
         canvas.withScale(settle, settle, centerX, centerY) {
 
             if (waitAlpha > 0f) {
@@ -473,6 +716,10 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
                 discOutlinePaint.color = colorForeground
                 discOutlinePaint.alpha = alphaOf(waitAlpha * outlineAlpha)
                 canvas.drawCircle(centerX, centerY, discRadius, discOutlinePaint)
+
+                if (orbitAlpha > 0f) {
+                    drawOrbitRim(canvas)
+                }
             }
 
             // Stripe swaps the idle disc for the filled one at once, then grows it into the ring.
@@ -489,9 +736,24 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
             }
         }
 
-        if (state == State.RESULT_TRANSITION || state == State.RESULT) {
+        if (currentState == State.RESULT_TRANSITION || currentState == State.RESULT) {
             drawResultIcon(canvas)
         }
+    }
+
+    /** Calm, Stripe-like orbiting rim around the filled disc so long confirmations stay alive. */
+    private fun drawOrbitRim(canvas: Canvas) {
+        val combinedAlpha = waitAlpha * orbitAlpha
+        orbitTrackPaint.color = colorForeground
+        orbitTrackPaint.alpha = alphaOf(combinedAlpha * ORBIT_TRACK_ALPHA)
+        canvas.drawOval(orbitBounds, orbitTrackPaint)
+
+        orbitArcPaint.color = colorForeground
+        orbitArcPaint.alpha = alphaOf(combinedAlpha * ORBIT_ARC_ALPHA)
+        val wave = sin(orbitPhase * 2.0 * PI).toFloat()
+        val sweepAngle = ORBIT_SWEEP_BASE_DEG + ORBIT_SWEEP_VARIATION_DEG * wave
+        val startAngle = -90f + 360f * orbitPhase - (ORBIT_SWEEP_VARIATION_DEG * 0.5f) * wave
+        canvas.drawArc(orbitBounds, startAngle, sweepAngle, false, orbitArcPaint)
     }
 
     private fun drawDiscShadow(canvas: Canvas, radius: Float) {
@@ -614,7 +876,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         private const val DISC_SHADOW_ALPHA = 0.22f
         private const val RESULT_ICON_STROKE = 0.075f
 
-        private const val PROCESSING_GROW_MS = 480L
+        private const val PROCESSING_GROW_MS = 440L
 
         private const val GLOW_RADIUS = 2.5f
         private const val GLOW_ALPHA = 0.2f
@@ -630,6 +892,17 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         private const val PULSE_GROWTH_MS = 5850f
         private const val PULSE_GROWTH_POWER = 3.2f
 
+        // Subtle orbiting rim around the filled disc while processing / confirming.
+        private const val ORBIT_RADIUS_FACTOR = 1.095f
+        private const val ORBIT_STROKE = 0.036f
+        private const val ORBIT_TRACK_ALPHA = 0.12f
+        private const val ORBIT_ARC_ALPHA = 0.80f
+        private const val ORBIT_SWEEP_BASE_DEG = 84f
+        private const val ORBIT_SWEEP_VARIATION_DEG = 34f
+        private const val ORBIT_PERIOD_MS = 1350L
+        private const val ORBIT_FADE_IN_MS = 240L
+        private const val ORBIT_FADE_IN_DELAY_MS = 120L
+
         private const val WAVE_COUNT = 4
         private const val WAVE_ORIGIN_OFFSET = 0.217f
         private const val WAVE_FIRST_RADIUS = 0.13f
@@ -640,8 +913,18 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         // Numo's own motion, around the parts that mirror Stripe's screen.
         private const val ENTER_MS = 180L
         private const val ENTER_SCALE = 0.96f
-        private const val PULSE_FADE_OUT_MS = 300L
-        private const val FLOOD_MS = 400L
-        private const val RESULT_ACTIONS_CUE_MS = 250L
+        private const val DIRECT_ENTER_SCALE = 0.86f
+        private const val PULSE_FADE_OUT_MS = 260L
+        internal const val WAIT_FADE_OUT_MS = 140L
+        private const val MORPH_MS = 260L
+        private const val FLOOD_MS = 380L
+        private const val DIRECT_FLOOD_MS = 340L
+        private const val DIRECT_CIRCLE_ENTER_MS = 280L
+        internal const val RESULT_ICON_DELAY_MS = 160L
+        private const val RESULT_ICON_DRAW_MS = 380L
+        private const val DIRECT_ICON_DELAY_MS = 120L
+        private const val DIRECT_ICON_DRAW_MS = 360L
+        private const val RESULT_ACTIONS_CUE_MS = 260L
+        private const val DIRECT_ACTIONS_CUE_MS = 240L
     }
 }

@@ -181,6 +181,7 @@
     <color name="color_nfc_idle">#0A0A0A</color>
     <color name="color_tap_screen_bg">#121212</color>
     <color name="color_tap_symbol">#FFFFFF</color>
+    <color name="color_tap_symbol_active">#121212</color>
     <color name="color_tap_disc_active">#B9B9B9</color>
     <color name="color_nfc_success">@color/numo_green_pressed</color>
     <color name="color_nfc_success_gradient_start">@color/numo_green_pressed</color>
