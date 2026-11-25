@@ -16,11 +16,13 @@ import android.view.animation.LinearInterpolator
 import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.ItemOnboardingTourPageBinding
 import com.electricdreams.numo.databinding.ViewOnboardingTourBinding
+import com.electricdreams.numo.payment.card.StripeTerminalManager
 
 /** Continuous product story. One lifecycle-owned clock drives scenes and the page crossfade. */
 class OnboardingTourView @JvmOverloads constructor(
@@ -30,13 +32,20 @@ class OnboardingTourView @JvmOverloads constructor(
     private val binding = ViewOnboardingTourBinding.inflate(LayoutInflater.from(context), this)
     private val accessibility = context.getSystemService(Context.ACCESSIBILITY_SERVICE)
         as AccessibilityManager
+    private data class Page(val title: Int, val body: Int, val duration: Long, val scene: Int?)
+
     private val pages = listOf(
-        R.string.onboarding_tour_welcome_title to R.string.onboarding_tour_welcome_body,
-        R.string.onboarding_tour_tap_title to R.string.onboarding_tour_tap_body,
-        R.string.onboarding_tour_withdraw_title to R.string.onboarding_tour_withdraw_body,
-        R.string.onboarding_tour_sales_title to R.string.onboarding_tour_sales_body,
+        Page(R.string.onboarding_tour_welcome_title, R.string.onboarding_tour_welcome_body, 5600L, 0),
+        Page(
+            R.string.onboarding_card_payments_title,
+            if (StripeTerminalManager.isDeviceSupported(context)) R.string.onboarding_card_payments_body
+            else R.string.settings_stripe_card_unsupported,
+            8800L, null,
+        ),
+        Page(R.string.onboarding_tour_tap_title, R.string.onboarding_tour_tap_body, 8800L, 1),
+        Page(R.string.onboarding_tour_withdraw_title, R.string.onboarding_tour_withdraw_body, 6400L, 2),
+        Page(R.string.onboarding_tour_sales_title, R.string.onboarding_tour_sales_body, 6200L, 3),
     )
-    private val durations = longArrayOf(5600L, 8800L, 6400L, 6200L)
     private val checkoutPreview = CheckoutPreviewScreens(context)
     private val holders = mutableSetOf<PageHolder>()
     private var clock: ValueAnimator? = null
@@ -65,10 +74,15 @@ class OnboardingTourView @JvmOverloads constructor(
 
             override fun onBindViewHolder(holder: PageHolder, position: Int) {
                 holder.page = position
-                holder.binding.tourTitle.setText(pages[position].first)
-                holder.binding.tourDescription.setText(pages[position].second)
-                holder.binding.tourScene.checkoutPreview = checkoutPreview
-                holder.binding.tourScene.page = position
+                val page = pages[position]
+                holder.binding.tourTitle.setText(page.title)
+                holder.binding.tourDescription.setText(page.body)
+                holder.binding.stripeMark.isVisible = page.scene == null
+                holder.binding.tourScene.isVisible = page.scene != null
+                page.scene?.let { scene ->
+                    holder.binding.tourScene.checkoutPreview = checkoutPreview
+                    holder.binding.tourScene.page = scene
+                }
                 ViewCompat.setAccessibilityHeading(holder.binding.tourTitle, true)
                 holder.binding.tourScene.timeMillis = sceneTime(position)
             }
@@ -84,6 +98,10 @@ class OnboardingTourView @JvmOverloads constructor(
         }
         binding.tourPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
+                binding.acceptButton.setText(
+                    if (pages[position].scene == null) R.string.onboarding_card_payments_skip
+                    else R.string.onboarding_tour_start
+                )
                 stopClock()
                 elapsed = 0L
                 fadeEntrance = automaticPageChange
@@ -119,7 +137,7 @@ class OnboardingTourView @JvmOverloads constructor(
     internal fun advancePage() {
         stopClock()
         automaticPageChange = true
-        // The shared clock has already faded out. Wrapping never scrolls back through three pages.
+        // The shared clock has already faded out, so wrap directly to the first page.
         binding.tourPager.setCurrentItem((currentPage + 1) % pages.size, false)
         automaticPageChange = false
     }
@@ -134,7 +152,7 @@ class OnboardingTourView @JvmOverloads constructor(
         binding.tourPager.setCurrentItem(state.getInt("tour_page").coerceIn(0, pages.lastIndex), false)
         // onPageSelected may have started the destination clock before its saved time is restored.
         stopClock()
-        elapsed = state.getLong("tour_elapsed").coerceIn(0L, durations[currentPage])
+        elapsed = state.getLong("tour_elapsed").coerceIn(0L, pages[currentPage].duration)
         fadeEntrance = false
         render()
         updatePlayback()
@@ -150,7 +168,7 @@ class OnboardingTourView @JvmOverloads constructor(
             return
         }
         if (clock != null) return
-        val pageDuration = durations[currentPage]
+        val pageDuration = pages[currentPage].duration
         val startTime = elapsed
         val animator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = (pageDuration - startTime).coerceAtLeast(1L)
@@ -184,13 +202,13 @@ class OnboardingTourView @JvmOverloads constructor(
             val entering = if (fadeEntrance) {
                 entranceEase.getInterpolation((elapsed / 260f).coerceIn(0f, 1f))
             } else 1f
-            val leaving = ((durations[currentPage] - elapsed) / 220f).coerceIn(0f, 1f)
+            val leaving = ((pages[currentPage].duration - elapsed) / 220f).coerceIn(0f, 1f)
             minOf(entering, leaving)
         }
     }
 
     private fun sceneTime(page: Int): Long =
-        if (!motionEnabled) durations[page] else if (page != currentPage) 0L else elapsed
+        if (!motionEnabled) pages[page].duration else if (page != currentPage) 0L else elapsed
 
     private fun motionAllowed(): Boolean = !accessibility.isTouchExplorationEnabled &&
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) ValueAnimator.areAnimatorsEnabled()

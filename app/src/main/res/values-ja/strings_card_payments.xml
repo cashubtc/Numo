@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="onboarding_card_payments_title">Stripe でカード決済を受け付けますか？</string>
+    <string name="onboarding_card_payments_body">お客様はカードやスマートフォンをかざして支払えます。Stripe は後から設定画面でも接続できます。</string>
+    <string name="onboarding_card_payments_skip">今はしない</string>
+    <string name="stripe_card_get_started">Stripe に接続</string>
+
     <string name="stripe_card_settings_title">カード決済</string>
     <string name="settings_stripe_card_subtitle">Stripe Tap to Pay でカードを受け付ける</string>
     <string name="settings_stripe_card_unsupported">NFC 搭載の Android 13 以降が必要です</string>

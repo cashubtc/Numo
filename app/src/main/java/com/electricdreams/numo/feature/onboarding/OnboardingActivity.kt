@@ -54,7 +54,11 @@ import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.MintProfileService
+import com.electricdreams.numo.feature.pin.PinEntryActivity
+import com.electricdreams.numo.feature.pin.PinProtectionHelper
+import com.electricdreams.numo.feature.pin.requirePinProtection
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
+import com.electricdreams.numo.feature.settings.StripeCardSetupActivity
 import com.electricdreams.numo.nostr.NostrMintBackup
 import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.seed.SeedWordEditText
@@ -79,7 +83,7 @@ import kotlin.coroutines.resume
  * Onboarding Activity - First-time user experience.
  * 
  * Flow:
- * 1. Welcome screen with Terms of Service
+ * 1. Welcome tour with Terms of Service and optional Stripe card setup
  * 2. Create new wallet OR Restore from seed phrase
  * 3. For new wallet: Generate seed phrase and add default mints
  *    For restore: Enter seed phrase → Fetch backup from Nostr → Add mints → Restore balances
@@ -215,6 +219,15 @@ class OnboardingActivity : AppCompatActivity() {
                 addMintBottomSheet = null
                 addDifferentMint(mintProfileService.normalizeUrl(scannedUrl))
             }
+        }
+    }
+
+    private val verifyStripePin = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            PinProtectionHelper.markVerified()
+            openStripeSetup()
         }
     }
 
@@ -561,6 +574,11 @@ class OnboardingActivity : AppCompatActivity() {
         acceptButton.setOnClickListener {
             if (previewOnly) finish() else showStep(OnboardingStep.CHOOSE_PATH)
         }
+        findViewById<View>(R.id.connect_stripe_button).setOnClickListener {
+            if (requirePinProtection(onVerified = ::openStripeSetup)) {
+                verifyStripePin.launch(Intent(this, PinEntryActivity::class.java))
+            }
+        }
 
         // Choose Path
         createWalletButton.setOnClickListener {
@@ -616,6 +634,10 @@ class OnboardingActivity : AppCompatActivity() {
         enterWalletButton.setOnClickListener {
             completeOnboarding()
         }
+    }
+
+    private fun openStripeSetup() {
+        startActivity(StripeCardSetupActivity.setupIntent(this))
     }
 
     private fun hideKeyboard() {

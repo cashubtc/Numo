@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="onboarding_card_payments_title">Kartenzahlungen mit Stripe annehmen?</string>
+    <string name="onboarding_card_payments_body">Deine Kunden können ihre Karte oder ihr Smartphone zum Bezahlen an dein Gerät halten. Du kannst Stripe auch später in den Einstellungen verbinden.</string>
+    <string name="onboarding_card_payments_skip">Jetzt nicht</string>
+    <string name="stripe_card_get_started">Stripe verbinden</string>
+
     <string name="stripe_card_settings_title">Kartenzahlungen</string>
     <string name="settings_stripe_card_subtitle">Karten mit Stripe Tap to Pay akzeptieren</string>
     <string name="settings_stripe_card_unsupported">Erfordert Android 13 oder neuer mit NFC</string>

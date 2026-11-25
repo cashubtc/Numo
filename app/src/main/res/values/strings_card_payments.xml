@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="onboarding_card_payments_title">Accept card payments with Stripe?</string>
+    <string name="onboarding_card_payments_body">Let customers tap a card or phone to pay. You can also connect Stripe later in Settings.</string>
+    <string name="onboarding_card_payments_skip">Not now</string>
+
     <!-- Settings: Card payments (Stripe Tap to Pay) -->
     <string name="stripe_card_settings_title">Card payments</string>
     <string name="settings_stripe_card_subtitle">Accept cards with Stripe Tap to Pay</string>
