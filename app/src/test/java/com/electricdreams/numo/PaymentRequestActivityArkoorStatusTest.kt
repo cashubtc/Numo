@@ -71,7 +71,8 @@ class PaymentRequestActivityArkoorStatusTest {
         ReflectionHelpers.setField(activity, "tabManager", tabs)
         repeat(2) {
             ReflectionHelpers.callInstanceMethod<Void>(activity, "updatePaymentMethodStatus")
-            assertEquals("Lightning\n$message", status.text.toString())
+            assertEquals(View.VISIBLE, status.visibility)
+            assertEquals(message, status.text.toString())
         }
         assertEquals(0, ShadowToast.shownToastCount())
     }
