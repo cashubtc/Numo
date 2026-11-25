@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="onboarding_card_payments_title">Stripe로 카드 결제를 받으시겠어요?</string>
+    <string name="onboarding_card_payments_body">고객이 카드나 휴대폰을 기기에 대면 결제할 수 있습니다. 나중에 설정에서 Stripe를 연결할 수도 있습니다.</string>
+    <string name="onboarding_card_payments_skip">나중에</string>
+    <string name="stripe_card_get_started">Stripe 연결</string>
+
     <string name="stripe_card_settings_title">카드 결제</string>
     <string name="settings_stripe_card_subtitle">Stripe Tap to Pay로 카드 결제 받기</string>
     <string name="settings_stripe_card_unsupported">NFC가 있는 Android 13 이상이 필요합니다</string>
