@@ -149,21 +149,25 @@ install_zsp() {
 }
 
 publish_zapstore() {
-    : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
     : "${RELEASE_VERSION:?RELEASE_VERSION is required}"
+    : "${PRE_RELEASE:?PRE_RELEASE is required}"
+    if [ "$PRE_RELEASE" = true ]; then
+        echo "Skipping Zapstore publication for pre-release $RELEASE_VERSION"
+        return 0
+    fi
+
+    : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
     : "${KEYSTORE_PATH:?KEYSTORE_PATH is required}"
     : "${KEYSTORE_PASSWORD:?KEYSTORE_PASSWORD is required}"
     : "${KEY_ALIAS:?KEY_ALIAS is required}"
     : "${KEY_PASSWORD:?KEY_PASSWORD is required}"
     : "${SIGN_WITH:?SIGN_WITH is required}"
     : "${GITHUB_SHA:?GITHUB_SHA is required}"
-    : "${PRE_RELEASE:?PRE_RELEASE is required}"
     local apk="app/build/outputs/apk/release/numo-${RELEASE_VERSION}-arm64-v8a.apk"
     local pkcs12="$RUNNER_TEMP/zapstore-release-key.p12"
     local proof="$RUNNER_TEMP/zapstore-identity-proof.json"
     local zsp="$RUNNER_TEMP/zsp"
     local nak="$RUNNER_TEMP/nak"
-    local channel="main"
     local commit="${RELEASE_COMMIT:-$GITHUB_SHA}"
 
     if [ ! -f "$apk" ]; then
@@ -188,11 +192,8 @@ publish_zapstore() {
             -destalias "$KEY_ALIAS" -noprompt
     fi
 
-    if [ "$PRE_RELEASE" = true ]; then
-        channel="beta"
-    fi
     "$zsp" publish --quiet --skip-preview --skip-certificate-linking --overwrite-release \
-        --no-color --commit "$commit" --channel "$channel" release/zapstore.yaml
+        --no-color --commit "$commit" --channel main release/zapstore.yaml
     "$zsp" identity --link-key "$pkcs12" --link-key-expiry 2y --offline --no-color \
         > "$proof"
     python3 - "$proof" <<'PY'
