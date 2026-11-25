@@ -2,9 +2,16 @@ package com.electricdreams.numo.ui.offline
 
 import android.app.Activity
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.util.TypedValue
-import com.electricdreams.numo.NfcEnableActivity
+import androidx.core.content.ContextCompat
 import com.electricdreams.numo.PaymentFailureActivity
 import com.electricdreams.numo.PaymentReceivedActivity
 import com.electricdreams.numo.PaymentRequestActivity
@@ -31,6 +38,9 @@ import java.lang.ref.WeakReference
  *
  * Follows [ConnectivityMonitor] and mirrors its state onto an [OfflineStripHost] per started
  * activity. Only the resumed activity animates; the others snap so they're correct when shown.
+ *
+ * While online it also says when NFC is switched off. No internet wins when both are true: it
+ * stops every new charge, NFC only the tapped ones.
  */
 class OfflineStripController private constructor(
     private val app: Application
@@ -43,8 +53,27 @@ class OfflineStripController private constructor(
     private var mode: OfflineStripView.Mode? = null
     private var hideJob: Job? = null
 
+    private val nfcReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) = refreshNfc()
+    }
+
     private fun start() {
         app.registerActivityLifecycleCallbacks(this)
+        try {
+            // Only the system may send this broadcast, so receiving it "exported" lets nobody
+            // else in. The not-exported flag would need an extra permission below Android 13.
+            ContextCompat.registerReceiver(
+                app,
+                nfcReceiver,
+                IntentFilter(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED),
+                ContextCompat.RECEIVER_EXPORTED,
+            )
+        } catch (e: Exception) {
+            // Each screen still re-reads the NFC state when it resumes.
+            Log.w(TAG, "Could not listen for NFC being switched on or off", e)
+        }
+        _nfcOff.value = isNfcOff()
+        if (nfcOff.value) setMode(restingMode())
         scope.launch {
             ConnectivityMonitor.getInstance(app).isOnline.collect(::onConnectivityChanged)
         }
@@ -57,15 +86,35 @@ class OfflineStripController private constructor(
             mode != OfflineStripView.Mode.OFFLINE -> Unit
             // The explainer celebrates on its own; a second "Back online" after it closes
             // would only flash, so the screens underneath simply settle back.
-            resumedActivity?.get() is OfflineExplainerActivity -> setMode(null)
+            resumedActivity?.get() is OfflineExplainerActivity -> setMode(restingMode())
             else -> {
                 setMode(OfflineStripView.Mode.BACK_ONLINE)
                 hideJob = scope.launch {
                     delay(BACK_ONLINE_HOLD_MS)
-                    setMode(null)
+                    setMode(restingMode())
                 }
             }
         }
+    }
+
+    /** What the strip shows when the connection has nothing to say. */
+    private fun restingMode(): OfflineStripView.Mode? =
+        if (nfcOff.value) OfflineStripView.Mode.NFC_OFF else null
+
+    /** A device without an NFC chip has nothing to switch on, so it is never "off". */
+    private fun isNfcOff(): Boolean = try {
+        NfcAdapter.getDefaultAdapter(app)?.isEnabled == false
+    } catch (e: Exception) {
+        Log.w(TAG, "Could not read the NFC state", e)
+        false
+    }
+
+    private fun refreshNfc() {
+        val off = isNfcOff()
+        if (off == nfcOff.value) return
+        _nfcOff.value = off
+        // The connection states keep the strip until they are done with it.
+        if (mode == null || mode == OfflineStripView.Mode.NFC_OFF) setMode(restingMode())
     }
 
     private fun setMode(newMode: OfflineStripView.Mode?) {
@@ -76,7 +125,15 @@ class OfflineStripController private constructor(
     }
 
     private fun onStripTapped(activity: Activity) {
-        if (mode == OfflineStripView.Mode.OFFLINE) OfflineExplainerActivity.start(activity)
+        when (mode) {
+            OfflineStripView.Mode.OFFLINE -> OfflineExplainerActivity.start(activity)
+            OfflineStripView.Mode.NFC_OFF -> try {
+                activity.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not open NFC settings", e)
+            }
+            else -> Unit
+        }
     }
 
     override fun onActivityStarted(activity: Activity) {
@@ -89,6 +146,8 @@ class OfflineStripController private constructor(
 
     override fun onActivityResumed(activity: Activity) {
         resumedActivity = WeakReference(activity)
+        // The broadcast can be missed while the app is in the background.
+        refreshNfc()
         hosts[activity]?.onResumed()
     }
 
@@ -112,10 +171,14 @@ class OfflineStripController private constructor(
     }
 
     companion object {
+        private const val TAG = "OfflineStripController"
         private const val APP_PACKAGE = "com.electricdreams.numo"
 
         /** How long "Back online" stays up before the strip tucks away. */
         private const val BACK_ONLINE_HOLD_MS = 2_000L
+
+        private val _nfcOff = MutableStateFlow(false)
+        val nfcOff = _nfcOff.asStateFlow()
 
         private val _stripMode = MutableStateFlow<OfflineStripView.Mode?>(null)
 
@@ -129,7 +192,6 @@ class OfflineStripController private constructor(
         private val EXEMPT_ACTIVITIES: Set<Class<out Activity>> = setOf(
             OnboardingActivity::class.java,
             PaymentRequestActivity::class.java,
-            NfcEnableActivity::class.java,
             PaymentReceivedActivity::class.java,
             PaymentFailureActivity::class.java,
             WithdrawSuccessActivity::class.java,

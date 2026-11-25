@@ -1,27 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="stripe_card_settings_title">Pagamentos com cartão</string>
-    <string name="settings_stripe_card_enabled">Ativado · Stripe Tap to Pay</string>
-    <string name="settings_stripe_card_disabled">Aceite cartões com Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_subtitle">Aceite cartões com Stripe Tap to Pay</string>
     <string name="settings_stripe_card_unsupported">Requer Android 13 ou superior com NFC</string>
     <string name="stripe_card_enable_title">Aceitar pagamentos com cartão</string>
-    <string name="stripe_card_enable_subtitle">Adiciona uma aba Cartão no pagamento. A Stripe repassa o dinheiro para a sua própria conta Stripe.</string>
     <string name="stripe_card_section_account">Conta Stripe</string>
-    <string name="stripe_card_restricted_key_label">Chave de API restrita (rk_…)</string>
-    <string name="stripe_card_restricted_key_saved_hint">Salva. Digite uma nova chave para substituí-la.</string>
-    <string name="stripe_card_location_label">ID do local do Terminal (tml_…)</string>
-    <string name="stripe_card_section_test">Teste</string>
-    <string name="stripe_card_test_title">Testar Conexão</string>
-    <string name="stripe_card_test_subtitle">Verifica a chave, a localização e este dispositivo</string>
-    <string name="stripe_card_test_connecting">Conectando à Stripe…</string>
-    <string name="stripe_card_test_success">Conectado à Stripe</string>
-    <string name="stripe_card_test_success_test_mode">Conectado à Stripe (modo de teste)</string>
-    <string name="stripe_card_test_failed">Falhou: %1$s</string>
     <string name="stripe_card_invalid_key">Digite uma chave restrita que comece com rk_live_ ou rk_test_. Chaves secretas (sk_…) não são aceitas.</string>
-    <string name="stripe_card_invalid_location">Digite um ID de local do Terminal que comece com tml_</string>
     <string name="stripe_card_save_failed">Não foi possível guardar a chave com segurança neste aparelho</string>
-    <string name="stripe_card_remove_title">Remover chave da Stripe</string>
-    <string name="stripe_card_remove_subtitle">Apaga a chave deste telefone e desativa os pagamentos com cartão</string>
     <string name="stripe_card_removed">Chave da Stripe removida</string>
     <string name="payment_request_tab_card">Cartão</string>
     <string name="payment_request_instruction_card">Pagamento com cartão</string>
@@ -44,18 +29,4 @@
     <string name="developer_settings_simulate_stripe_reader">Simular leitor de cartões da Stripe</string>
     <string name="card_payment_simulation_requires_test_key">O leitor simulado requer uma chave de teste da Stripe (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">A Stripe exige uma versão de produção para ler cartões físicos. Para testar no ambiente de testes, ative o leitor simulado nas configurações de desenvolvedor.</string>
-    <string name="stripe_tutorial_title">Configuração do Stripe</string>
-    <string name="stripe_tutorial_entry_title">Tutorial de configuração</string>
-    <string name="stripe_tutorial_entry_subtitle">Três passos para conectar sua conta do Stripe</string>
-    <string name="stripe_tutorial_progress">%1$d de %2$d</string>
-    <string name="stripe_tutorial_cancel">Cancelar</string>
-    <string name="stripe_tutorial_back">Voltar</string>
-    <string name="stripe_tutorial_next">Avançar</string>
-    <string name="stripe_tutorial_done">Concluir</string>
-    <string name="stripe_tutorial_key_title">Crie uma chave restrita</string>
-    <string name="stripe_tutorial_key_body">Developers → API keys → Create restricted key.\nAtive Terminal Connection Tokens: Write. Use uma chave diferente em cada telefone.</string>
-    <string name="stripe_tutorial_location_title">Adicione seu local</string>
-    <string name="stripe_tutorial_location_body">Terminal → Locations → Create location.\nInsira o endereço da sua loja e copie o ID tml_….</string>
-    <string name="stripe_tutorial_connect_title">Conecte o Numo</string>
-    <string name="stripe_tutorial_connect_body">Cole a chave e o ID do local.\nTeste a conexão e ative os pagamentos com cartão.</string>
 </resources>

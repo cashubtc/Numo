@@ -77,14 +77,6 @@
             </intent-filter>
         </activity>
 
-        <!-- NFC Enable Activity -->
-        <activity
-            android:name=".NfcEnableActivity"
-            android:exported="false"
-            android:label="@string/nfc_enable_title"
-            android:theme="@style/Theme.Numo"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
-
         <!-- Modern POS Activity - Main App -->
         <activity
             android:name=".feature.settings.AppUpdateActivity"
@@ -617,16 +609,27 @@
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
 
-        <activity android:name="com.electricdreams.numo.feature.settings.StripeCardTutorialActivity"
+        <activity android:name="com.electricdreams.numo.feature.settings.StripeCardSetupActivity"
             android:exported="false"
-            android:label="@string/stripe_tutorial_title"
-            android:theme="@style/Theme.Numo"
-            android:screenOrientation="portrait"
+            android:label="@string/stripe_card_setup_title"
+            android:theme="@style/Theme.Numo.Settings"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.StripeCardSettingsActivity"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.StripeCardSettingsActivity" />
+        </activity>
+
+        <activity android:name="com.electricdreams.numo.feature.settings.StripeCardCheckActivity"
+            android:exported="false"
+            android:label="@string/stripe_card_check_title"
+            android:theme="@style/Theme.Numo.Settings"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.StripeCardSettingsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.electricdreams.numo.feature.settings.StripeCardSettingsActivity" />
+                android:value=".feature.settings.StripeCardSettingsActivity" />
         </activity>
 
         <activity android:name="com.electricdreams.numo.feature.settings.BtcPaySettingsActivity"

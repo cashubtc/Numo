@@ -4,10 +4,8 @@ import com.electricdreams.numo.R
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.nfc.NfcAdapter
-import android.nfc.NfcManager
 import android.nfc.cardemulation.CardEmulation
 import android.content.ComponentName
 import android.os.Bundle
@@ -230,14 +228,6 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
     // Lifecycle methods
     override fun onResume() {
         super.onResume()
-        
-        // Check if NFC is enabled - if not, redirect to enable screen
-        val nfcManager = getSystemService(Context.NFC_SERVICE) as? NfcManager
-        val adapter = nfcManager?.defaultAdapter
-        if (adapter != null && !adapter.isEnabled) {
-            startActivity(Intent(this, NfcEnableActivity::class.java))
-            return
-        }
         
         // Set this app's HCE service as the preferred one while the app is open
         try {

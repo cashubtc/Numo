@@ -311,9 +311,9 @@
     <string name="nfc_dialog_content_description_cashu">Cashu</string>
     <string name="nfc_dialog_subtitle_or_scan_qr">oder QR-Code scannen</string>
     <string name="nfc_dialog_waiting_message">Warte auf NFC...</string>
-    <string name="nfc_enable_title">NFC aktivieren</string>
-    <string name="nfc_enable_message">NFC wird für „Tippen zum Bezahlen" benötigt. Bitte in den Einstellungen aktivieren.</string>
-    <string name="nfc_enable_button">Einstellungen</string>
+    <string name="nfc_off_strip_title">NFC ist aus</string>
+    <string name="nfc_off_strip_subtitle">Zahlen per Tippen braucht NFC</string>
+    <string name="nfc_off_strip_action">NFC-Einstellungen öffnen</string>
     <string name="common_cancel">Abbrechen</string>
 
 

@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.Application
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -127,6 +128,50 @@ class OfflineStripHostTest {
                 fixture.resize(800)
                 assertEquals(View.GONE, fixture.strip.visibility)
                 assertEquals(STATUS_BAR_HEIGHT, fixture.content.paddingTop)
+            } finally {
+                fixture.host.detach()
+            }
+        }
+    }
+
+    @Test
+    fun `NFC off shows its own words and can be tapped`() {
+        Robolectric.buildActivity(Activity::class.java).setup().visible().use { controller ->
+            val fixture = Fixture(controller.get())
+            try {
+                fixture.resize(800)
+                fixture.host.render(OfflineStripView.Mode.NFC_OFF, animate = false)
+                fixture.resize(800)
+
+                assertEquals(
+                    "NFC is off",
+                    fixture.strip.findViewById<TextView>(R.id.strip_title).text.toString(),
+                )
+                assertEquals(
+                    "Tap payments need NFC",
+                    fixture.strip.findViewById<TextView>(R.id.strip_subtitle).text.toString(),
+                )
+                assertTrue(fixture.stripContent.isClickable)
+                fixture.assertContentBelowStrip()
+            } finally {
+                fixture.host.detach()
+            }
+        }
+    }
+
+    @Test
+    fun `losing the connection takes the strip over from NFC off`() {
+        Robolectric.buildActivity(Activity::class.java).setup().visible().use { controller ->
+            val fixture = Fixture(controller.get())
+            try {
+                fixture.resize(800)
+                fixture.host.render(OfflineStripView.Mode.NFC_OFF, animate = false)
+                fixture.host.render(OfflineStripView.Mode.OFFLINE, animate = false)
+
+                assertEquals(
+                    "Offline",
+                    fixture.strip.findViewById<TextView>(R.id.strip_title).text.toString(),
+                )
             } finally {
                 fixture.host.detach()
             }
