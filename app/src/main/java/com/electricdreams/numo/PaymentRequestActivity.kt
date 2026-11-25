@@ -46,7 +46,6 @@ import androidx.core.view.doOnLayout
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -1014,9 +1013,7 @@ class PaymentRequestActivity : AppCompatActivity() {
      * that reassures the merchant.
      */
     private fun observeConnectivityForPayment() {
-        val contactlessIcon = findViewById<ImageView>(R.id.contactless_icon)
         val instructionText = findViewById<TextView>(R.id.instruction_text)
-        val iconGap = resources.getDimensionPixelSize(R.dimen.space_m)
         val offlinePill = findViewById<View>(R.id.offline_pill)
         offlinePill.setOnClickListener {
             OfflineExplainerActivity.start(this, paymentOnScreen = confirmsAfterReconnect())
@@ -1031,10 +1028,6 @@ class PaymentRequestActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     ConnectivityMonitor.getInstance(this@PaymentRequestActivity).isOnline.collect { online ->
-                        contactlessIcon.visibility = if (online) View.VISIBLE else View.GONE
-                        instructionText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                            marginStart = if (online) iconGap else 0
-                        }
                         instructionText.setText(
                             if (online) R.string.payment_request_instruction_scan_or_tap
                             else R.string.payment_request_instruction_scan
