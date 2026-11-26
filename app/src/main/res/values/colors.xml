@@ -215,15 +215,12 @@
     <color name="color_lightning_bolt_outer_glow">#FFCC80</color>
 
     <!-- NFC Payment Animation Colors -->
-    <color name="color_nfc_idle">#0A0A0A</color>
     <!-- The tap waiting screen, in the colours of Stripe's card tap screen -->
     <color name="color_tap_screen_bg">#FFFFFF</color>
     <color name="color_tap_symbol">#697386</color>
     <color name="color_tap_symbol_active">#FFFFFF</color>
     <color name="color_tap_disc_active">@color/numo_dark</color>
     <color name="color_nfc_success">@color/numo_green_pressed</color>
-    <color name="color_nfc_success_gradient_start">@color/numo_green_pressed</color>
-    <color name="color_nfc_success_gradient_end">@color/numo_green_pressed</color>
 
     <!-- Theme Background Colors (for ThemeManager) -->
     <color name="color_theme_obsidian">@color/numo_dark</color>

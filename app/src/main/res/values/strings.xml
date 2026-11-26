@@ -59,7 +59,6 @@
     
     <string name="payment_request_close_content_description">Close</string>
     <string name="payment_request_share_content_description">Share</string>
-    <string name="payment_request_pay_label">Pay</string>
     <string name="payment_request_instruction_scan_or_tap">Scan or tap to pay</string>
     <string name="payment_request_nfc_reading">Reading from NFC...</string>
     <string name="payment_request_animation_close">Done</string>
@@ -68,7 +67,6 @@
     <string name="payment_request_error_ndef_prepare">Failed to prepare NDEF payment data</string>
     <string name="payment_request_error_nothing_to_share">Nothing to share yet</string>
 
-    <string name="payment_request_status_preparing">Preparing payment request...</string>
     <string name="payment_request_status_waiting_for_payment">Waiting for payment...</string>
     <string name="payment_request_status_error_qr">Error generating QR code</string>
     <string name="payment_request_status_error_generic">Error: %1$s</string>
@@ -974,7 +972,6 @@
     <string name="pin_reset_recovery_phrase">Recovery Phrase</string>
     <string name="pin_reset_paste_clipboard">Paste from Clipboard</string>
     <string name="pin_reset_button">Reset PIN</string>
-    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
 

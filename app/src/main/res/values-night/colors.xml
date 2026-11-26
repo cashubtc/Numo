@@ -178,14 +178,11 @@
     <color name="color_lightning_bolt_outer_glow">#FFCC80</color>
 
     <!-- NFC Payment Animation Colors (same in dark mode) -->
-    <color name="color_nfc_idle">#0A0A0A</color>
     <color name="color_tap_screen_bg">#121212</color>
     <color name="color_tap_symbol">#FFFFFF</color>
     <color name="color_tap_symbol_active">#121212</color>
     <color name="color_tap_disc_active">#B9B9B9</color>
     <color name="color_nfc_success">@color/numo_green_pressed</color>
-    <color name="color_nfc_success_gradient_start">@color/numo_green_pressed</color>
-    <color name="color_nfc_success_gradient_end">@color/numo_green_pressed</color>
 
     <!-- Theme Background Colors (same — ThemeManager handles these directly) -->
     <color name="color_theme_obsidian">@color/numo_dark</color>

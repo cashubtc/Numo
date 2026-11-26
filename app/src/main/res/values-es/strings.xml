@@ -44,14 +44,12 @@
     <string name="tip_selection_main_confirm">Confirmar</string>
     <string name="payment_request_close_content_description">Cerrar</string>
     <string name="payment_request_share_content_description">Compartir</string>
-    <string name="payment_request_pay_label">Pagar</string>
     <string name="payment_request_instruction_scan_or_tap">Escanea o acerca para pagar</string>
     <string name="payment_request_nfc_reading">Leyendo desde NFC...</string>
     <string name="payment_request_animation_close">Listo</string>
     <string name="payment_request_error_invalid_amount">Importe de pago no válido</string>
     <string name="payment_request_error_ndef_prepare">No se pudo preparar los datos de pago NDEF</string>
     <string name="payment_request_error_nothing_to_share">Nada que compartir todavía</string>
-    <string name="payment_request_status_preparing">Preparando la solicitud de pago...</string>
     <string name="payment_request_status_waiting_for_payment">Esperando el pago...</string>
     <string name="payment_request_status_error_qr">Error al generar el código QR</string>
     <string name="payment_request_status_error_generic">Error: %1$s</string>
@@ -252,6 +250,7 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="nfc_payment_error_unexpected">Se produjo un error inesperado: %1$s</string>
     <string name="nfc_payment_hint_keep_close">Mantén el teléfono cerca</string>
     <string name="nfc_payment_hint_processing">Procesando pago...\nPuedes levantar tu teléfono</string>
+    <string name="nfc_payment_hint_tap_lost">Se perdió el contacto: mantén el teléfono quieto e inténtalo de nuevo</string>
     <string name="common_ok">Aceptar</string>
     <string name="common_or">o</string>
     <string name="withdraw_lightning_toolbar_back">Atrás</string>
@@ -693,7 +692,6 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="pin_reset_recovery_phrase">Frase de recuperación</string>
     <string name="pin_reset_paste_clipboard">Pegar del portapapeles</string>
     <string name="pin_reset_button">Restablecer PIN</string>
-    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">Pago de %1$d sats</string>
     <string name="payment_request_lightning_description">Pago Numo POS de %1$d sats</string>
     <string name="auto_withdraw_lightning_address_valid">Dirección Lightning válida</string>
