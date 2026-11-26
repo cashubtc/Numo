@@ -165,14 +165,16 @@ class StripeCardSettingsActivity : AppCompatActivity() {
         checkJob?.cancel()
         locationNameJob?.cancel()
         binding.checkProgress.show()
+        var hasCompleteConfig = false
         return lifecycleScope.launch {
             try {
                 val snapshot = withContext(Dispatchers.IO) { settings.snapshot() }
+                hasCompleteConfig = snapshot.config != null
                 setSwitch(snapshot.enabled)
                 binding.keyRow.setTrailingText(snapshot.maskedKey)
                 showLastChecked(snapshot.lastCheckedAt)
                 showLocation(snapshot)
-                binding.disconnectRow.visibility = if (snapshot.hasStoredKey) View.VISIBLE else View.GONE
+                binding.disconnectRow.visibility = if (snapshot.config != null) View.VISIBLE else View.GONE
 
                 val config = snapshot.config
                 if (config == null) {
@@ -192,7 +194,7 @@ class StripeCardSettingsActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 // HTTP client exceptions can include request headers.
                 Log.e(TAG, "Could not check Stripe settings (${e.javaClass.simpleName})")
-                binding.disconnectRow.visibility = View.VISIBLE
+                binding.disconnectRow.visibility = if (hasCompleteConfig) View.VISIBLE else View.GONE
                 show(State.CHECK_ERROR)
             } finally {
                 if (isActive) binding.checkProgress.hide()

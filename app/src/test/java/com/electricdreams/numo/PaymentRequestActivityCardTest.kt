@@ -2,11 +2,11 @@ package com.electricdreams.numo
 
 import android.app.Activity
 import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -33,6 +33,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowToast
+import org.robolectric.shadows.ShadowLooper
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
@@ -40,31 +41,23 @@ import org.robolectric.util.ReflectionHelpers
 class PaymentRequestActivityCardTest {
     private lateinit var activity: PaymentRequestActivity
     private val tabs = mock<PaymentTabManager>()
-    private lateinit var cardStatus: TextView
-    private lateinit var cardProgress: ProgressBar
-    private lateinit var cardAction: MaterialButton
-    private lateinit var shareButton: View
+    private lateinit var cardMessage: TextView
+    private lateinit var cardButton: MaterialButton
 
     @Before
     fun setUp() {
         // Attach the activity without starting quote creation or other payment services.
         activity = Robolectric.buildActivity(PaymentRequestActivity::class.java).get()
         ReflectionHelpers.setStaticField(AutoWithdrawManager::class.java, "instance", mock<AutoWithdrawManager>())
-        cardStatus = TextView(activity)
-        cardProgress = ProgressBar(activity)
-        cardAction = MaterialButton(ContextThemeWrapper(activity, R.style.Theme_Numo))
-        shareButton = View(activity)
-        whenever(tabs.getCurrentTab()).thenReturn(PaymentTab.CARD)
+        cardMessage = TextView(activity)
+        cardButton = MaterialButton(ContextThemeWrapper(activity, R.style.Theme_Numo))
+        whenever(tabs.getCurrentTab()).thenReturn(PaymentTab.UNIFIED)
         mapOf(
             "tabManager" to tabs,
-            "unifiedTab" to LinearLayout(activity),
             "paymentAmount" to 12_345L,
             "statusText" to TextView(activity),
-            "shareButton" to shareButton,
-            "cardContainer" to FrameLayout(activity),
-            "cardStatusText" to cardStatus,
-            "cardProgress" to cardProgress,
-            "cardActionButton" to cardAction,
+            "cardMessageText" to cardMessage,
+            "cardPayButton" to cardButton,
             "nfcAnimationContainer" to FrameLayout(activity),
             "nfcAnimationView" to mock<NfcPaymentAnimationView>(),
             "animationResultAmountText" to TextView(activity),
@@ -115,12 +108,112 @@ class PaymentRequestActivityCardTest {
     }
 
     @Test
-    fun `card tab stays hidden on devices without Tap to Pay`() {
+    fun `card button stays hidden on devices without Tap to Pay`() {
         // SDK 28 is below the Android 13 that Tap to Pay requires.
         call("setupCardPayments")
 
-        verify(tabs).setCardTabAvailable(false)
-        verify(tabs, never()).setCardTabAvailable(true)
+        assertEquals(View.GONE, cardButton.visibility)
+        assertEquals(View.GONE, cardMessage.visibility)
+    }
+
+    @Test
+    fun `card button and its message are pinned to the bottom of the screen`() {
+        val root = LayoutInflater.from(ContextThemeWrapper(activity, R.style.Theme_Numo))
+            .inflate(R.layout.activity_payment_request, null)
+        val button = root.findViewById<View>(R.id.card_pay_button).layoutParams as ConstraintLayout.LayoutParams
+        val message = root.findViewById<View>(R.id.card_message_text).layoutParams as ConstraintLayout.LayoutParams
+
+        // Anchored only from below, so text of any height above them cannot move them.
+        assertEquals(ConstraintLayout.LayoutParams.PARENT_ID, button.bottomToBottom)
+        assertEquals(ConstraintLayout.LayoutParams.UNSET, button.topToBottom)
+        assertEquals(R.id.card_pay_button, message.bottomToTop)
+        assertEquals(ConstraintLayout.LayoutParams.UNSET, message.topToBottom)
+    }
+
+    @Test
+    fun `card button names the action and leaves the amount to the total above`() {
+        ReflectionHelpers.setField(activity, "cardAmount", CardAmountResolver.CardAmount(1200, "usd"))
+
+        ReflectionHelpers.callInstanceMethod<Any?>(activity, "updateCardButtonLabel")
+
+        assertEquals("Pay with card", cardButton.text.toString())
+    }
+
+    @Test
+    fun `card attempt that ends without a charge explains why and offers the card again`() {
+        call("showCardBusy")
+        assertFalse(cardButton.isEnabled)
+        assertEquals(activity.getString(R.string.card_payment_button_preparing), cardButton.text.toString())
+        assertTrue(ReflectionHelpers.getField(activity, "isCardCollecting"))
+
+        showCardIdle(activity.getString(R.string.card_payment_status_cancelled))
+
+        assertFalse(ReflectionHelpers.getField(activity, "isCardCollecting"))
+        assertEquals(activity.getString(R.string.card_payment_status_cancelled), cardMessage.text.toString())
+        assertTrue(cardButton.isEnabled)
+        assertEquals(activity.getString(R.string.card_payment_button), cardButton.text.toString())
+    }
+
+    @Test
+    fun `numo's waiting screen covers checkout while the charge is confirmed and leaves if it fails`() {
+        // Leaving the overlay re-applies insets to the screen's root view.
+        activity.window.setContentView(FrameLayout(activity).apply { id = R.id.payment_request_root })
+        val overlay: View = ReflectionHelpers.getField(activity, "nfcAnimationContainer")
+        val animationView: NfcPaymentAnimationView = ReflectionHelpers.getField(activity, "nfcAnimationView")
+        overlay.visibility = View.GONE
+
+        call("showCardConfirming")
+        assertEquals(View.VISIBLE, overlay.visibility)
+        verify(animationView).startProcessingDirectly(animateIn = true)
+        verify(animationView, never()).startReading(false)
+
+        showCardIdle(activity.getString(R.string.card_payment_status_unresolved))
+        // The waiting screen fades out over checkout before it goes.
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+        assertEquals(View.GONE, overlay.visibility)
+    }
+
+    @Test
+    fun `pausing while Stripe launches parks a neutral cover behind Stripe and clears it on cancel`() {
+        activity.window.setContentView(FrameLayout(activity).apply { id = R.id.payment_request_root })
+        val overlay: View = ReflectionHelpers.getField(activity, "nfcAnimationContainer")
+        val animationView: NfcPaymentAnimationView = ReflectionHelpers.getField(activity, "nfcAnimationView")
+        overlay.visibility = View.GONE
+
+        call("showCardBusy")
+        call("onCardCollectionStarting")
+        call("maybeParkCardSurfaceCoverOnPause")
+
+        assertEquals(View.VISIBLE, overlay.visibility)
+        assertTrue(ReflectionHelpers.getField(activity, "isCardSurfaceCovered"))
+        verify(animationView).showSurfaceCover()
+
+        showCardIdle(activity.getString(R.string.card_payment_status_cancelled))
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+        assertFalse(ReflectionHelpers.getField(activity, "isCardSurfaceCovered"))
+        assertEquals(View.GONE, overlay.visibility)
+    }
+
+    @Test
+    fun `pausing during normal checkout does not park the card surface cover`() {
+        val overlay: View = ReflectionHelpers.getField(activity, "nfcAnimationContainer")
+        val animationView: NfcPaymentAnimationView = ReflectionHelpers.getField(activity, "nfcAnimationView")
+        overlay.visibility = View.GONE
+
+        call("maybeParkCardSurfaceCoverOnPause")
+
+        assertEquals(View.GONE, overlay.visibility)
+        assertFalse(ReflectionHelpers.getField(activity, "isCardSurfaceCovered"))
+        verify(animationView, never()).showSurfaceCover()
+    }
+
+    @Test
+    fun `card attempt with an unknown outcome turns the button into a status check`() {
+        setReviewRequired(true)
+        showCardIdle(activity.getString(R.string.card_payment_status_unresolved))
+
+        assertTrue(cardButton.isEnabled)
+        assertEquals(activity.getString(R.string.card_payment_action_check), cardButton.text.toString())
     }
 
     @Test
@@ -144,11 +237,11 @@ class PaymentRequestActivityCardTest {
     @Test
     fun `uncertain card outcome disables bitcoin until its status is checked`() {
         val paymentId = addPendingPayment()
-        val unifiedTab = ReflectionHelpers.getField<LinearLayout>(activity, "unifiedTab")
+        val bitcoinViews = attachBitcoinViews()
 
         setReviewRequired(true)
 
-        assertFalse(unifiedTab.isEnabled)
+        bitcoinViews.forEach { assertEquals(View.INVISIBLE, it.visibility) }
         assertTrue(
             PaymentsHistoryActivity.getPaymentEntryById(activity, paymentId)
                 ?.cardPaymentReviewRequired == true,
@@ -156,7 +249,7 @@ class PaymentRequestActivityCardTest {
 
         setReviewRequired(false)
 
-        assertTrue(unifiedTab.isEnabled)
+        bitcoinViews.forEach { assertEquals(View.VISIBLE, it.visibility) }
         assertFalse(
             PaymentsHistoryActivity.getPaymentEntryById(activity, paymentId)
                 ?.cardPaymentReviewRequired == true,
@@ -164,18 +257,32 @@ class PaymentRequestActivityCardTest {
     }
 
     @Test
+    fun `uncertain card outcome starts its status check when checkout reopens`() {
+        val bitcoinViews = attachBitcoinViews()
+        ReflectionHelpers.setField(
+            activity,
+            "cardAmount",
+            CardAmountResolver.CardAmount(minorUnits = 1_250, currency = "usd"),
+        )
+
+        call("resumeCardPaymentReview")
+
+        // The check ran straight away: with no Stripe key in this test it stops at "not set up".
+        assertEquals(activity.getString(R.string.card_payment_status_not_configured), cardMessage.text.toString())
+        assertFalse(cardButton.isEnabled)
+        assertEquals(activity.getString(R.string.card_payment_action_check), cardButton.text.toString())
+        bitcoinViews.forEach { assertEquals(View.INVISIBLE, it.visibility) }
+    }
+
+    @Test
     fun `missing bitcoin price offers a retry instead of charging`() {
         ReflectionHelpers.setField(activity, "formattedAmountString", "12,345 sats")
 
-        call("enterCardMode")
-        assertEquals(View.GONE, cardStatus.visibility)
         call("startCardPayment")
 
-        val message = cardStatus.text.toString()
+        val message = cardMessage.text.toString()
         assertTrue(message, message.startsWith("Card amount unavailable"))
-        assertEquals(View.VISIBLE, cardStatus.visibility)
-        assertEquals(View.VISIBLE, cardAction.visibility)
-        assertEquals(View.GONE, cardProgress.visibility)
+        assertTrue(cardButton.isEnabled)
         assertEquals(null, ReflectionHelpers.getField<Job?>(activity, "cardJob"))
     }
 
@@ -185,49 +292,19 @@ class PaymentRequestActivityCardTest {
 
         call("startCardPayment")
 
-        assertEquals(activity.getString(R.string.card_payment_status_not_configured), cardStatus.text.toString())
-        assertEquals(View.GONE, cardAction.visibility)
+        assertEquals(activity.getString(R.string.card_payment_status_not_configured), cardMessage.text.toString())
+        assertFalse(cardButton.isEnabled)
         assertEquals(null, ReflectionHelpers.getField<Job?>(activity, "cardJob"))
     }
 
     @Test
-    fun `card tab waits for explicit initialization and leaving it restores sharing`() {
-        ReflectionHelpers.setField(
-            activity,
-            "cardAmount",
-            CardAmountResolver.CardAmount(minorUnits = 1_250, currency = "usd"),
-        )
-
-        call("enterCardMode")
-
-        assertEquals(View.GONE, cardStatus.visibility)
-        assertEquals(View.VISIBLE, cardAction.visibility)
-        assertEquals(View.GONE, cardProgress.visibility)
-        assertEquals(null, ReflectionHelpers.getField<Job?>(activity, "cardJob"))
-        assertEquals(View.INVISIBLE, shareButton.visibility)
-
+    fun `closing checkout stops card collection`() {
         val collection = Job()
         ReflectionHelpers.setField(activity, "cardJob", collection)
-        whenever(tabs.getCurrentTab()).thenReturn(PaymentTab.UNIFIED)
-        call("exitCardMode")
+
+        call("cancelCardCollection")
 
         assertTrue(collection.isCancelled)
-        assertEquals(View.VISIBLE, shareButton.visibility)
-    }
-
-    @Test
-    fun `uncertain card outcome starts reconciliation when card tab opens`() {
-        ReflectionHelpers.setField(
-            activity,
-            "cardAmount",
-            CardAmountResolver.CardAmount(minorUnits = 1_250, currency = "usd"),
-        )
-        setReviewRequired(true)
-
-        call("enterCardMode")
-
-        assertEquals(activity.getString(R.string.card_payment_status_not_configured), cardStatus.text.toString())
-        assertEquals(View.GONE, cardAction.visibility)
     }
 
     @Test
@@ -265,12 +342,12 @@ class PaymentRequestActivityCardTest {
     }
 
     @Test
-    fun `leaving the card tab while the card is being charged lets the charge finish`() {
+    fun `closing checkout while the card is being charged lets the charge finish`() {
         val collection = Job()
         ReflectionHelpers.setField(activity, "cardJob", collection)
         setCharging(true)
 
-        call("exitCardMode")
+        call("cancelCardCollection")
 
         assertFalse(collection.isCancelled)
         assertEquals(collection, ReflectionHelpers.getField<Job?>(activity, "cardJob"))
@@ -301,6 +378,29 @@ class PaymentRequestActivityCardTest {
 
     private fun setCharging(charging: Boolean) {
         ReflectionHelpers.setStaticField(StripeTerminalManager::class.java, "isCharging", charging)
+    }
+
+    /** Gives the activity the QR, instruction and share views that the review lock hides. */
+    private fun attachBitcoinViews(): List<View> {
+        val qr = View(activity).apply { id = R.id.qr_card }
+        val instruction = TextView(activity).apply { id = R.id.instruction_text }
+        val share = View(activity)
+        activity.window.setContentView(FrameLayout(activity).apply {
+            id = R.id.payment_request_root
+            addView(qr)
+            addView(instruction)
+        })
+        ReflectionHelpers.setField(activity, "shareButton", share)
+        return listOf(qr, instruction, share)
+    }
+
+    private fun showCardIdle(message: String) {
+        ReflectionHelpers.callInstanceMethod<Any?>(
+            activity,
+            "showCardIdle",
+            ReflectionHelpers.ClassParameter.from(String::class.java, message),
+            ReflectionHelpers.ClassParameter.from(Boolean::class.javaPrimitiveType, true),
+        )
     }
 
     private fun call(method: String, vararg args: String): Any? =

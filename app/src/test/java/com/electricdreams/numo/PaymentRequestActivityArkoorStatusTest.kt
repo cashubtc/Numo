@@ -63,14 +63,15 @@ class PaymentRequestActivityArkoorStatusTest {
     }
 
     @Test
-    fun `failed arkoor leaves only the working payment methods in the status`() {
+    fun `failed arkoor leaves the status line hidden`() {
         unavailable()
         val tabs = mock<PaymentTabManager>()
         whenever(tabs.getCurrentTab()).thenReturn(PaymentTabManager.PaymentTab.UNIFIED)
         ReflectionHelpers.setField(activity, "tabManager", tabs)
         repeat(2) {
             ReflectionHelpers.callInstanceMethod<Void>(activity, "updatePaymentMethodStatus")
-            assertEquals("Lightning", status.text.toString())
+            assertEquals(View.GONE, status.visibility)
+            assertEquals("", status.text.toString())
         }
         assertEquals(0, ShadowToast.shownToastCount())
     }

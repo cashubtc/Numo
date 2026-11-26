@@ -16,7 +16,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.Filter
 import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -34,12 +36,19 @@ import com.google.android.material.transition.MaterialFadeThrough
 import com.google.android.material.transition.MaterialSharedAxis
 import java.util.Locale
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.ActivityStripeCardSetupBinding
+import com.electricdreams.numo.payment.card.AddressLookup
+import com.electricdreams.numo.payment.card.AddressQuery
+import com.electricdreams.numo.payment.card.AddressSuggestion
+import com.electricdreams.numo.payment.card.PhotonAddressLookup
 import com.electricdreams.numo.payment.card.StripeCardConfig
 import com.electricdreams.numo.payment.card.StripeCardSettings
 import com.electricdreams.numo.payment.card.StripeConnectionTokenClient.StripeApiException
@@ -50,8 +59,8 @@ import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
- * Guided setup for card payments: paste a Stripe key, then pick or add the shop location. The
- * setup check follows in [StripeCardCheckActivity].
+ * Guided setup for card payments: paste a Stripe key, then pick, add, or paste the shop location.
+ * The setup check follows in [StripeCardCheckActivity].
  *
  * The same screen edits one part later (the key or the location), opened at that step.
  */
@@ -61,6 +70,55 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
     private enum class Step { KEY, LOCATION, ADD_LOCATION }
 
+    private data class CountryChoice(val name: String, val code: String) {
+        override fun toString(): String = name
+    }
+
+    private inner class CountryAdapter(choices: List<CountryChoice>) : ArrayAdapter<CountryChoice>(
+        this,
+        android.R.layout.simple_list_item_1,
+        choices,
+    ) {
+        private val allChoices = choices.toList()
+        private val countryFilter = object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val query = constraint?.toString()?.trim().orEmpty()
+                val filtered = if (query.isEmpty()) allChoices else allChoices.filter { choice ->
+                    choice.name.contains(query, ignoreCase = true) ||
+                        choice.code.startsWith(query, ignoreCase = true)
+                }
+                return FilterResults().apply {
+                    values = filtered
+                    count = filtered.size
+                }
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                clear()
+                val filtered = (results?.values as? List<*>).orEmpty().filterIsInstance<CountryChoice>()
+                addAll(filtered)
+                notifyDataSetChanged()
+            }
+        }
+
+        override fun getFilter(): Filter = countryFilter
+    }
+
+    private inner class StreetSuggestionAdapter : ArrayAdapter<AddressSuggestion>(
+        this,
+        android.R.layout.simple_list_item_1,
+        mutableListOf(),
+    ) {
+        private val serverResultsFilter = object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults =
+                FilterResults().apply { count = this@StreetSuggestionAdapter.count }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) = Unit
+        }
+
+        override fun getFilter(): Filter = serverResultsFilter
+    }
+
     private lateinit var binding: ActivityStripeCardSetupBinding
 
     /** Replaceable so tests can store a key without the Android Keystore. */
@@ -69,6 +127,8 @@ class StripeCardSetupActivity : AppCompatActivity() {
     /** Replaceable so tests can answer for Stripe. */
     internal var locationsClient = StripeLocationsClient()
 
+    internal var addressLookup: AddressLookup = PhotonAddressLookup()
+
     private lateinit var mode: Mode
     private var locationRequestId: String? = null
     private var step = Step.KEY
@@ -76,8 +136,12 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
     /** Locations of the account, once listed; null until then. */
     private var locations: List<StripeLocation>? = null
+    private var locationListingDenied = false
     private var selectedLocationId: String? = null
     private val countryCodesByName = linkedMapOf<String, String>()
+    private lateinit var streetSuggestionAdapter: ArrayAdapter<AddressSuggestion>
+    private var streetLookupJob: Job? = null
+    private var suppressStreetLookup = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,6 +185,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private fun showStep(target: Step, animate: Boolean = true) {
         val forward = target.ordinal >= step.ordinal
         step = target
+        if (target != Step.ADD_LOCATION) streetLookupJob?.cancel()
         hideKeyboard()
         if (animate) {
             // Steps slide along one axis, so going back visibly goes back.
@@ -136,6 +201,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
         ).forEach { (containerStep, view) ->
             view.visibility = if (containerStep == target) View.VISIBLE else View.GONE
         }
+        binding.nextButton.visibility = if (target == Step.ADD_LOCATION) View.GONE else View.VISIBLE
 
         val position = if (target == Step.KEY) 1 else 2
         binding.progressHeader.visibility = if (mode == Mode.SETUP) View.VISIBLE else View.GONE
@@ -156,9 +222,6 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private fun goBack() {
         if (isBusy) return
         when {
-            // Setup skips the empty picker on the way in, so it skips it on the way back too.
-            step == Step.ADD_LOCATION && mode == Mode.SETUP && locations.isNullOrEmpty() ->
-                showStep(Step.KEY)
             step == Step.ADD_LOCATION -> showStep(Step.LOCATION)
             step == Step.LOCATION && mode == Mode.SETUP -> showStep(Step.KEY)
             else -> finish()
@@ -184,11 +247,14 @@ class StripeCardSetupActivity : AppCompatActivity() {
     }
 
     private fun updateNextButton() {
-        binding.nextButton.isEnabled = !isBusy && when (step) {
+        val enabled = !isBusy && when (step) {
             Step.KEY -> true
-            Step.LOCATION -> selectedLocationId != null && locations != null
+            Step.LOCATION -> binding.locationIdInput.text?.isNotBlank() == true ||
+                (selectedLocationId != null && locations != null)
             Step.ADD_LOCATION -> true
         }
+        binding.nextButton.isEnabled = enabled
+        binding.addLocationSubmitButton.isEnabled = enabled
         binding.nextButton.setText(
             when {
                 isBusy && step == Step.KEY -> R.string.stripe_card_setup_checking_key
@@ -197,12 +263,17 @@ class StripeCardSetupActivity : AppCompatActivity() {
                 else -> R.string.stripe_card_setup_next
             }
         )
+        binding.addLocationSubmitButton.setText(
+            if (isBusy) R.string.stripe_card_add_location_saving
+            else R.string.stripe_card_add_location_submit
+        )
     }
 
     private fun setBusy(busy: Boolean) {
         isBusy = busy
         // A waiting button that shows no motion looks frozen.
         binding.nextButton.icon = if (busy) busyIndicator else null
+        binding.addLocationSubmitButton.icon = if (busy) busyIndicator else null
         updateNextButton()
     }
 
@@ -253,7 +324,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
     private fun submitKey() {
         val typed = binding.stripeKeyInput.text?.toString()?.trim().orEmpty()
-        val key = typed.ifEmpty { settings.storedKey().orEmpty() }
+        val key = if (mode == Mode.EDIT_KEY) typed.ifEmpty { settings.storedKey().orEmpty() } else typed
         if (!StripeCardConfig.isValidRestrictedKey(key)) {
             showFieldError(binding.stripeKeyLayout, getString(R.string.stripe_card_invalid_key))
             return
@@ -272,12 +343,8 @@ class StripeCardSetupActivity : AppCompatActivity() {
             }
             setBusy(false)
             when {
-                // Such a key could take payments, but the location could then only be typed in
-                // by its ID, which Stripe gives no way to verify with the same key.
-                error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN -> showFieldError(
-                    binding.stripeKeyLayout,
-                    getString(R.string.stripe_card_key_no_locations),
-                )
+                error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN ->
+                    acceptKey(key, null)
                 else -> {
                     Log.w(TAG, "Stripe did not accept the key", error)
                     showFieldError(binding.stripeKeyLayout, stripeErrorText(error))
@@ -286,7 +353,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun acceptKey(key: String, listed: List<StripeLocation>) {
+    private suspend fun acceptKey(key: String, listed: List<StripeLocation>?) {
         val saved = withContext(Dispatchers.IO) { settings.saveKey(key) }
         setBusy(false)
         if (!saved) {
@@ -296,14 +363,14 @@ class StripeCardSetupActivity : AppCompatActivity() {
         binding.stripeKeyInput.text?.clear()
         showCurrentKey(StripeCardSettings.maskKey(key))
         locations = listed
-        val only = listed.singleOrNull()
+        locationListingDenied = listed == null
+        val only = listed?.singleOrNull()
         when {
             mode == Mode.EDIT_KEY -> done()
+            listed == null -> showStep(Step.LOCATION)
             // One location leaves nothing to choose. It shows on the status page afterwards,
             // where it can be changed or another added.
             only != null -> saveSelectedLocation(only)
-            // None yet: adding one is the only way on.
-            listed.isEmpty() -> showStep(Step.ADD_LOCATION)
             else -> showStep(Step.LOCATION)
         }
     }
@@ -332,6 +399,16 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private fun setupLocationStep() {
         binding.locationRetryButton.setOnClickListener { loadLocations() }
         binding.addLocationButton.setOnClickListener { showStep(Step.ADD_LOCATION) }
+        binding.locationIdLayout.setEndIconOnClickListener { paste(binding.locationIdInput) }
+        binding.locationIdInput.setOnEditorActionListener(submitOnAction)
+        binding.locationIdInput.doAfterTextChanged {
+            binding.locationIdLayout.error = null
+            if (!it.isNullOrBlank() && selectedLocationId != null) {
+                selectedLocationId = null
+                binding.locationList.clearCheck()
+            }
+            updateNextButton()
+        }
         binding.useOtherKeyButton.setOnClickListener {
             if (mode == Mode.SETUP) showStep(Step.KEY) else {
                 startActivity(editKeyIntent(this, intent.getBooleanExtra(EXTRA_THEN_CHECK, true)))
@@ -339,13 +416,27 @@ class StripeCardSetupActivity : AppCompatActivity() {
             }
         }
         binding.locationList.setOnCheckedChangeListener { group, checkedId ->
-            selectedLocationId = group.findViewById<RadioButton>(checkedId)?.tag as? String
-            updateNextButton()
+            onLocationChoiceChanged(group, checkedId)
         }
     }
 
+    private fun onLocationChoiceChanged(group: RadioGroup, checkedId: Int) {
+        selectedLocationId = group.findViewById<RadioButton>(checkedId)?.tag as? String
+        if (selectedLocationId != null && binding.locationIdInput.text?.isNotEmpty() == true) {
+            binding.locationIdInput.text?.clear()
+        }
+        updateNextButton()
+    }
+
     private fun enterLocationStep() {
-        if (locations != null) showLocations() else loadLocations()
+        when {
+            locationListingDenied -> showLocationState(
+                message = getString(R.string.stripe_card_location_no_permission),
+                otherKey = true,
+            )
+            locations != null -> showLocations()
+            else -> loadLocations()
+        }
     }
 
     private fun loadLocations() {
@@ -363,14 +454,17 @@ class StripeCardSetupActivity : AppCompatActivity() {
             when {
                 error == null -> {
                     locations = result.getOrThrow()
+                    locationListingDenied = false
                     showLocations(animate = true)
                 }
-                // Only a key stored before keys had to list locations gets here.
-                error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN -> showLocationState(
-                    animate = true,
-                    message = getString(R.string.stripe_card_location_no_permission),
-                    otherKey = true,
-                )
+                error is StripeApiException && error.httpStatus == HTTP_FORBIDDEN -> {
+                    locationListingDenied = true
+                    showLocationState(
+                        animate = true,
+                        message = getString(R.string.stripe_card_location_no_permission),
+                        otherKey = true,
+                    )
+                }
                 else -> {
                     Log.w(TAG, "Could not list Stripe locations", error)
                     showLocationState(animate = true, message = stripeErrorText(error), retry = true)
@@ -400,8 +494,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
             if (location.id == preselected) binding.locationList.check(choice.id)
         }
         binding.locationList.setOnCheckedChangeListener { group, checkedId ->
-            selectedLocationId = group.findViewById<RadioButton>(checkedId)?.tag as? String
-            updateNextButton()
+            onLocationChoiceChanged(group, checkedId)
         }
         showLocationState(
             animate = animate,
@@ -450,21 +543,37 @@ class StripeCardSetupActivity : AppCompatActivity() {
     }
 
     private fun submitLocation() {
+        val locationId = binding.locationIdInput.text?.toString()?.trim().orEmpty()
+        if (locationId.isNotEmpty()) {
+            if (!StripeCardConfig.isValidLocationId(locationId)) {
+                showFieldError(
+                    binding.locationIdLayout,
+                    getString(R.string.stripe_card_location_id_invalid),
+                )
+                return
+            }
+            saveLocation(locationId, null)
+            return
+        }
         val location = locations?.firstOrNull { it.id == selectedLocationId } ?: return
         saveSelectedLocation(location)
     }
 
     private fun saveSelectedLocation(location: StripeLocation) {
+        saveLocation(location.id, location.displayName, location.place)
+    }
+
+    private fun saveLocation(locationId: String, name: String?, place: String? = null) {
         setBusy(true)
         lifecycleScope.launch {
             val saved = withContext(Dispatchers.IO) {
-                settings.saveLocation(location.id, location.displayName, location.place)
+                settings.saveLocation(locationId, name, place)
             }
             setBusy(false)
             if (saved) {
                 done()
             } else {
-                selectedLocationId = location.id
+                selectedLocationId = locationId
                 showStep(Step.LOCATION)
                 Toast.makeText(
                     this@StripeCardSetupActivity,
@@ -486,12 +595,12 @@ class StripeCardSetupActivity : AppCompatActivity() {
             .filter { (name, _) -> name.isNotBlank() }
             .sortedBy { (name, _) -> name }
             .forEach { (name, code) -> countryCodesByName[name] = code }
-        binding.countryInput.setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1, countryCodesByName.keys.toList())
-        )
         countryCodesByName.entries.firstOrNull { it.value == locale.country }?.let {
             binding.countryInput.setText(it.key, false)
         }
+        binding.countryInput.setAdapter(
+            CountryAdapter(countryCodesByName.map { (name, code) -> CountryChoice(name, code) })
+        )
         addressFields().forEach { (layout, input) ->
             input.doAfterTextChanged {
                 layout.error = null
@@ -499,7 +608,73 @@ class StripeCardSetupActivity : AppCompatActivity() {
             }
         }
         binding.postalInput.setOnEditorActionListener(submitOnAction)
+        binding.addLocationSubmitButton.setOnClickListener { onNext() }
+        setupStreetLookup()
     }
+
+    private fun setupStreetLookup() {
+        streetSuggestionAdapter = StreetSuggestionAdapter()
+        binding.streetInput.setAdapter(streetSuggestionAdapter)
+        binding.streetInput.setOnItemClickListener { _, _, position, _ ->
+            val suggestion = streetSuggestionAdapter.getItem(position) ?: return@setOnItemClickListener
+            suppressStreetLookup = true
+            binding.streetInput.setText(suggestion.line1)
+            suggestion.postalCode?.let(binding.postalInput::setText)
+            suggestion.city?.let(binding.cityInput::setText)
+            suggestion.state?.let(binding.stateInput::setText)
+            suggestion.countryCode?.let { code ->
+                countryCodesByName.entries.firstOrNull { it.value == code }?.let {
+                    binding.countryInput.setText(it.key, false)
+                }
+            }
+            suppressStreetLookup = false
+            locationRequestId = null
+            binding.streetInput.dismissDropDown()
+        }
+        listOf(binding.streetInput, binding.postalInput, binding.cityInput).forEach { input ->
+            input.doAfterTextChanged { scheduleStreetLookup() }
+        }
+        binding.countryInput.doAfterTextChanged {
+            locationRequestId = null
+            scheduleStreetLookup()
+        }
+    }
+
+    private fun scheduleStreetLookup() {
+        if (suppressStreetLookup) return
+        streetLookupJob?.cancel()
+        val query = currentAddressQuery()
+        if (query.street.length < MIN_STREET_QUERY_LENGTH) {
+            streetSuggestionAdapter.clear()
+            binding.streetInput.dismissDropDown()
+            return
+        }
+        streetLookupJob = lifecycleScope.launch {
+            delay(STREET_LOOKUP_DEBOUNCE_MS)
+            try {
+                val suggestions = withContext(Dispatchers.IO) { addressLookup.search(query) }
+                if (currentAddressQuery() != query) return@launch
+                streetSuggestionAdapter.clear()
+                streetSuggestionAdapter.addAll(suggestions)
+                if (suggestions.isNotEmpty() && binding.streetInput.hasFocus()) {
+                    binding.streetInput.showDropDown()
+                } else {
+                    binding.streetInput.dismissDropDown()
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                Log.w(TAG, "Address lookup failed (${error.javaClass.simpleName})")
+            }
+        }
+    }
+
+    private fun currentAddressQuery() = AddressQuery(
+        street = binding.streetInput.text.toString().trim(),
+        postalCode = binding.postalInput.text.toString().trim(),
+        city = binding.cityInput.text.toString().trim(),
+        countryCode = countryCodesByName[binding.countryInput.text.toString()],
+    )
 
     private fun addressFields(): List<Pair<TextInputLayout, EditText>> = listOf(
         binding.shopNameLayout to binding.shopNameInput,
@@ -608,15 +783,17 @@ class StripeCardSetupActivity : AppCompatActivity() {
         private const val EXTRA_MODE = "mode"
         private const val EXTRA_THEN_CHECK = "then_check"
         /**
-         * Stripe's form for a new restricted key, with the name and the two permissions Numo
-         * needs filled in, so the merchant only has to create it and copy it.
+         * Stripe's form for a new restricted key, with the name and recommended permissions
+         * filled in, so the merchant only has to create it and copy it.
          */
         private const val STRIPE_API_KEYS_URL = "https://dashboard.stripe.com/apikeys/create" +
             "?name=Numo" +
             "&permissions%5B%5D=rak_terminal_connection_token_write" +
-            "&permissions%5B%5D=rak_terminal_location_write"
+            "&permissions%5B%5D=rak_terminal_location_read"
         private const val HTTP_UNAUTHORIZED = 401
         private const val HTTP_FORBIDDEN = 403
+        private const val MIN_STREET_QUERY_LENGTH = 3
+        private const val STREET_LOOKUP_DEBOUNCE_MS = 400L
         private const val STEP_ANIMATION_MS = 240L
         private const val CAPTION_SCALE = 0.85f
 

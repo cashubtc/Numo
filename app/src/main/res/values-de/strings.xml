@@ -59,7 +59,6 @@
 
     <string name="payment_request_close_content_description">Schließen</string>
     <string name="payment_request_share_content_description">Teilen</string>
-    <string name="payment_request_pay_label">Bezahlen</string>
     <string name="payment_request_instruction_scan_or_tap">Scannen oder tippen zum Bezahlen</string>
     <string name="payment_request_nfc_reading">Lesen von NFC...</string>
     <string name="payment_request_animation_close">Fertig</string>
@@ -68,7 +67,6 @@
     <string name="payment_request_error_ndef_prepare">NDEF-Zahlungsdaten konnten nicht vorbereitet werden</string>
     <string name="payment_request_error_nothing_to_share">Noch nichts zum Teilen</string>
 
-    <string name="payment_request_status_preparing">Zahlungsanfrage wird vorbereitet...</string>
     <string name="payment_request_status_waiting_for_payment">Warte auf Zahlung...</string>
     <string name="payment_request_status_error_qr">Fehler beim Generieren des QR-Codes</string>
     <string name="payment_request_status_error_generic">Fehler: %1$s</string>
@@ -332,6 +330,7 @@
     <string name="nfc_payment_error_unexpected">Etwas ist schiefgelaufen. Versuche es erneut — es wurden keine Gelder überwiesen.</string>
     <string name="nfc_payment_hint_keep_close">Telefon nah halten</string>
     <string name="nfc_payment_hint_processing">Zahlung wird verarbeitet...\nDu kannst dein Telefon wegnehmen</string>
+    <string name="nfc_payment_hint_tap_lost">Verbindung unterbrochen – Telefon ruhig halten und erneut versuchen</string>
 
 
     <string name="common_ok">OK</string>
@@ -771,11 +770,6 @@
 
     <string name="settings_item_withdrawals_title">Abhebungen</string>
     <string name="settings_item_withdrawals_subtitle">Auto-Abhebungseinstellungen und -verlauf</string>
-    <string name="settings_item_default_payment_method_title">Standardzahlung</string>
-    <string name="default_payment_method_explainer_title">Schnelleinstellungen</string>
-    <string name="default_payment_method_explainer_body">Du kannst die Standardzahlungsmethode direkt im Checkout ändern, indem du den Tab Bitcoin oder Karte lange drückst.</string>
-    <string name="default_payment_method_section_options">STANDARDZAHLUNGSMETHODE</string>
-    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
 
 
     <string name="manual_withdraw_section_title">Manuelle Abhebung</string>
@@ -950,8 +944,6 @@
     <string name="pin_reset_recovery_phrase">Wiederherstellungsphrase</string>
     <string name="pin_reset_paste_clipboard">Aus Zwischenablage einfügen</string>
     <string name="pin_reset_button">PIN zurücksetzen</string>
-    <string name="payment_request_tab_unified">Bitcoin</string>
-    <string name="payment_request_default_method_set">%1$s als Standardzahlungsmethode festgelegt</string>
     <string name="payment_request_default_description">Zahlung von %1$d Sats</string>
     <string name="payment_request_lightning_description">Numo-POS-Zahlung von %1$d Sats</string>
 

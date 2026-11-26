@@ -59,7 +59,6 @@
     
     <string name="payment_request_close_content_description">近い</string>
     <string name="payment_request_share_content_description">共有</string>
-    <string name="payment_request_pay_label">支払う</string>
     <string name="payment_request_instruction_scan_or_tap">スキャンまたはタップして支払う</string>
     <string name="payment_request_nfc_reading">NFCから読み取り中...</string>
     <string name="payment_request_animation_close">終わり</string>
@@ -68,7 +67,6 @@
     <string name="payment_request_error_ndef_prepare">NDEF 支払いデータの準備に失敗しました</string>
     <string name="payment_request_error_nothing_to_share">まだ共有するものはありません</string>
 
-    <string name="payment_request_status_preparing">支払いリクエストを準備しています...</string>
     <string name="payment_request_status_waiting_for_payment">支払いを待っています...</string>
     <string name="payment_request_status_error_qr">QRコード生成エラー</string>
     <string name="payment_request_status_error_generic">エラー: %1$s</string>
@@ -306,6 +304,7 @@
     <string name="nfc_payment_error_unexpected">予期しないエラーが発生しました: %1$s</string>
     <string name="nfc_payment_hint_keep_close">携帯電話を近くに置いておく</string>
     <string name="nfc_payment_hint_processing">支払いを処理しています...\n携帯電話を持ち上げても大丈夫です</string>
+    <string name="nfc_payment_hint_tap_lost">タップが途切れました。携帯電話を動かさずにもう一度お試しください</string>
 
     
     <string name="common_ok">わかりました</string>
@@ -885,7 +884,6 @@
     <string name="pin_reset_recovery_phrase">リカバリーフレーズ</string>
     <string name="pin_reset_paste_clipboard">クリップボードから貼り付け</string>
     <string name="pin_reset_button">PINのリセット</string>
-    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">%1$d の支払い</string>
     <string name="payment_request_lightning_description">%1$d 衛星の Numo POS 支払い</string>
     <string name="onboarding_status_generating_seed">シードフレーズを生成しています…</string>
@@ -896,12 +894,6 @@
     <string name="onboarding_generating_hint">少々お待ちください</string>
     <string name="onboarding_fetching_searching_backup">バックアップを検索しています…</string>
     <string name="onboarding_fetching_checking_relays">ミント設定のNostrリレーを確認しています</string>
-    <string name="settings_item_default_payment_method_title">デフォルトの支払い</string>
-    <string name="default_payment_method_explainer_title">クイック設定</string>
-    <string name="default_payment_method_explainer_body">決済画面でBitcoinまたはカードのタブを長押しすると、デフォルトの支払い方法を変更できます。</string>
-    <string name="default_payment_method_section_options">デフォルトの支払い方法</string>
-    <string name="default_payment_method_option_unified">Bitcoin（Cashu + Lightning）</string>
-    <string name="payment_request_default_method_set">%1$sがデフォルトの支払い方法として設定されました</string>
     <!-- Insights Screen -->
     <string name="insights_open">売上</string>
     <string name="insights_title">売上</string>

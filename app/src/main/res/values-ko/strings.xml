@@ -59,7 +59,6 @@
     
     <string name="payment_request_close_content_description">닫다</string>
     <string name="payment_request_share_content_description">공유하다</string>
-    <string name="payment_request_pay_label">지불하다</string>
     <string name="payment_request_instruction_scan_or_tap">스캔하거나 탭하여 결제하세요</string>
     <string name="payment_request_nfc_reading">NFC에서 읽는 중...</string>
     <string name="payment_request_animation_close">완료</string>
@@ -68,7 +67,6 @@
     <string name="payment_request_error_ndef_prepare">NDEF 결제 데이터를 준비하지 못했습니다.</string>
     <string name="payment_request_error_nothing_to_share">아직 공유할 내용이 없습니다.</string>
 
-    <string name="payment_request_status_preparing">결제 요청 준비 중...</string>
     <string name="payment_request_status_waiting_for_payment">결제를 기다리는 중...</string>
     <string name="payment_request_status_error_qr">QR 코드 생성 오류</string>
     <string name="payment_request_status_error_generic">오류: %1$s</string>
@@ -306,6 +304,7 @@
     <string name="nfc_payment_error_unexpected">예상치 못한 오류가 발생했습니다: %1$s</string>
     <string name="nfc_payment_hint_keep_close">휴대전화를 가까이에 두세요</string>
     <string name="nfc_payment_hint_processing">결제 처리 중...\n휴대전화를 들어도 됩니다.</string>
+    <string name="nfc_payment_hint_tap_lost">탭이 끊겼습니다. 휴대전화를 움직이지 말고 다시 시도하세요</string>
 
     
     <string name="common_ok">좋아요</string>
@@ -885,7 +884,6 @@
     <string name="pin_reset_recovery_phrase">회복 문구</string>
     <string name="pin_reset_paste_clipboard">클립보드에서 붙여넣기</string>
     <string name="pin_reset_button">PIN 재설정</string>
-    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">%1$d 토요일 결제</string>
     <string name="payment_request_lightning_description">%1$d sats의 Numo POS 결제</string>
     <string name="onboarding_status_generating_seed">시드 구문 생성 중…</string>
@@ -896,12 +894,6 @@
     <string name="onboarding_generating_hint">잠시만 기다려 주세요</string>
     <string name="onboarding_fetching_searching_backup">백업 검색 중…</string>
     <string name="onboarding_fetching_checking_relays">민트 설정에 대한 Nostr 릴레이 확인 중</string>
-    <string name="settings_item_default_payment_method_title">기본 결제 수단</string>
-    <string name="default_payment_method_explainer_title">빠른 설정</string>
-    <string name="default_payment_method_explainer_body">결제 화면에서 Bitcoin 또는 카드 탭을 길게 누르면 기본 결제 수단을 빠르게 변경할 수 있습니다.</string>
-    <string name="default_payment_method_section_options">기본 결제 수단</string>
-    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
-    <string name="payment_request_default_method_set">%1$s(이)가 기본 결제 수단으로 설정되었습니다</string>
     <!-- Insights Screen -->
     <string name="insights_open">매출</string>
     <string name="insights_title">매출</string>

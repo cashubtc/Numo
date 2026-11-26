@@ -94,7 +94,6 @@ class SettingsPageLayoutTest {
             R.layout.activity_settings,
             R.layout.activity_theme_settings,
             R.layout.activity_language_settings,
-            R.layout.activity_default_payment_method_settings,
             R.layout.activity_currency_settings,
             R.layout.activity_security_settings,
             R.layout.activity_developer_settings,

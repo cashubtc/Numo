@@ -13,10 +13,7 @@
     <string name="stripe_card_invalid_key">rk_live_ または rk_test_ で始まる制限付きキーを入力してください。シークレットキー (sk_…) は使用できません。</string>
     <string name="stripe_card_save_failed">この端末にキーを安全に保存できませんでした</string>
     <string name="stripe_card_removed">Stripe キーを削除しました</string>
-    <string name="payment_request_tab_card">カード</string>
-    <string name="payment_request_instruction_card">カード決済</string>
-    <string name="card_payment_status_preparing">カードリーダーを準備中…</string>
-    <string name="card_payment_status_waiting">カードを待っています…</string>
+    <string name="card_payment_status_confirming">支払いを確認中…</string>
     <string name="card_payment_status_cancelled">カード決済がキャンセルされました</string>
     <string name="card_payment_status_failed">カード決済に失敗しました: %1$s</string>
     <string name="card_payment_status_unresolved">カード決済を確認できませんでした。ボタンをタップして状態を確認してください。二重に請求されることはありません。</string>
@@ -27,10 +24,10 @@
     <string name="card_payment_status_amount_unavailable">カード決済額を計算できません: %1$s のビットコイン価格をまだ読み込んでいません</string>
     <string name="card_payment_status_location_required">Stripe のカード決済には位置情報の権限が必要です</string>
     <string name="card_payment_status_not_configured">カード決済が設定されていません</string>
-    <string name="card_payment_action_charge">%1$s を請求</string>
-    <string name="card_payment_action_retry">再試行</string>
+    <string name="card_payment_button">カードで支払う</string>
+    <string name="card_payment_button_preparing">カードリーダーを起動中…</string>
+    <string name="card_payment_action_check">カード決済を確認</string>
     <string name="transaction_detail_payment_type_card_value">カード (Stripe)</string>
-    <string name="default_payment_method_option_card">カード</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe カードリーダーをシミュレート</string>
     <string name="card_payment_simulation_requires_test_key">シミュレーションには Stripe のサンドボックスキー（rk_test_…）が必要です。</string>
     <string name="card_payment_debug_reader_unsupported">実際のカードを読み取るにはリリースビルドが必要です。サンドボックスでテストするには、開発者設定でカードリーダーのシミュレーションを有効にしてください。</string>

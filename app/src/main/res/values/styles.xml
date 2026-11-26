@@ -85,6 +85,15 @@
     </style>
 
     <!-- Button: Primary/secondary action labels -->
+    <!-- The checkout screen's single small size: instruction, status, conversion and tip lines -->
+    <style name="Text.PaymentCaption">
+        <item name="fontFamily">@font/inter_regular</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineSpacingExtra">2sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
     <style name="Text.Button">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">16sp</item>
@@ -271,6 +280,20 @@
         <item name="elevation">0dp</item>
     </style>
 
+    <!-- Card payment on the checkout screen: a quiet outlined pill beneath the QR code -->
+    <style name="Widget.Numo.Button.CardPay" parent="Widget.Button.Secondary.Outlined">
+        <item name="android:fontFamily">@font/inter_semi_bold</item>
+        <item name="fontFamily">@font/inter_semi_bold</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="cornerRadius">@dimen/radius_button_pill</item>
+        <item name="iconTint">@color/color_text_primary</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">@dimen/space_s</item>
+        <item name="iconSize">20dp</item>
+    </style>
+
     <style name="Widget.Numo.Button.Segmented" parent="Widget.Button.Secondary">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
@@ -435,6 +458,34 @@
         <item name="android:stateListAnimator">@null</item>
         <item name="backgroundTint">@null</item>
         <item name="elevation">0dp</item>
+    </style>
+
+    <!-- On colour: actions on the full-bleed green / red payment result screen -->
+    <style name="Widget.Numo.Button.OnColor" parent="Widget.Numo.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:fontFamily">@font/inter_semi_bold</item>
+        <item name="fontFamily">@font/inter_semi_bold</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="elevation">0dp</item>
+        <item name="cornerRadius">@dimen/radius_pill</item>
+    </style>
+
+    <!-- White pill with ink label: echoes the white result disc -->
+    <style name="Widget.Numo.Button.OnColor.Filled">
+        <item name="backgroundTint">@color/white</item>
+        <item name="android:textColor">@color/numo_dark</item>
+        <item name="rippleColor">@color/color_black_20</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+    </style>
+
+    <!-- Quiet white text action above the pill -->
+    <style name="Widget.Numo.Button.OnColor.Text">
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="rippleColor">@color/color_white_30</item>
+        <item name="android:minHeight">48dp</item>
     </style>
 
     <!-- Charge: POS primary action; theme-aware via bg_button_charge drawable -->

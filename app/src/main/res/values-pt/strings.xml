@@ -44,14 +44,12 @@
     <string name="tip_selection_main_confirm">Confirmar</string>
     <string name="payment_request_close_content_description">Fechar</string>
     <string name="payment_request_share_content_description">Compartilhar</string>
-    <string name="payment_request_pay_label">Pagar</string>
     <string name="payment_request_instruction_scan_or_tap">Escaneie ou aproxime para pagar</string>
     <string name="payment_request_nfc_reading">Lendo via NFC...</string>
     <string name="payment_request_animation_close">Pronto</string>
     <string name="payment_request_error_invalid_amount">Valor de pagamento inválido</string>
     <string name="payment_request_error_ndef_prepare">Não foi possível preparar os dados de pagamento NDEF</string>
     <string name="payment_request_error_nothing_to_share">Nada para compartilhar ainda</string>
-    <string name="payment_request_status_preparing">Preparando a solicitação de pagamento...</string>
     <string name="payment_request_status_waiting_for_payment">Aguardando o pagamento...</string>
     <string name="payment_request_status_error_qr">Erro ao gerar o código QR</string>
     <string name="payment_request_status_error_generic">Erro: %1$s</string>
@@ -252,6 +250,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="nfc_payment_error_unexpected">Ocorreu um erro inesperado: %1$s</string>
     <string name="nfc_payment_hint_keep_close">Mantenha o telefone próximo</string>
     <string name="nfc_payment_hint_processing">Processando pagamento...\nVocê pode levantar o telefone</string>
+    <string name="nfc_payment_hint_tap_lost">Aproximação perdida. Mantenha o telefone parado e tente novamente</string>
     <string name="common_ok">OK</string>
     <string name="common_or">ou</string>
     <string name="withdraw_lightning_toolbar_back">Voltar</string>
@@ -707,7 +706,6 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="pin_reset_recovery_phrase">Frase de recuperação</string>
     <string name="pin_reset_paste_clipboard">Colar da área de transferência</string>
     <string name="pin_reset_button">Redefinir PIN</string>
-    <string name="payment_request_tab_unified">Bitcoin</string>
     <string name="payment_request_default_description">Pagamento de %1$d sats</string>
     <string name="payment_request_lightning_description">Pagamento Numo POS de %1$d sats</string>
     <string name="onboarding_add_mint_url_hint">Insira a URL do mint</string>
@@ -735,12 +733,6 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="onboarding_mints_default_section_title">Mint Padrão</string>
     <string name="onboarding_mints_add_different_button">+ Novo Mint</string>
     <string name="onboarding_mints_scan_row_title">Escanear Código QR</string>
-    <string name="settings_item_default_payment_method_title">Pagamento padrão</string>
-    <string name="default_payment_method_explainer_title">Configurações rápidas</string>
-    <string name="default_payment_method_explainer_body">Você pode alterar o método de pagamento padrão diretamente no checkout mantendo pressionada a aba Bitcoin ou Cartão.</string>
-    <string name="default_payment_method_section_options">MÉTODO DE PAGAMENTO PADRÃO</string>
-    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
-    <string name="payment_request_default_method_set">%1$s definido como método de pagamento padrão</string>
     <!-- Tela de Estatísticas / Vendas -->
     <string name="insights_open">Vendas</string>
     <string name="insights_title">Vendas</string>

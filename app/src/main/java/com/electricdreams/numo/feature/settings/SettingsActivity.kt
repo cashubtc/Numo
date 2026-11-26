@@ -27,8 +27,6 @@ import com.electricdreams.numo.feature.pin.PinEntryActivity
 import com.electricdreams.numo.feature.pin.PinManager
 import com.electricdreams.numo.feature.pin.PinProtectionHelper
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
-import com.electricdreams.numo.payment.DefaultPaymentMethodManager
-import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.components.SettingsRowView
 import com.electricdreams.numo.util.startActivityForResultCompat
@@ -109,15 +107,6 @@ class SettingsActivity : AppCompatActivity() {
             getString(R.string.settings_fiat_conversion_disabled_custom_unit)
         })
 
-        val method = DefaultPaymentMethodManager.getInstance(this).getDefaultPaymentMethod()
-        binding.defaultPaymentMethodSettingsItem.setSubtitle(getString(
-            if (method == PaymentTab.CARD) {
-                R.string.default_payment_method_option_card
-            } else {
-                R.string.default_payment_method_option_unified
-            }
-        ))
-
         val theme = when (prefs.getString(ThemeSettingsActivity.PREF_THEME)) {
             ThemeSettingsActivity.THEME_OBSIDIAN -> R.string.theme_settings_option_obsidian
             ThemeSettingsActivity.THEME_BITCOIN_ORANGE -> R.string.theme_settings_option_bitcoin_orange
@@ -174,9 +163,6 @@ class SettingsActivity : AppCompatActivity() {
         basketNamesSettingsItem.setOnClickListener { openActivity(BasketNamesSettingsActivity::class.java) }
         currencySettingsItem.setOnClickListener {
             if (currencySettingsItem.isEnabled) openActivity(CurrencySettingsActivity::class.java)
-        }
-        defaultPaymentMethodSettingsItem.setOnClickListener {
-            openActivity(DefaultPaymentMethodSettingsActivity::class.java)
         }
         mintsSettingsItem.setOnClickListener {
             if (mintsSettingsItem.isEnabled) openProtectedActivity(MintsSettingsActivity::class.java)

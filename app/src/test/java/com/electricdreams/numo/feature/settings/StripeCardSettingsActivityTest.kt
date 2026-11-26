@@ -258,7 +258,7 @@ class StripeCardSettingsActivityTest {
     }
 
     @Test
-    fun `a partially configured key can be disconnected immediately`() {
+    fun `an incomplete setup does not offer disconnect`() {
         ActivityScenario.launch(StripeCardSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val settings = connectedSettings().apply {
@@ -268,13 +268,9 @@ class StripeCardSettingsActivityTest {
                 activity.settings = settings
                 val refresh = activity.refresh()
                 activity.idleUntil { refresh.isCompleted }
-                val disconnect = activity.findViewById<View>(R.id.disconnect_row)
-                assertTrue(disconnect.isShown)
-                disconnect.performClick()
-                activity.supportFragmentManager.executePendingTransactions()
-                activity.supportFragmentManager.fragments.single().requireView()
-                    .findViewById<View>(R.id.confirm_button).performClick()
-                assertFalse(settings.hasStoredKey())
+
+                assertFalse(activity.findViewById<View>(R.id.disconnect_row).isShown)
+                assertTrue(activity.findViewById<View>(R.id.intro_container).isShown)
             }
         }
     }

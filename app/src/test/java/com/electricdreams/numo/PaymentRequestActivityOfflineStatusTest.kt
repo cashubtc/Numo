@@ -2,7 +2,6 @@ package com.electricdreams.numo
 
 import android.provider.Settings
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
@@ -52,19 +51,22 @@ class PaymentRequestActivityOfflineStatusTest {
     }
 
     @Test
-    fun `unified payment keeps its request while status follows disconnect and reconnect`() {
+    fun `unified payment hides protocol list while online and toggles offline reassurance`() {
         ReflectionHelpers.callInstanceMethod<Void>(activity, "updatePaymentMethodStatus")
-        assertEquals("Lightning · Arkoor", status.text.toString())
+        assertEquals(View.GONE, status.visibility)
+        assertEquals("", status.text.toString())
         val request = ReflectionHelpers.callInstanceMethod<String>(activity, "unifiedPaymentRequest")
 
         whenever(monitor.isOnlineNow()).thenReturn(false)
         refreshStatus()
+        assertEquals(View.VISIBLE, status.visibility)
         assertEquals(activity.getString(R.string.payment_request_offline_note), status.text.toString())
         assertEquals(request, ReflectionHelpers.callInstanceMethod<String>(activity, "unifiedPaymentRequest"))
 
         whenever(monitor.isOnlineNow()).thenReturn(true)
         refreshStatus()
-        assertEquals("Lightning · Arkoor", status.text.toString())
+        assertEquals(View.GONE, status.visibility)
+        assertEquals("", status.text.toString())
         assertEquals(request, ReflectionHelpers.callInstanceMethod<String>(activity, "unifiedPaymentRequest"))
     }
 
@@ -79,14 +81,14 @@ class PaymentRequestActivityOfflineStatusTest {
     }
 
     @Test
-    fun `btcpay waiting status keeps its existing offline behavior`() {
+    fun `btcpay waiting status stays hidden without promising offline reconnect confirmation`() {
         ReflectionHelpers.setField(activity, "isDualQuoteCheckout", false)
         ReflectionHelpers.setField(activity, "paymentService", mock<BTCPayPaymentService>())
         whenever(monitor.isOnlineNow()).thenReturn(false)
-        val waiting = activity.getString(R.string.payment_request_status_waiting_for_payment)
-        status.text = waiting
+        status.text = ""
         refreshStatus()
-        assertEquals(waiting, status.text.toString())
+        assertEquals(View.GONE, status.visibility)
+        assertEquals("", status.text.toString())
     }
 
     @Test
@@ -102,14 +104,12 @@ class PaymentRequestActivityOfflineStatusTest {
         val controller = Robolectric.buildActivity(PaymentRequestActivity::class.java).create().start()
         val checkout = controller.get()
         val instruction = checkout.findViewById<TextView>(R.id.instruction_text)
-        val contactless = checkout.findViewById<ImageView>(R.id.contactless_icon)
         val pill = checkout.findViewById<View>(R.id.offline_pill)
         try {
             nfcOff.value = true
             strip.value = OfflineStripView.Mode.NFC_OFF
             shadowOf(checkout.mainLooper).idle()
             assertEquals(activity.getString(R.string.payment_request_instruction_scan), instruction.text)
-            assertEquals(View.GONE, contactless.visibility)
             pill.performClick()
             assertEquals(Settings.ACTION_NFC_SETTINGS, shadowOf(checkout).nextStartedActivity.action)
 
@@ -117,7 +117,6 @@ class PaymentRequestActivityOfflineStatusTest {
             strip.value = null
             shadowOf(checkout.mainLooper).idle()
             assertEquals(activity.getString(R.string.payment_request_instruction_scan_or_tap), instruction.text)
-            assertEquals(View.VISIBLE, contactless.visibility)
         } finally {
             controller.stop().destroy()
             nfcOff.value = false

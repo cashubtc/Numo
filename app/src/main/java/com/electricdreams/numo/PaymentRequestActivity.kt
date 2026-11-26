@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.ComponentName
+import android.content.res.Configuration
 import android.nfc.NfcAdapter
 import android.nfc.cardemulation.CardEmulation
 import android.os.Build
@@ -31,23 +32,26 @@ import com.electricdreams.numo.ui.offline.OfflineStripView
 import android.Manifest
 import android.content.pm.PackageManager
 import android.widget.ImageView
-import android.widget.ProgressBar
+import android.view.animation.PathInterpolator
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.progressindicator.CircularProgressIndicatorSpec
+import com.google.android.material.progressindicator.IndeterminateDrawable
 import com.stripe.stripeterminal.external.models.PaymentIntent
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import android.view.animation.DecelerateInterpolator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -75,6 +79,8 @@ import com.electricdreams.numo.payment.card.StripeCardSettings
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
+import com.electricdreams.numo.ui.util.isAnimationEnabled
+import com.electricdreams.numo.ui.util.shake
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.core.payment.BtcPayQrCodeBuilder
 import com.electricdreams.numo.core.payment.IPaymentService
@@ -102,15 +108,6 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var unifiedQrContainer: View
     private lateinit var cashuQrContainer: View
     private lateinit var lightningQrContainer: View
-    private lateinit var unifiedTab: android.widget.LinearLayout
-    private lateinit var cashuTab: android.widget.LinearLayout
-    private lateinit var lightningTab: android.widget.LinearLayout
-    private lateinit var unifiedTabText: TextView
-    private lateinit var cashuTabText: TextView
-    private lateinit var lightningTabText: TextView
-    private lateinit var unifiedTabIcon: TextView
-    private lateinit var cashuTabIcon: ImageView
-    private lateinit var lightningTabIcon: ImageView
     private lateinit var largeAmountDisplay: TextView
     private lateinit var convertedAmountDisplay: TextView
     private lateinit var statusText: TextView
@@ -135,14 +132,38 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var tipInfoText: TextView
 
     // Card (Stripe Tap to Pay) views and state
-    private lateinit var cardTab: android.widget.LinearLayout
-    private lateinit var cardContainer: View
-    private lateinit var cardStatusText: TextView
-    private lateinit var cardProgress: ProgressBar
-    private lateinit var cardActionButton: MaterialButton
+    private lateinit var cardPayButton: MaterialButton
+    private lateinit var cardMessageText: TextView
     private var cardAmount: CardAmountResolver.CardAmount? = null
     private var cardJob: Job? = null
+
+    /**
+     * True when the last card attempt's outcome is unknown. The sale may already be paid, so
+     * bitcoin stays off the screen and the next tap checks on the attempt. Saved with the sale.
+     */
     private var cardPaymentReviewRequired = false
+
+    /** True while the phone is reading a card, when it must not also emulate a payment tag. */
+    private var isCardCollecting = false
+
+    /** True once Stripe's Tap to Pay screen has been asked to open over checkout. */
+    private var isCardTapScreenLaunched = false
+
+    /** True while a neutral tap surface covers checkout underneath Stripe's Tap to Pay screen. */
+    private var isCardSurfaceCovered = false
+
+    /** True while Numo's own waiting screen covers checkout as Stripe confirms the charge. */
+    private var isCardConfirming = false
+
+    /** True while the tap waiting screen has the status bar hidden. */
+    private var isStatusBarHiddenForWaiting = false
+
+    /** Tracks whether the overlay is currently on the light/dark tap surface or full-bleed result colour. */
+    private enum class OverlayBarStyle { TAP_SURFACE, RESULT_COLOR }
+    private var currentOverlayBarStyle: OverlayBarStyle = OverlayBarStyle.TAP_SURFACE
+
+    /** Tracks whether the unified QR has already revealed once so only the first reveal fades in. */
+    private var hasShownUnifiedQr = false
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -235,16 +256,27 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var isProcessingNfcPayment = false
 
     private var hcePaymentCallback: NdefHostCardEmulationService.CashuPaymentCallback? = null
-    private var nfcSetupRunnable: Runnable? = null
-    private val nfcSetupHandler = Handler(Looper.getMainLooper())
+    private var hceReadyListener: NdefHostCardEmulationService.ReadyListener? = null
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
     // NFC animation timing diagnostics
     private var nfcOverlayShownAtMs: Long = 0
     private var nfcAnimationStartedAtMs: Long = 0
-    private var animationAmountBaseTranslationY: Float = 0f
-    private var animationLabelBaseTranslationY: Float = 0f
+    private var resultTextAnimator: AnimatorSet? = null
+
+    /** Dedicated waiting/processing hint anchored below the disc; nullable for unit tests. */
+    private var animationWaitingHintText: TextView? = null
+
+    /** Dedicated result amount + caption stack anchored below the result circle; nullable for unit tests. */
+    private var animationResultTextContainer: View? = null
+
+    /** The amount under "Total" on the waiting screen; absent until the layout is bound. */
+    private var animationTotalContainer: View? = null
+    private var animationTotalAmountText: TextView? = null
+
+    /** Material's emphasized-decelerate curve, for everything that enters the result screen. */
+    private val resultEnterInterpolator = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
     private var nfcAnimationTimeoutRunnable: Runnable? = null
     private val nfcTimeoutHandler = Handler(Looper.getMainLooper())
 
@@ -259,11 +291,10 @@ class PaymentRequestActivity : AppCompatActivity() {
             window.isStatusBarContrastEnforced = false
         }
 
-        // Apply window insets to handle edge-to-edge correctly without squishing the NFC overlay.
-        // The root itself is not padded — individual chrome views have their margins adjusted
-        // so the NFC animation container stays full-bleed edge-to-edge.
+        // Apply window insets using getInsetsIgnoringVisibility so hiding the status bar during
+        // tap-to-pay never shifts the QR code or top chrome underneath the overlay.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.payment_request_root)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val insets = windowInsets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars())
 
             val density = resources.displayMetrics.density
             val topMarginPx = (16 * density).toInt()
@@ -279,13 +310,10 @@ class PaymentRequestActivity : AppCompatActivity() {
                     topMargin = insets.top + topMarginPx
                 }
 
-            val switchContainer = findViewById<View>(R.id.lightning_cashu_switch_container)
-            if (switchContainer != null) {
-                switchContainer.layoutParams =
-                    (switchContainer.layoutParams as MarginLayoutParams).apply {
-                        bottomMargin = insets.bottom + bottomMarginPx
-                    }
-            }
+            findViewById<View>(R.id.card_pay_button).layoutParams =
+                (findViewById<View>(R.id.card_pay_button).layoutParams as MarginLayoutParams).apply {
+                    bottomMargin = insets.bottom + bottomMarginPx
+                }
 
             windowInsets
         }
@@ -297,15 +325,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         unifiedQrContainer = findViewById(R.id.unified_qr_container)
         cashuQrContainer = findViewById(R.id.cashu_qr_container)
         lightningQrContainer = findViewById(R.id.lightning_qr_container)
-        unifiedTab = findViewById(R.id.unified_tab)
-        cashuTab = findViewById(R.id.cashu_tab)
-        lightningTab = findViewById(R.id.lightning_tab)
-        unifiedTabText = findViewById(R.id.unified_tab_text)
-        cashuTabText = findViewById(R.id.cashu_tab_text)
-        lightningTabText = findViewById(R.id.lightning_tab_text)
-        unifiedTabIcon = findViewById(R.id.unified_tab_icon)
-        cashuTabIcon = findViewById(R.id.cashu_tab_icon)
-        lightningTabIcon = findViewById(R.id.lightning_tab_icon)
         largeAmountDisplay = findViewById(R.id.large_amount_display)
         convertedAmountDisplay = findViewById(R.id.converted_amount_display)
         statusText = findViewById(R.id.payment_status_text)
@@ -316,65 +335,41 @@ class PaymentRequestActivity : AppCompatActivity() {
         cashuLoadingSpinner = findViewById(R.id.cashu_loading_spinner)
         lightningLogoCard = findViewById(R.id.lightning_logo_card)
         cashuLogoCard = findViewById(R.id.cashu_logo_card)
-        cardTab = findViewById(R.id.card_tab)
-        cardContainer = findViewById(R.id.card_container)
-        cardStatusText = findViewById(R.id.card_status_text)
-        cardProgress = findViewById(R.id.card_progress)
-        cardActionButton = findViewById(R.id.card_action_button)
-        cardActionButton.setOnClickListener { startCardPayment() }
+        cardPayButton = findViewById(R.id.card_pay_button)
+        cardMessageText = findViewById(R.id.card_message_text)
+        cardPayButton.setOnClickListener { startCardPayment() }
 
         // NFC Animation views
         nfcAnimationContainer = findViewById(R.id.nfc_animation_container)
         nfcAnimationView = findViewById(R.id.nfc_animation_view)
+        animationWaitingHintText = findViewById(R.id.animation_waiting_hint)
+        animationResultTextContainer = findViewById(R.id.animation_result_text_container)
         animationResultAmountText = findViewById(R.id.animation_result_amount)
         animationResultLabelText = findViewById(R.id.animation_result_label)
         animationActionsContainer = findViewById(R.id.animation_actions_container)
         animationViewDetailsButton = findViewById(R.id.animation_view_details_button)
         animationCloseButton = findViewById(R.id.animation_close_button)
-        animationAmountBaseTranslationY = animationResultAmountText.translationY
-        animationLabelBaseTranslationY = animationResultLabelText.translationY
+        animationTotalContainer = findViewById(R.id.animation_total_container)
+        animationTotalAmountText = findViewById(R.id.animation_total_amount)
 
         setupNfcAnimationOverlay()
         observeConnectivityForPayment()
 
         // Initialize tab manager
         tabManager = PaymentTabManager(
-            unifiedTab = unifiedTab,
-            cashuTab = cashuTab,
-            lightningTab = lightningTab,
-            unifiedTabText = unifiedTabText,
-            cashuTabText = cashuTabText,
-            lightningTabText = lightningTabText,
-            unifiedTabIcon = unifiedTabIcon,
-            cashuTabIcon = cashuTabIcon,
-            lightningTabIcon = lightningTabIcon,
             unifiedQrContainer = unifiedQrContainer,
             cashuQrContainer = cashuQrContainer,
             lightningQrContainer = lightningQrContainer,
-            unifiedQrImageView = unifiedQrImageView,
-            unifiedLoadingSpinner = unifiedLoadingSpinner,
-            lightningLoadingSpinner = lightningLoadingSpinner,
-            cashuLoadingSpinner = cashuLoadingSpinner,
-            cashuQrImageView = cashuQrImageView,
-            lightningQrImageView = lightningQrImageView,
-            resources = resources,
-            theme = theme,
-            cardTab = cardTab,
-            cardTabText = findViewById(R.id.card_tab_text),
-            cardTabIcon = findViewById(R.id.card_tab_icon),
-            cardContainer = cardContainer,
         )
 
         // Set up tabs with listener
         tabManager.setup(object : PaymentTabManager.TabSelectionListener {
             override fun onTabSelected(tab: PaymentTabManager.PaymentTab) {
                 Log.d(TAG, "onTabSelected() called. tab=$tab, lightningStarted=$lightningStarted, lightningInvoice=$lightningInvoice")
-                if (tab != PaymentTabManager.PaymentTab.CARD) exitCardMode()
                 when (tab) {
                     PaymentTabManager.PaymentTab.UNIFIED -> setHceToUnified()
                     PaymentTabManager.PaymentTab.LIGHTNING -> setHceToLightning()
                     PaymentTabManager.PaymentTab.CASHU -> setHceToCashu()
-                    PaymentTabManager.PaymentTab.CARD -> enterCardMode()
                 }
                 updatePaymentMethodStatus()
             }
@@ -441,7 +436,6 @@ class PaymentRequestActivity : AppCompatActivity() {
                 PaymentTabManager.PaymentTab.LIGHTNING -> lightningHandler?.currentInvoice ?: lightningInvoice
                 PaymentTabManager.PaymentTab.CASHU -> nostrHandler?.paymentRequest ?: btcPayCashuPR ?: hcePaymentRequest
                 PaymentTabManager.PaymentTab.UNIFIED -> unifiedPaymentRequest()
-                PaymentTabManager.PaymentTab.CARD -> null
             }
             if (toShare != null) {
                 sharePaymentRequest(toShare)
@@ -601,8 +595,18 @@ class PaymentRequestActivity : AppCompatActivity() {
     @Deprecated("Deprecated in Java")
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
-        if (hasTerminalOutcome && currentOverlayActionMode == OverlayActionMode.SUCCESS) {
+        if (hasTerminalOutcome) {
             animateSuccessScreenOut()
+            return
+        }
+        // Dismiss an active waiting tap screen back to the QR without cancelling the sale.
+        if (::nfcAnimationContainer.isInitialized &&
+            nfcAnimationContainer.visibility == View.VISIBLE &&
+            !isProcessingNfcPayment &&
+            !isCardConfirming &&
+            !isCardSurfaceCovered
+        ) {
+            hideNfcAnimationOverlay()
             return
         }
         cancelPayment()
@@ -612,47 +616,57 @@ class PaymentRequestActivity : AppCompatActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus && ::nfcAnimationContainer.isInitialized && nfcAnimationContainer.visibility == View.VISIBLE) {
-            applyFullscreenForAnimationOverlay()
+            val waiting = isStatusBarHiddenForWaiting
+            applyFullscreenForAnimationOverlay(onResultColor = currentOverlayBarStyle == OverlayBarStyle.RESULT_COLOR)
+            if (waiting) hideStatusBarWhileWaiting()
         }
     }
 
     override fun onResume() {
         super.onResume()
         if (isFinishing) return
-        try {
-            val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-            if (nfcAdapter != null) {
-                val cardEmulation = CardEmulation.getInstance(nfcAdapter)
-                val componentName = ComponentName(this, com.electricdreams.numo.ndef.NdefHostCardEmulationService::class.java)
-                cardEmulation.setPreferredService(this, componentName)
-                Log.d(TAG, "setPreferredService to NdefHostCardEmulationService")
-                
-                // Mute the active polling loop to prevent Apple Pay popups on iPhones.
-                // NOTE: enableReaderMode disables HCE, so we can only suppress polling on Android 15+.
-                if (android.os.Build.VERSION.SDK_INT >= 35) {
-                    nfcAdapter.setDiscoveryTechnology(
-                        this,
-                        NfcAdapter.FLAG_READER_DISABLE,
-                        NfcAdapter.FLAG_LISTEN_KEEP
-                    )
-                    Log.d(TAG, "setDiscoveryTechnology called to suppress active polling")
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to set preferred HCE service: ${e.message}", e)
+        // Safety net: if Stripe returned without triggering a card outcome, drop the neutral cover.
+        if (isCardSurfaceCovered && !isCardCollecting && !isCardConfirming && !hasTerminalOutcome) {
+            isCardSurfaceCovered = false
+            hideNfcAnimationOverlay()
         }
-        
-        // Re-start and re-setup HCE service in case it was killed while backgrounded
-        val ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this)
-        if (ndefAvailable && hcePaymentRequest != null) {
-            val serviceIntent = Intent(this, NdefHostCardEmulationService::class.java)
-            startService(serviceIntent)
-            setupNdefPayment()
+        if (!isCardCollecting && !isCardConfirming) {
+            try {
+                val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+                if (nfcAdapter != null) {
+                    val cardEmulation = CardEmulation.getInstance(nfcAdapter)
+                    val componentName = ComponentName(this, com.electricdreams.numo.ndef.NdefHostCardEmulationService::class.java)
+                    cardEmulation.setPreferredService(this, componentName)
+                    Log.d(TAG, "setPreferredService to NdefHostCardEmulationService")
+                    
+                    // Mute the active polling loop to prevent Apple Pay popups on iPhones.
+                    // NOTE: enableReaderMode disables HCE, so we can only suppress polling on Android 15+.
+                    if (android.os.Build.VERSION.SDK_INT >= 35) {
+                        nfcAdapter.setDiscoveryTechnology(
+                            this,
+                            NfcAdapter.FLAG_READER_DISABLE,
+                            NfcAdapter.FLAG_LISTEN_KEEP
+                        )
+                        Log.d(TAG, "setDiscoveryTechnology called to suppress active polling")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to set preferred HCE service: ${e.message}", e)
+            }
+            
+            // Re-start and re-setup HCE service in case it was killed while backgrounded
+            val ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this)
+            if (ndefAvailable && hcePaymentRequest != null) {
+                val serviceIntent = Intent(this, NdefHostCardEmulationService::class.java)
+                startService(serviceIntent)
+                setupNdefPayment()
+            }
         }
     }
 
     override fun onPause() {
-        nfcSetupRunnable?.let { nfcSetupHandler.removeCallbacks(it) }
+        clearPendingHceReadyListener()
+        maybeParkCardSurfaceCoverOnPause()
         try {
             val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
             if (nfcAdapter != null) {
@@ -672,8 +686,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun initializePaymentRequest() {
-        statusText.visibility = View.VISIBLE
-        statusText.text = getString(R.string.payment_request_status_preparing)
+        statusText.text = ""
+        statusText.visibility = View.GONE
 
         // Create the payment service (BTCPay or Local)
         paymentService = PaymentServiceFactory.create(this)
@@ -768,6 +782,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             }.onFailure { error ->
                 Log.e(TAG, "BTCPay createPayment failed: ${error.message}", error)
                 cashuLoadingSpinner.visibility = View.GONE
+                statusText.visibility = View.VISIBLE
                 statusText.text = getString(R.string.payment_request_status_error_generic, error.message ?: "Unknown error")
             }
         }
@@ -1002,6 +1017,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                             Log.w(TAG, "Arkoor quote check or issuance will retry", error)
                             withContext(Dispatchers.Main) {
                                 if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED) {
+                                    statusText.visibility = View.VISIBLE
                                     statusText.setText(R.string.payment_request_arkoor_retrying)
                                 }
                             }
@@ -1035,9 +1051,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     combine(online, OfflineStripController.nfcOff) { connected, nfcOff ->
                         connected && !nfcOff
                     }.collect { canTap ->
-                        if (tabManager.getCurrentTab() != PaymentTabManager.PaymentTab.CARD) {
-                            showScanInstruction(canTap)
-                        }
+                        showScanInstruction(canTap)
                         refreshWaitingStatus()
                     }
                 }
@@ -1048,10 +1062,6 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun showScanInstruction(canTap: Boolean) {
         val instruction = findViewById<TextView>(R.id.instruction_text) ?: return
-        findViewById<ImageView>(R.id.contactless_icon).visibility = if (canTap) View.VISIBLE else View.GONE
-        instruction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            marginStart = if (canTap) resources.getDimensionPixelSize(R.dimen.space_m) else 0
-        }
         instruction.setText(
             if (canTap) R.string.payment_request_instruction_scan_or_tap
             else R.string.payment_request_instruction_scan
@@ -1061,20 +1071,23 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun refreshWaitingStatus() {
         // Preserve errors and results while updating either checkout's waiting line.
         val current = statusText.text.toString()
-        if (current == getString(R.string.payment_request_status_waiting_for_payment) ||
-            current == getString(R.string.payment_request_offline_note) ||
-            (isDualQuoteCheckout && current == paymentMethodsLabel())) {
+        if (current.isEmpty() ||
+            current == getString(R.string.payment_request_status_waiting_for_payment) ||
+            current == getString(R.string.payment_request_offline_note)) {
             if (isDualQuoteCheckout) updatePaymentMethodStatus() else showWaitingStatus()
         }
     }
 
-    /** "Waiting for payment...", or the offline reassurance while there's no connection. */
+    /** Keeps the status line hidden while online; shows the offline reassurance when disconnected. */
     private fun showWaitingStatus() {
         val offline = !NetworkUtils.isNetworkAvailable(this)
-        statusText.text = getString(
-            if (offline && confirmsAfterReconnect()) R.string.payment_request_offline_note
-            else R.string.payment_request_status_waiting_for_payment
-        )
+        if (offline && confirmsAfterReconnect()) {
+            statusText.text = getString(R.string.payment_request_offline_note)
+            statusText.visibility = View.VISIBLE
+        } else {
+            statusText.text = ""
+            statusText.visibility = View.GONE
+        }
     }
 
     /**
@@ -1200,6 +1213,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToCashu() {
+        if (isCardCollecting || cardPaymentReviewRequired) return
         val request = hcePaymentRequest ?: run {
             Log.w(TAG, "setHceToCashu() called but hcePaymentRequest is null")
             return
@@ -1220,6 +1234,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToLightning() {
+        if (isCardCollecting || cardPaymentReviewRequired) return
         val invoice = lightningInvoice ?: run {
             Log.w(TAG, "setHceToLightning() called but lightningInvoice is null")
             return
@@ -1242,6 +1257,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToUnified() {
+        if (isCardCollecting || cardPaymentReviewRequired) return
         val payload = unifiedPaymentRequest() ?: return
 
         try {
@@ -1282,24 +1298,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         ).toUri()
     }
 
+    /**
+     * The QR screen names no protocols and, as on main, hides Arkoor's raw errors, so the only
+     * line that can show here is the offline reassurance.
+     */
     private fun updatePaymentMethodStatus() {
         if (hasTerminalOutcome || !isDualQuoteCheckout) return
-        statusText.visibility = View.VISIBLE
-        if (!NetworkUtils.isNetworkAvailable(this) && confirmsAfterReconnect()) {
-            showWaitingStatus()
-        } else if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED &&
-            unifiedPaymentRequest() != null) {
-            statusText.text = paymentMethodsLabel()
-        } else {
-            showWaitingStatus()
-        }
+        showWaitingStatus()
     }
-
-    private fun paymentMethodsLabel(): String = listOfNotNull(
-        "Cashu".takeIf { nostrHandler?.paymentRequestBech32 != null || hcePaymentRequest != null },
-        "Lightning".takeIf { lightningInvoice != null },
-        getString(R.string.payment_request_arkoor).takeIf { arkoorAddress != null },
-    ).joinToString(" · ")
 
     private fun updateUnifiedQrCode() {
         if (hasTerminalOutcome) return
@@ -1309,8 +1315,31 @@ class PaymentRequestActivity : AppCompatActivity() {
             unifiedQrImageView.setImageBitmap(
                 QrCodeGenerator.generate(unifiedUri, 1024, roundedDots = false),
             )
-            unifiedQrImageView.visibility = View.VISIBLE
-            unifiedLoadingSpinner.visibility = View.GONE
+            val firstReveal = !hasShownUnifiedQr
+            hasShownUnifiedQr = true
+            if (firstReveal && unifiedQrImageView.isAttachedToWindow && isAnimationEnabled()) {
+                unifiedQrImageView.animate().cancel()
+                unifiedQrImageView.alpha = 0f
+                unifiedQrImageView.visibility = View.VISIBLE
+                unifiedQrImageView.animate()
+                    .alpha(1f)
+                    .setDuration(QR_REVEAL_MS)
+                    .setInterpolator(resultEnterInterpolator)
+                    .start()
+                unifiedLoadingSpinner.animate().cancel()
+                unifiedLoadingSpinner.animate()
+                    .alpha(0f)
+                    .setDuration(QR_SPINNER_FADE_MS)
+                    .withEndAction {
+                        unifiedLoadingSpinner.visibility = View.GONE
+                        unifiedLoadingSpinner.alpha = 1f
+                    }
+                    .start()
+            } else {
+                unifiedQrImageView.visibility = View.VISIBLE
+                unifiedQrImageView.alpha = 1f
+                unifiedLoadingSpinner.visibility = View.GONE
+            }
             updatePaymentMethodStatus()
             if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED) {
                 setHceToUnified()
@@ -1334,6 +1363,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     updateUnifiedQrCode()
                 } catch (e: Exception) {
                     Log.e(TAG, "Error generating Cashu QR bitmap: ${e.message}", e)
+                    statusText.visibility = View.VISIBLE
                     statusText.text = getString(R.string.payment_request_status_error_qr)
                 }
             }
@@ -1443,218 +1473,242 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupNdefPayment() {
-        val request = hcePaymentRequest ?: return
-
-        // Match original behavior: slight delay before configuring service
-        nfcSetupRunnable = Runnable {
-            val hceService = NdefHostCardEmulationService.getInstance()
-            if (hceService != null) {
-                Log.d(TAG, "Setting up NDEF payment with HCE service")
-
-                // Set the payment request to the HCE service based on current tab selection
-                when (tabManager.getCurrentTab()) {
-                    PaymentTabManager.PaymentTab.LIGHTNING -> {
-                        if (lightningInvoice != null) {
-                            setHceToLightning()
-                        } else {
-                            setHceToCashu()
-                        }
-                    }
-                    PaymentTabManager.PaymentTab.UNIFIED -> {
-                        setHceToUnified()
-                    }
-                    PaymentTabManager.PaymentTab.CASHU -> {
-                        setHceToCashu()
-                    }
-                    PaymentTabManager.PaymentTab.CARD -> {
-                        // The phone reads the card itself; never emulate a payment tag meanwhile.
-                        hceService.clearPaymentRequest()
-                    }
-                }
-
-                // Set up callback for when a token is received or an error occurs
-                hcePaymentCallback = object : NdefHostCardEmulationService.CashuPaymentCallback {
-                    override fun onCashuTokenReceived(token: String) {
-                        // Raw Cashu token received over NFC. Delegate full
-                        // validation, swap-to-Lightning-mint (if needed),
-                        // and redemption to CashuPaymentHelper.
-                        uiScope.launchPaymentOperation {
-                            // Check if we are already processing a payment to avoid double-processing
-                            if (isProcessingNfcPayment) {
-                                Log.d(TAG, "NFC token received but ignored - already processing a payment")
-                                return@launchPaymentOperation
-                            }
-                            
-                            // Mark as processing immediately to lock out subsequent NFC reads
-                            isProcessingNfcPayment = true
-
-                            // Transition UI to PROCESSING stage
-                            runOnUiThread {
-                                showNfcAnimationProcessing()
-                            }
-
-                            // Cancel the NFC safety timeout immediately as we have received data.
-                            // The subsequent processing (swap/redemption) may take longer than
-                            // the NFC timeout allows, but that is a network operation, not an NFC one.
-                            cancelNfcSafetyTimeout()
-                            Log.d(TAG, "NFC token received, cancelled safety timeout")
-
-                            try {
-                                // If using BTCPay, redeem the token via the BTCNutServer API.
-                                if (paymentService is BTCPayPaymentService) {
-                                    val invoiceId = btcPayPaymentId
-                                    if (invoiceId != null) {
-                                        Log.d(TAG, "Redeeming NFC token via BTCPay /cashu/pay-invoice")
-                                        val result = paymentService.redeemToken(token, invoiceId)
-                                        result.onSuccess {
-                                            // BTCPay now returns 200 when the token is accepted for
-                                            // processing, not when the invoice is settled. Settlement
-                                            // is confirmed by the polling loop (startBtcPayPolling)
-                                            // which calls handleLightningPaymentSuccess on PAID.
-                                            Log.d(TAG, "BTCPay token submitted — waiting for invoice settlement via polling")
-                                        }.onFailure { e ->
-                                            // Redemption failed — check BTCPay invoice status to see
-                                            // if it settled anyway (e.g. race condition).
-                                            Log.w(TAG, "BTCPay NFC redemption failed: ${e.message} — checking invoice status")
-                                            val statusResult = paymentService.checkPaymentStatus(invoiceId)
-                                            statusResult.onSuccess { state ->
-                                                when (state) {
-                                                    PaymentState.PAID -> withContext(Dispatchers.Main) {
-                                                        handleLightningPaymentSuccess(PaymentHistoryEntry.TYPE_CASHU)
-                                                    }
-                                                    PaymentState.PENDING -> withContext(Dispatchers.Main) {
-                                                        handlePaymentError(e.message ?: "NFC payment failed")
-                                                    }
-                                                    else -> throw Exception("BTCPay redemption failed: ${e.message}")
-                                                }
-                                            }.onFailure {
-                                                throw Exception("BTCPay redemption failed: ${e.message}")
-                                            }
-                                        }
-                                        return@launchPaymentOperation
-                                    } else {
-                                        Log.w(TAG, "BTCPay invoice ID not available, falling back to local flow (likely to fail)")
-                                    }
-                                }
-
-                                val paymentId = pendingPaymentId
-                                val paymentContext = com.electricdreams.numo.payment.SwapToLightningMintManager.PaymentContext(
-                                    paymentId = paymentId,
-                                    amountSats = paymentAmount,
-                                    unit = paymentUnit,
-                                )
-
-                                val mintManager = MintManager.getInstance(this@PaymentRequestActivity)
-                                val activeUnit = paymentUnit
-                                val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
-
-                                val redeemedToken = CashuPaymentHelper.redeemTokenWithSwap(
-                                    appContext = this@PaymentRequestActivity,
-                                    tokenString = token,
-                                    expectedAmount = paymentAmount,
-                                    allowedMints = allowedMints,
-                                    paymentContext = paymentContext,
-                                )
-
-                                // If redeemedToken is non-empty, it's a Cashu
-                                // payment; if empty, it was fulfilled via
-                                // Lightning swap.
-                                withContext(Dispatchers.Main) {
-                                    if (redeemedToken.isNotEmpty()) {
-                                        handlePaymentSuccess(redeemedToken)
-                                    } else {
-                                        handleLightningPaymentSuccess()
-                                    }
-                                }
-                            } catch (e: CashuPaymentHelper.RedemptionException) {
-                                val msg = e.message ?: "Unknown redemption error"
-                                Log.e(TAG, "Error in NDEF payment redemption: $msg", e)
-                                withContext(Dispatchers.Main) {
-                                    handlePaymentError("NDEF Payment failed: $msg")
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Unexpected error in NDEF payment callback: ${e.message}", e)
-                                withContext(Dispatchers.Main) {
-                                    handlePaymentError("NDEF Payment failed: ${e.message}")
-                                }
-                            }
-                        }
-                    }
-
-                    override fun onCashuPaymentError(errorMessage: String) {
-                        runOnUiThread {
-                            Log.e(TAG, "NDEF Payment error callback: $errorMessage")
-                            handlePaymentError("NDEF Payment failed: $errorMessage")
-                        }
-                    }
-
-                    override fun onNfcReadingStarted() {
-                        runOnUiThread {
-                            if (isProcessingNfcPayment || hasTerminalOutcome) {
-                                Log.d(TAG, "NFC reading started ignored - already processing or done")
-                                return@runOnUiThread
-                            }
-                            if (currentHceMode == HceMode.LIGHTNING) {
-                                Log.d(TAG, "NFC reading started ignored - currently in Lightning mode")
-                                return@runOnUiThread
-                            }
-                            Log.d(TAG, "NFC reading started - showing animation overlay")
-                            showNfcAnimationOverlay()
-                        }
-                    }
-
-                    override fun onNfcReadingStopped(failedInMiddleOfTransaction: Boolean) {
-                        runOnUiThread {
-                            Log.w(TAG, "NFC reading stopped callback received (failedInMiddleOfTransaction: $failedInMiddleOfTransaction)")
-                            if (hasTerminalOutcome) {
-                                Log.d(TAG, "NFC reading stopped ignored - terminal outcome already set")
-                                return@runOnUiThread
-                            }
-
-                            if (failedInMiddleOfTransaction) {
-                                Log.e(TAG, "NFC connection lost while writing data - failing payment")
-                                handlePaymentError(getString(R.string.payment_failure_button_try_again))
-                            } else {
-                                Log.d(TAG, "NFC connection stopped without writing data. Returning to payment request screen.")
-                                hideNfcAnimationOverlay()
-                            }
-                        }
-                    }
-                }
-                hceService.setPaymentCallback(hcePaymentCallback)
-
-                Log.d(TAG, "NDEF payment service ready")
-            }
+    /** Offers the current bitcoin payment request over NFC. */
+    private fun publishHcePaymentRequest() {
+        when (tabManager.getCurrentTab()) {
+            PaymentTabManager.PaymentTab.LIGHTNING ->
+                if (lightningInvoice != null) setHceToLightning() else setHceToCashu()
+            PaymentTabManager.PaymentTab.UNIFIED ->
+                if (unifiedPaymentRequest() != null) setHceToUnified() else setHceToCashu()
+            PaymentTabManager.PaymentTab.CASHU -> setHceToCashu()
         }
-        nfcSetupRunnable?.let { nfcSetupHandler.postDelayed(it, 1000) }
+    }
+
+    private fun clearPendingHceReadyListener() {
+        hceReadyListener?.let { NdefHostCardEmulationService.clearReadyListener(it) }
+        hceReadyListener = null
+    }
+
+    private fun setupNdefPayment() {
+        if (hcePaymentRequest == null) return
+
+        clearPendingHceReadyListener()
+        val listener = NdefHostCardEmulationService.ReadyListener { hceService ->
+            hceReadyListener = null
+            if (isFinishing || isDestroyed || hasTerminalOutcome) return@ReadyListener
+            Log.d(TAG, "Setting up NDEF payment with HCE service")
+
+            if (isCardCollecting || isCardConfirming || isProcessingNfcPayment ||
+                cardPaymentReviewRequired
+            ) {
+                // Never emulate a payment tag while reading a card, redeeming an NFC token, or
+                // waiting to learn whether a card was charged.
+                hceService.clearPaymentRequest()
+            } else {
+                publishHcePaymentRequest()
+            }
+
+            // Set up callback for when a token is received or an error occurs
+            hcePaymentCallback = object : NdefHostCardEmulationService.CashuPaymentCallback {
+                override fun onCashuTokenReceived(token: String) {
+                    // Raw Cashu token received over NFC. Delegate full
+                    // validation, swap-to-Lightning-mint (if needed),
+                    // and redemption to CashuPaymentHelper.
+                    uiScope.launchPaymentOperation {
+                        // Check if we are already processing a payment to avoid double-processing
+                        if (isProcessingNfcPayment) {
+                            Log.d(TAG, "NFC token received but ignored - already processing a payment")
+                            return@launchPaymentOperation
+                        }
+                        
+                        // Mark as processing immediately and stop HCE so trailing APDUs while
+                        // lifting the phone cannot re-arm HCE timeouts during network redemption.
+                        isProcessingNfcPayment = true
+                        NdefHostCardEmulationService.getInstance()?.clearPaymentRequest()
+
+                        // Transition UI to PROCESSING stage
+                        runOnUiThread {
+                            showNfcAnimationProcessing()
+                        }
+
+                        // Cancel the NFC safety timeout immediately as we have received data.
+                        // The subsequent processing (swap/redemption) may take longer than
+                        // the NFC timeout allows, but that is a network operation, not an NFC one.
+                        cancelNfcSafetyTimeout()
+                        Log.d(TAG, "NFC token received, cancelled safety timeout")
+
+                        try {
+                            // If using BTCPay, redeem the token via the BTCNutServer API.
+                            if (paymentService is BTCPayPaymentService) {
+                                val invoiceId = btcPayPaymentId
+                                if (invoiceId != null) {
+                                    Log.d(TAG, "Redeeming NFC token via BTCPay /cashu/pay-invoice")
+                                    val result = paymentService.redeemToken(token, invoiceId)
+                                    result.onSuccess {
+                                        // BTCPay now returns 200 when the token is accepted for
+                                        // processing, not when the invoice is settled. Settlement
+                                        // is confirmed by the polling loop (startBtcPayPolling)
+                                        // which calls handleLightningPaymentSuccess on PAID.
+                                        Log.d(TAG, "BTCPay token submitted — waiting for invoice settlement via polling")
+                                    }.onFailure { e ->
+                                        // Redemption failed — check BTCPay invoice status to see
+                                        // if it settled anyway (e.g. race condition).
+                                        Log.w(TAG, "BTCPay NFC redemption failed: ${e.message} — checking invoice status")
+                                        val statusResult = paymentService.checkPaymentStatus(invoiceId)
+                                        statusResult.onSuccess { state ->
+                                            when (state) {
+                                                PaymentState.PAID -> withContext(Dispatchers.Main) {
+                                                    handleLightningPaymentSuccess(PaymentHistoryEntry.TYPE_CASHU)
+                                                }
+                                                PaymentState.PENDING -> withContext(Dispatchers.Main) {
+                                                    handlePaymentError(e.message ?: "NFC payment failed")
+                                                }
+                                                else -> throw Exception("BTCPay redemption failed: ${e.message}")
+                                            }
+                                        }.onFailure {
+                                            throw Exception("BTCPay redemption failed: ${e.message}")
+                                        }
+                                    }
+                                    return@launchPaymentOperation
+                                } else {
+                                    Log.w(TAG, "BTCPay invoice ID not available, falling back to local flow (likely to fail)")
+                                }
+                            }
+
+                            val paymentId = pendingPaymentId
+                            val paymentContext = com.electricdreams.numo.payment.SwapToLightningMintManager.PaymentContext(
+                                paymentId = paymentId,
+                                amountSats = paymentAmount,
+                                unit = paymentUnit,
+                            )
+
+                            val mintManager = MintManager.getInstance(this@PaymentRequestActivity)
+                            val activeUnit = paymentUnit
+                            val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
+
+                            val redeemedToken = CashuPaymentHelper.redeemTokenWithSwap(
+                                appContext = this@PaymentRequestActivity,
+                                tokenString = token,
+                                expectedAmount = paymentAmount,
+                                allowedMints = allowedMints,
+                                paymentContext = paymentContext,
+                            )
+
+                            // If redeemedToken is non-empty, it's a Cashu
+                            // payment; if empty, it was fulfilled via
+                            // Lightning swap.
+                            withContext(Dispatchers.Main) {
+                                if (redeemedToken.isNotEmpty()) {
+                                    handlePaymentSuccess(redeemedToken)
+                                } else {
+                                    handleLightningPaymentSuccess()
+                                }
+                            }
+                        } catch (e: CashuPaymentHelper.RedemptionException) {
+                            val msg = e.message ?: "Unknown redemption error"
+                            Log.e(TAG, "Error in NDEF payment redemption: $msg", e)
+                            withContext(Dispatchers.Main) {
+                                handlePaymentError("NDEF Payment failed: $msg")
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Unexpected error in NDEF payment callback: ${e.message}", e)
+                            withContext(Dispatchers.Main) {
+                                handlePaymentError("NDEF Payment failed: ${e.message}")
+                            }
+                        }
+                    }
+                }
+
+                override fun onCashuPaymentError(errorMessage: String) {
+                    runOnUiThread {
+                        Log.e(TAG, "NDEF Payment error callback: $errorMessage")
+                        handlePaymentError("NDEF Payment failed: $errorMessage")
+                    }
+                }
+
+                override fun onNfcReadingStarted() {
+                    runOnUiThread {
+                        if (isProcessingNfcPayment || hasTerminalOutcome) {
+                            Log.d(TAG, "NFC reading started ignored - already processing or done")
+                            return@runOnUiThread
+                        }
+                        if (currentHceMode == HceMode.LIGHTNING) {
+                            Log.d(TAG, "NFC reading started ignored - currently in Lightning mode")
+                            return@runOnUiThread
+                        }
+                        if (nfcAnimationContainer.visibility == View.VISIBLE && !isCardSurfaceCovered) {
+                            Log.d(TAG, "NFC reading resumed on active overlay - refreshing hint")
+                            keepOverlayShown()
+                            swapWaitingHint(getString(R.string.nfc_payment_hint_keep_close))
+                            startNfcSafetyTimeout()
+                            return@runOnUiThread
+                        }
+                        Log.d(TAG, "NFC reading started - showing animation overlay")
+                        showNfcAnimationOverlay()
+                    }
+                }
+
+                override fun onNfcReadingStopped(failedInMiddleOfTransaction: Boolean) {
+                    runOnUiThread {
+                        handleNfcReadingStopped(failedInMiddleOfTransaction)
+                    }
+                }
+            }
+            hceService.setPaymentCallback(hcePaymentCallback)
+
+            Log.d(TAG, "NDEF payment service ready")
+        }
+        hceReadyListener = listener
+        NdefHostCardEmulationService.runWhenReady(listener)
+    }
+
+    /** Handles an NFC link drop or timeout without ever exposing QR during active processing. */
+    private fun handleNfcReadingStopped(failedInMiddleOfTransaction: Boolean) {
+        Log.w(TAG, "NFC reading stopped callback received (failedInMiddleOfTransaction: $failedInMiddleOfTransaction)")
+        if (hasTerminalOutcome || isProcessingNfcPayment) {
+            Log.d(TAG, "NFC reading stopped ignored - already processing or terminal outcome set")
+            return
+        }
+
+        if (failedInMiddleOfTransaction) {
+            Log.w(TAG, "NFC connection lost mid-write - prompting customer to tap again")
+            showRecoverableTapLost()
+        } else {
+            Log.d(TAG, "NFC connection stopped without writing data. Returning to payment request screen.")
+            hideNfcAnimationOverlay()
+        }
     }
 
     // ============================================================
     // Card payments (Stripe Tap to Pay)
     // ============================================================
 
-    /** Shows the Card tab when Stripe is configured, the device qualifies, and the unit is sats. */
+    /** Offers the card button when Stripe is configured, the device qualifies, and the unit is sats. */
     private fun setupCardPayments() {
-        val reviewRequired = pendingPaymentId?.let { paymentId ->
-            PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)?.cardPaymentReviewRequired
-        } == true
-        setCardPaymentReviewRequired(reviewRequired, persist = false)
         val available = paymentUnit.equals("sat", ignoreCase = true) &&
             StripeTerminalManager.isDeviceSupported(this) &&
             StripeCardSettings.getInstance(this).isReady()
-        if (!available) {
-            tabManager.setCardTabAvailable(false)
-            return
-        }
+        val visibility = if (available) View.VISIBLE else View.GONE
+        cardPayButton.visibility = visibility
+        cardMessageText.visibility = visibility
+        // Without the card button there is no way to check on an attempt, so bitcoin stays on offer.
+        if (!available) return
 
         resolveCardAmount()
-        tabManager.setCardTabAvailable(true)
-        if (reviewRequired) {
-            tabManager.selectTab(PaymentTabManager.PaymentTab.CARD)
-        } else {
-            tabManager.selectDefaultPaymentMethod()
-        }
+        val reviewRequired = pendingPaymentId?.let { paymentId ->
+            PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)?.cardPaymentReviewRequired
+        } == true
+        if (reviewRequired) resumeCardPaymentReview()
+    }
+
+    /**
+     * Reopens a sale whose last card attempt has an unknown outcome: bitcoin stays off the
+     * screen and the status check starts at once, without waiting for a tap.
+     */
+    private fun resumeCardPaymentReview() {
+        setCardPaymentReviewRequired(true, persist = false)
+        showCardIdle(getString(R.string.card_payment_status_unresolved), showAction = true)
+        startCardPayment()
     }
 
     /**
@@ -1671,10 +1725,16 @@ class PaymentRequestActivity : AppCompatActivity() {
             currencyCode = currencyCode,
             btcPrice = bitcoinPriceWorker?.getCurrentPrice() ?: 0.0,
         )
-        cardActionButton.text = cardAmount?.let {
-            getString(R.string.card_payment_action_charge, formatCardAmount(it))
-        } ?: getString(R.string.card_payment_action_retry)
+        updateCardButtonLabel()
         return cardAmount
+    }
+
+    /** The amount is already shown above, so the button only names the action. */
+    private fun updateCardButtonLabel() {
+        cardPayButton.text = getString(
+            if (cardPaymentReviewRequired) R.string.card_payment_action_check
+            else R.string.card_payment_button
+        )
     }
 
     private fun formatCardAmount(amount: CardAmountResolver.CardAmount): String = try {
@@ -1687,28 +1747,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         }.format(java.math.BigDecimal.valueOf(amount.minorUnits).movePointLeft(digits))
     } catch (e: IllegalArgumentException) {
         "${amount.minorUnits} ${amount.currency.uppercase(java.util.Locale.US)}"
-    }
-
-    private fun enterCardMode() {
-        // While the phone acts as a card reader it must not also offer a Cashu/Lightning tag.
-        NdefHostCardEmulationService.getInstance()?.clearPaymentRequest()
-        findViewById<TextView>(R.id.instruction_text)?.setText(R.string.payment_request_instruction_card)
-        // There is no payment request to share for a card payment.
-        shareButton.visibility = View.INVISIBLE
-        if (cardPaymentReviewRequired) {
-            startCardPayment()
-        } else {
-            resolveCardAmount()
-            showCardIdle(message = null, showAction = true)
-        }
-    }
-
-    private fun exitCardMode() {
-        if (!::cardContainer.isInitialized) return
-        cancelCardCollection()
-        shareButton.visibility = View.VISIBLE
-        val canTap = ConnectivityMonitor.getInstance(this).isOnlineNow() && !OfflineStripController.nfcOff.value
-        showScanInstruction(canTap)
     }
 
     /**
@@ -1736,11 +1774,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setCardPaymentReviewRequired(reviewRequired: Boolean, persist: Boolean = true) {
+        val changed = cardPaymentReviewRequired != reviewRequired
         cardPaymentReviewRequired = reviewRequired
-        if (::unifiedTab.isInitialized) {
-            unifiedTab.isEnabled = !reviewRequired
-            unifiedTab.alpha = if (reviewRequired) 0.35f else 1f
-        }
+        if (changed) applyCardPaymentReview()
         if (!persist) return
         val paymentId = pendingPaymentId ?: return
         val saved = PaymentsHistoryActivity.updatePendingCardPaymentReview(
@@ -1749,6 +1785,26 @@ class PaymentRequestActivity : AppCompatActivity() {
             reviewRequired = reviewRequired,
         )
         if (!saved) Log.w(TAG, "Could not save card payment review state for $paymentId")
+    }
+
+    /**
+     * Takes bitcoin off the screen and off NFC while a card attempt's outcome is unknown, and
+     * puts it back once the status check settles it. The views are hidden in place, so nothing
+     * else on the screen moves.
+     */
+    private fun applyCardPaymentReview() {
+        if (isFinishing || isDestroyed) return
+        val locked = cardPaymentReviewRequired
+        val bitcoin = if (locked) View.INVISIBLE else View.VISIBLE
+        findViewById<View>(R.id.qr_card)?.visibility = bitcoin
+        findViewById<View>(R.id.instruction_text)?.visibility = bitcoin
+        if (::shareButton.isInitialized) shareButton.visibility = bitcoin
+        if (locked) {
+            NdefHostCardEmulationService.getInstance()?.clearPaymentRequest()
+        } else if (!isCardCollecting && !hasTerminalOutcome) {
+            publishHcePaymentRequest()
+        }
+        if (::cardPayButton.isInitialized) updateCardButtonLabel()
     }
 
     private fun persistCardPaymentIntent(paymentIntent: PaymentIntent) {
@@ -1771,7 +1827,6 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun startCardPayment() {
         if (hasTerminalOutcome || cardJob?.isActive == true) return
-        if (tabManager.getCurrentTab() != PaymentTabManager.PaymentTab.CARD) return
 
         val amount = resolveCardAmount() ?: run {
             val currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
@@ -1800,10 +1855,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Runs outside lifecycleScope: a charge Stripe is confirming must still be recorded
         // if this screen closes. cancelCardCollection() stops it until that point.
         cardJob = StripeTerminalManager.paymentScope.launchPaymentOperation {
-            showCardBusy(getString(R.string.card_payment_status_preparing))
+            showCardBusy()
             try {
                 StripeTerminalManager.ensureReaderConnected(this@PaymentRequestActivity, config)
-                showCardBusy(getString(R.string.card_payment_status_waiting))
                 val paymentIntent = StripeTerminalManager.collectPayment(
                     context = this@PaymentRequestActivity,
                     amount = amount,
@@ -1814,6 +1868,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                     },
                     previous = savedCardPaymentReference(),
                     onPaymentIntent = ::persistCardPaymentIntent,
+                    onCollectionStarting = ::onCardCollectionStarting,
+                    onCharging = ::showCardConfirming,
                 )
                 val chargedAmount = CardAmountResolver.CardAmount(
                     minorUnits = paymentIntent.amount,
@@ -1863,18 +1919,102 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
-    private fun showCardBusy(message: String) {
-        cardStatusText.text = message
-        cardStatusText.visibility = View.VISIBLE
-        cardProgress.visibility = View.VISIBLE
-        cardActionButton.visibility = View.GONE
+    /**
+     * The card attempt is running: stay on checkout with a clear button state while Stripe
+     * connects the reader and prepares the PaymentIntent, then park a neutral cover underneath
+     * Stripe once its Tap to Pay Activity takes foreground.
+     */
+    private fun showCardBusy() {
+        isCardCollecting = true
+        isCardTapScreenLaunched = false
+        NdefHostCardEmulationService.getInstance()?.clearPaymentRequest()
+        cardMessageText.text = ""
+        cardPayButton.isEnabled = false
+        cardPayButton.alpha = 1f
+        cardPayButton.text = getString(R.string.card_payment_button_preparing)
+        cardPayButton.icon = IndeterminateDrawable.createCircularDrawable(
+            cardPayButton.context,
+            CircularProgressIndicatorSpec(
+                cardPayButton.context,
+                null,
+                0,
+                com.google.android.material.R.style.Widget_Material3_CircularProgressIndicator_ExtraSmall,
+            ),
+        )
     }
 
-    private fun showCardIdle(message: String?, showAction: Boolean) {
-        cardStatusText.text = message
-        cardStatusText.visibility = if (message == null) View.GONE else View.VISIBLE
-        cardProgress.visibility = View.GONE
-        cardActionButton.visibility = if (showAction && !hasTerminalOutcome) View.VISIBLE else View.GONE
+    /** Marks that Stripe's Tap to Pay Activity is launching over checkout. */
+    private fun onCardCollectionStarting() {
+        if (hasTerminalOutcome) return
+        isCardTapScreenLaunched = true
+    }
+
+    /**
+     * Called from [onPause]: when Stripe's Tap to Pay Activity takes foreground over checkout,
+     * parks a neutral tap surface beneath it so dismissing Stripe never flashes the QR screen.
+     */
+    private fun maybeParkCardSurfaceCoverOnPause() {
+        if (isCardTapScreenLaunched && isCardCollecting && !isCardConfirming && !hasTerminalOutcome) {
+            showCardSurfaceCover()
+        }
+    }
+
+    /**
+     * Covers checkout with the matching neutral tap surface while Stripe's Tap to Pay Activity
+     * sits in front, so dismissing Stripe never flashes the QR screen.
+     */
+    private fun showCardSurfaceCover() {
+        if (hasTerminalOutcome || isCardConfirming) return
+        isCardSurfaceCovered = true
+        applyFullscreenForAnimationOverlay(onResultColor = false)
+        revealOverlay(animated = false)
+        resetResultTextViews()
+        resetResultActionButtons()
+        nfcAnimationView.showSurfaceCover()
+    }
+
+    /**
+     * Stripe's tap screen has read the card and is closing while the charge is confirmed. Numo's
+     * matching confirming screen enters already filled with its orbiting rim, with zero pulse flash.
+     */
+    private fun showCardConfirming() {
+        if (hasTerminalOutcome) return
+        isCardConfirming = true
+        isCardSurfaceCovered = false
+
+        applyFullscreenForAnimationOverlay(onResultColor = false)
+        hideStatusBarWhileWaiting()
+        revealOverlay(animated = false)
+        resetResultTextViews()
+        resetResultActionButtons()
+        // The card tap screen drops its total once it has read the card, so it stays hidden.
+        showNfcHint(getString(R.string.card_payment_status_confirming), animated = true)
+
+        nfcAnimationView.startProcessingDirectly(animateIn = true)
+        ViewCompat.requestApplyInsets(nfcAnimationContainer)
+    }
+
+    /**
+     * The card attempt ended without a charge and [message] says what happened. Bitcoin is on
+     * offer again unless the attempt's outcome is unknown. [showAction] is false for problems
+     * another tap cannot fix.
+     */
+    private fun showCardIdle(message: String, showAction: Boolean) {
+        isCardTapScreenLaunched = false
+        if (isCardConfirming || isCardSurfaceCovered) {
+            isCardConfirming = false
+            isCardSurfaceCovered = false
+            if (!hasTerminalOutcome) hideNfcAnimationOverlay()
+        }
+        if (isCardCollecting) {
+            isCardCollecting = false
+            if (!hasTerminalOutcome) publishHcePaymentRequest()
+        }
+        cardMessageText.text = message
+        cardPayButton.setIconResource(R.drawable.ic_card)
+        cardPayButton.isEnabled = showAction && !hasTerminalOutcome
+        cardPayButton.alpha = if (cardPayButton.isEnabled) 1f else DISABLED_ALPHA
+        updateCardButtonLabel()
     }
 
     /**
@@ -2131,21 +2271,23 @@ class PaymentRequestActivity : AppCompatActivity() {
         statusText.text = getString(R.string.payment_request_status_failed, errorMessage)
         setResult(Activity.RESULT_CANCELED)
 
-        // ALWAYS render the native failure overlay (the ALL RED screen) so that failure paths stay consistent,
-        // mirroring the behavior of showPaymentSuccess.
-        if (nfcAnimationContainer.visibility != View.VISIBLE) {
+        // Render the native failure overlay; enter directly when no tap screen was active so
+        // non-NFC failures never flash the contactless waiting disc.
+        val fromActiveTapOverlay = nfcAnimationContainer.visibility == View.VISIBLE && !isCardSurfaceCovered
+        isCardSurfaceCovered = false
+        if (!fromActiveTapOverlay) {
             nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
-            applyFullscreenForAnimationOverlay()
-            nfcAnimationContainer.visibility = View.VISIBLE
+            applyFullscreenForAnimationOverlay(onResultColor = true)
+            revealOverlay(animated = false)
             nfcAnimationView.reset()
             resetResultTextViews()
             resetResultActionButtons()
             ViewCompat.requestApplyInsets(nfcAnimationContainer)
         } else {
-            applyFullscreenForAnimationOverlay()
+            applyFullscreenForAnimationOverlay(onResultColor = true)
         }
 
-        showNfcAnimationError(errorMessage)
+        showNfcAnimationError(errorMessage, direct = !fromActiveTapOverlay)
     }
 
     private fun cancelPayment() {
@@ -2174,7 +2316,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // called [beginTerminalOutcome] explicitly.
         hasTerminalOutcome = true
 
-        nfcSetupRunnable?.let { nfcSetupHandler.removeCallbacks(it) }
+        clearPendingHceReadyListener()
 
         cancelNfcSafetyTimeout()
 
@@ -2209,7 +2351,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         cancelCardCollection()
-        nfcSetupRunnable?.let { nfcSetupHandler.removeCallbacks(it) }
+        clearPendingHceReadyListener()
         cancelNfcSafetyTimeout()
         btcPayPollingJob?.cancel()
         btcPayPollingJob = null
@@ -2318,22 +2460,24 @@ class PaymentRequestActivity : AppCompatActivity() {
         receivedMintUrl: String? = null,
         playSound: Boolean = true,
     ) {
-        if (nfcAnimationContainer.visibility != View.VISIBLE) {
+        val fromActiveTapOverlay = nfcAnimationContainer.visibility == View.VISIBLE && !isCardSurfaceCovered
+        isCardSurfaceCovered = false
+        if (!fromActiveTapOverlay) {
             nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
             Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
-            applyFullscreenForAnimationOverlay()
-            nfcAnimationContainer.visibility = View.VISIBLE
+            applyFullscreenForAnimationOverlay(onResultColor = true)
+            revealOverlay(animated = false)
             nfcAnimationView.reset()
             resetResultTextViews()
             resetResultActionButtons()
             ViewCompat.requestApplyInsets(nfcAnimationContainer)
         } else {
-            applyFullscreenForAnimationOverlay()
+            applyFullscreenForAnimationOverlay(onResultColor = true)
         }
         pendingNfcSuccessToken = token
         pendingNfcSuccessMintUrl = receivedMintUrl
         pendingNfcSuccessAmount = amount
-        showNfcAnimationSuccess(formattedAmountString, playSound)
+        showNfcAnimationSuccess(formattedAmountString, playSound, direct = !fromActiveTapOverlay)
     }
 
     // ============================================================
@@ -2352,6 +2496,9 @@ class PaymentRequestActivity : AppCompatActivity() {
             runOnUiThread {
                 onNfcAnimationResultDisplayed(success)
             }
+        }
+        nfcAnimationView.setOnGeometryChangedListener {
+            positionOverlayTextBelowDisc()
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(nfcAnimationContainer) { _, insets ->
@@ -2379,7 +2526,12 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Does NOT exit full-screen mode so the terminal result screen stays full during the fade.
      */
     private fun cleanupAndFinishWithFade() {
+        clearPendingHceReadyListener()
         cancelNfcSafetyTimeout()
+
+        // Stop BTCPay polling
+        btcPayPollingJob?.cancel()
+        btcPayPollingJob = null
 
         // Stop Nostr handler
         nostrHandler?.stop()
@@ -2391,6 +2543,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         lightningHandler = null
         quoteSockets?.close()
         quoteSockets = null
+
+        cancelCardCollection()
 
         // Clean up HCE service
         clearHceService()
@@ -2407,30 +2561,27 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
         Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
 
-        applyFullscreenForAnimationOverlay()
-        
-        nfcAnimationContainer.visibility = View.VISIBLE
+        isCardSurfaceCovered = false
+        applyFullscreenForAnimationOverlay(onResultColor = false)
+        // Hiding the status bar does not shift checkout (root uses getInsetsIgnoringVisibility),
+        // and still waits until the waiting screen has faded in so the chrome feels steady.
+        revealOverlay(animated = true) {
+            if (nfcAnimationContainer.visibility == View.VISIBLE && !hasTerminalOutcome) {
+                hideStatusBarWhileWaiting()
+            }
+        }
         resetResultTextViews()
         resetResultActionButtons()
         pendingNfcSuccessToken = null
         pendingNfcSuccessMintUrl = null
         pendingNfcSuccessAmount = 0
 
-        animationResultLabelText.animate().cancel()
-
-        // Show "Keep phone close" hint during NFC communication
-        animationResultLabelText.visibility = View.VISIBLE
-        animationResultLabelText.alpha = 0.75f
-        animationResultLabelText.translationY = animationLabelBaseTranslationY
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
-        animationResultLabelText.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-        animationResultLabelText.gravity = android.view.Gravity.CENTER
-        animationResultLabelText.textAlignment = View.TEXT_ALIGNMENT_CENTER
-        animationResultLabelText.letterSpacing = 0.03f
-        animationResultLabelText.text = getString(R.string.nfc_payment_hint_keep_close)
+        // Show "Keep phone close" hint during NFC communication, top-anchored beneath the disc
+        showNfcHint(getString(R.string.nfc_payment_hint_keep_close))
+        showWaitingTotal()
         
         nfcAnimationView.reset()
-        nfcAnimationView.startReading()
+        nfcAnimationView.startReading(animateIn = true)
         nfcAnimationStartedAtMs = SystemClock.elapsedRealtime()
         Log.d(TAG, "animation_started_ms=${nfcAnimationStartedAtMs - nfcOverlayShownAtMs}")
         startNfcSafetyTimeout()
@@ -2438,55 +2589,247 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun showNfcAnimationProcessing() {
-        if (nfcAnimationContainer.visibility != View.VISIBLE) return
-        
         // Vibrate when switching to processing phase
         try {
             val vibrator = getVibrator()
             vibrator?.vibrateCompat(longArrayOf(0, 50), -1)
         } catch (_: Exception) {}
-        
-        // Show "Processing... You can lift your phone" hint with a gentle crossfade
-        animationResultLabelText.animate().cancel()
-        animationResultLabelText.animate()
-            .alpha(0f)
-            .setDuration(150)
-            .setInterpolator(android.view.animation.AccelerateInterpolator())
-            .withEndAction {
-                animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
-                animationResultLabelText.gravity = android.view.Gravity.CENTER
-                animationResultLabelText.textAlignment = View.TEXT_ALIGNMENT_CENTER
-                animationResultLabelText.text = getString(R.string.nfc_payment_hint_processing)
-                animationResultLabelText.animate()
-                    .alpha(0.75f)
-                    .setDuration(200)
-                    .setInterpolator(android.view.animation.DecelerateInterpolator())
-                    .start()
+
+        val alreadyShowingTap = nfcAnimationContainer.visibility == View.VISIBLE && !isCardSurfaceCovered
+        isCardSurfaceCovered = false
+
+        if (!alreadyShowingTap) {
+            // Token arrived without an active waiting screen (e.g. after a long biometric pause):
+            // cover checkout immediately so the user never sees the QR code during redemption.
+            nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
+            applyFullscreenForAnimationOverlay(onResultColor = false)
+            revealOverlay(animated = true) {
+                if (nfcAnimationContainer.visibility == View.VISIBLE && !hasTerminalOutcome) {
+                    hideStatusBarWhileWaiting()
+                }
             }
-            .start()
-        
+            resetResultTextViews()
+            resetResultActionButtons()
+            showNfcHint(getString(R.string.nfc_payment_hint_processing), animated = true)
+            nfcAnimationView.startProcessingDirectly(animateIn = true)
+            ViewCompat.requestApplyInsets(nfcAnimationContainer)
+            return
+        }
+
+        keepOverlayShown()
+        swapWaitingHint(getString(R.string.nfc_payment_hint_processing))
+        // The card tap screen drops its total once it has read the card.
+        hideWaitingTotal(animated = true)
         nfcAnimationView.startProcessing()
     }
 
+    /**
+     * Gentle, recoverable feedback when the customer lifts their phone mid-write: keeps the
+     * invoice, QR, and HCE live so an immediate second tap works without restarting checkout.
+     */
+    private fun showRecoverableTapLost() {
+        if (hasTerminalOutcome || isProcessingNfcPayment) return
+        try {
+            val vibrator = getVibrator()
+            vibrator?.vibrateCompat(longArrayOf(0, 40, 60, 40), -1)
+        } catch (_: Exception) {}
+
+        val hintText = getString(R.string.nfc_payment_hint_tap_lost)
+        if (nfcAnimationContainer.visibility != View.VISIBLE || isCardSurfaceCovered) {
+            showNfcAnimationOverlay()
+        } else {
+            keepOverlayShown()
+        }
+        swapWaitingHint(hintText, shakeAfter = true)
+        startNfcSafetyTimeout()
+    }
+
+    /** Shows [text] in the dedicated waiting hint top-anchored beneath the disc. */
+    private fun showNfcHint(text: String, animated: Boolean = false) {
+        val hint = animationWaitingHintText ?: return
+        hint.animate().cancel()
+        hint.translationX = 0f
+        hint.typeface = interFont(R.font.inter_semi_bold)
+        hint.setTextColor(ContextCompat.getColor(this, R.color.color_text_primary))
+        hint.setTextSize(TypedValue.COMPLEX_UNIT_SP, NFC_HINT_TEXT_SP)
+        hint.text = text
+        hint.visibility = View.VISIBLE
+        positionOverlayTextBelowDisc()
+        if (animated && isAnimationEnabled()) {
+            hint.alpha = 0f
+            hint.animate()
+                .alpha(NFC_HINT_ALPHA)
+                .setDuration(NFC_HINT_SWAP_IN_MS)
+                .setInterpolator(resultEnterInterpolator)
+                .start()
+        } else {
+            hint.alpha = NFC_HINT_ALPHA
+        }
+    }
+
+    /** Crossfades the waiting hint in place — top-anchored, so 1-line -> 2-line never jumps. */
+    private fun swapWaitingHint(text: String, shakeAfter: Boolean = false) {
+        val hint = animationWaitingHintText ?: return
+        hint.animate().cancel()
+        hint.translationX = 0f
+        if (!isAnimationEnabled() || hint.visibility != View.VISIBLE) {
+            showNfcHint(text, animated = false)
+            return
+        }
+        if (hint.text.toString() == text && hint.alpha >= 0.99f) {
+            if (shakeAfter) hint.shake(amplitude = 10f, duration = 320L)
+            return
+        }
+        hint.animate()
+            .alpha(0f)
+            .setDuration(NFC_HINT_SWAP_OUT_MS)
+            .setInterpolator(resultEnterInterpolator)
+            .withEndAction {
+                hint.text = text
+                positionOverlayTextBelowDisc()
+                hint.animate()
+                    .alpha(NFC_HINT_ALPHA)
+                    .setDuration(NFC_HINT_SWAP_IN_MS)
+                    .setInterpolator(resultEnterInterpolator)
+                    .withEndAction {
+                        if (shakeAfter) hint.shake(amplitude = 10f, duration = 320L)
+                    }
+                    .start()
+            }
+            .start()
+    }
+
+    /** Smoothly fades out the waiting hint when the result takes over, instead of blinking out. */
+    private fun hideWaitingHint(animated: Boolean) {
+        val hint = animationWaitingHintText ?: return
+        hint.animate().cancel()
+        if (!animated || hint.visibility != View.VISIBLE || !isAnimationEnabled()) {
+            hint.visibility = View.GONE
+            hint.alpha = 0f
+            hint.text = ""
+            return
+        }
+        hint.animate()
+            .alpha(0f)
+            .setDuration(NfcPaymentAnimationView.WAIT_FADE_OUT_MS)
+            .setInterpolator(DecelerateInterpolator())
+            .withEndAction {
+                hint.visibility = View.GONE
+                hint.text = ""
+            }
+            .start()
+    }
+
+    /**
+     * Anchors the top edges of the waiting hint and result text stack below the animation's disc.
+     * Because both views use Gravity.TOP inside the overlay, multi-line text grows downward
+     * cleanly without any manual measure() or translationY jumps.
+     */
+    private fun positionOverlayTextBelowDisc() {
+        val containerHeight = nfcAnimationContainer.height
+        val discBottom = nfcAnimationView.discBottom
+        if (containerHeight <= 0 || discBottom <= 0f) {
+            nfcAnimationContainer.doOnLayout { positionOverlayTextBelowDisc() }
+            return
+        }
+
+        val hintTop = (discBottom + dpToPx(NFC_HINT_GAP_DP)).toInt()
+        setTopMargin(animationWaitingHintText, hintTop)
+
+        val preferredResultTop = (discBottom + dpToPx(NFC_RESULT_GAP_DP)).toInt()
+        val maxResultTop = (containerHeight - dpToPx(RESULT_ACTIONS_RESERVE_DP) - dpToPx(RESULT_STACK_MIN_HEIGHT_DP))
+            .coerceAtLeast(hintTop)
+        setTopMargin(animationResultTextContainer, minOf(preferredResultTop, maxResultTop))
+    }
+
+    /** Steps the amount down from its full size until it fits on one line. */
+    private fun fitResultAmountToWidth() {
+        val containerWidth = nfcAnimationContainer.width
+        if (containerWidth <= 0) return
+        val parentMargins = animationResultTextContainer?.layoutParams as? MarginLayoutParams
+        val margins = animationResultAmountText.layoutParams as? MarginLayoutParams
+        val available = containerWidth -
+            (parentMargins?.marginStart ?: 0) - (parentMargins?.marginEnd ?: 0) -
+            (margins?.marginStart ?: 0) - (margins?.marginEnd ?: 0)
+        if (available <= 0) return
+        var sizeSp = RESULT_AMOUNT_MAX_TEXT_SP
+        animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+        val amount = animationResultAmountText.text.toString()
+        while (sizeSp > RESULT_AMOUNT_MIN_TEXT_SP &&
+            animationResultAmountText.paint.measureText(amount) > available
+        ) {
+            sizeSp -= RESULT_AMOUNT_TEXT_STEP_SP
+            animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+        }
+    }
+
     private fun hideNfcAnimationOverlay() {
+        cancelNfcSafetyTimeout()
+        isProcessingNfcPayment = false
+        isCardSurfaceCovered = false
+
+        nfcAnimationContainer.animate().cancel()
+        if (nfcAnimationContainer.visibility != View.VISIBLE || !isAnimationEnabled()) {
+            clearHiddenOverlay()
+            return
+        }
+        // Checkout returns as the waiting screen fades away over it; system bars restore cleanly
+        // at the end (and checkout stays rock-still thanks to getInsetsIgnoringVisibility).
+        nfcAnimationContainer.animate()
+            .alpha(0f)
+            .setDuration(OVERLAY_FADE_OUT_MS)
+            .setInterpolator(resultEnterInterpolator)
+            .withEndAction { clearHiddenOverlay() }
+            .start()
+    }
+
+    /** Stops a fade-out in progress, for when the overlay turns out to be needed after all. */
+    private fun keepOverlayShown() {
+        nfcAnimationContainer.animate().cancel()
+        nfcAnimationContainer.alpha = 1f
+    }
+
+    private fun clearHiddenOverlay() {
         nfcAnimationContainer.visibility = View.GONE
+        nfcAnimationContainer.alpha = 1f
         nfcAnimationView.reset()
         resetResultTextViews()
         resetResultActionButtons()
         restoreSystemBarsAfterAnimation()
-        cancelNfcSafetyTimeout()
-        isProcessingNfcPayment = false
+    }
+
+    /**
+     * Shows the overlay over checkout. A tap fades it in; a result or the return from the card
+     * tap screen must cover checkout at once.
+     */
+    private fun revealOverlay(animated: Boolean, onShown: () -> Unit = {}) {
+        nfcAnimationContainer.animate().cancel()
+        nfcAnimationContainer.visibility = View.VISIBLE
+        if (!animated || !isAnimationEnabled()) {
+            nfcAnimationContainer.alpha = 1f
+            onShown()
+            return
+        }
+        nfcAnimationContainer.alpha = 0f
+        nfcAnimationContainer.animate()
+            .alpha(1f)
+            .setDuration(OVERLAY_FADE_IN_MS)
+            .setInterpolator(resultEnterInterpolator)
+            .withEndAction(onShown)
+            .start()
     }
 
     private fun startNfcSafetyTimeout() {
         cancelNfcSafetyTimeout()
 
         nfcAnimationTimeoutRunnable = Runnable {
-            if (hasTerminalOutcome || nfcAnimationContainer.visibility != View.VISIBLE) {
+            if (hasTerminalOutcome || isProcessingNfcPayment || nfcAnimationContainer.visibility != View.VISIBLE) {
                 return@Runnable
             }
-            Log.e(TAG, "NFC safety timeout triggered - payment did not reach terminal state")
-            handlePaymentError("Payment failed. Please try again.")
+            // Non-terminal timeout: gracefully fade the waiting screen back to the live QR
+            // rather than destroying an unpaid checkout.
+            Log.w(TAG, "NFC waiting timeout elapsed without token - returning to checkout")
+            hideNfcAnimationOverlay()
         }
 
         nfcTimeoutHandler.postDelayed(nfcAnimationTimeoutRunnable!!, NFC_READ_TIMEOUT_MS)
@@ -2500,23 +2843,35 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationTimeoutRunnable = null
     }
 
-    private fun showNfcAnimationSuccess(amountText: String, playSound: Boolean = true) {
-        if (nfcAnimationContainer.visibility != View.VISIBLE) return
+    private fun showNfcAnimationSuccess(amountText: String, playSound: Boolean = true) =
+        showNfcAnimationSuccess(amountText, playSound, direct = false)
 
-        animationResultLabelText.animate().cancel()
+    private fun showNfcAnimationSuccess(
+        amountText: String,
+        playSound: Boolean,
+        direct: Boolean,
+    ) {
+        if (nfcAnimationContainer.visibility != View.VISIBLE) return
+        keepOverlayShown()
 
         currentOverlayActionMode = OverlayActionMode.SUCCESS
-        animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 56f)
-        
-        // Reset to bold/stronger style for success title
-        animationResultLabelText.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+        animationResultAmountText.typeface = interFont(R.font.inter_semi_bold)
+        animationResultLabelText.typeface = interFont(R.font.inter_medium)
         animationResultLabelText.letterSpacing = 0f
-        animationResultLabelText.alpha = 1f
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        animationResultLabelText.setTextColor(android.graphics.Color.WHITE)
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, RESULT_CAPTION_TEXT_SP)
         animationResultLabelText.maxLines = 1
         animationResultAmountText.text = amountText
         animationResultLabelText.text = getString(R.string.transaction_detail_type_payment_received)
-        nfcAnimationView.showSuccess(amountText)
+
+        if (direct) {
+            nfcAnimationView.showSuccessDirect(amountText)
+        } else {
+            nfcAnimationView.showSuccess(amountText)
+        }
+        hideWaitingHint(animated = !direct)
+        hideWaitingTotal(animated = !direct)
+        showResultTextWithTransition(showAmount = true, direct = direct)
 
         // Play success sound and vibration
         playNfcSuccessFeedback(playSound)
@@ -2536,22 +2891,30 @@ class PaymentRequestActivity : AppCompatActivity() {
         vibrator?.vibrateCompat(longArrayOf(0, 50, 100, 50), -1)
     }
 
-    private fun showNfcAnimationError(message: String) {
-        if (nfcAnimationContainer.visibility != View.VISIBLE) return
+    private fun showNfcAnimationError(message: String) =
+        showNfcAnimationError(message, direct = false)
 
-        animationResultLabelText.animate().cancel()
+    private fun showNfcAnimationError(message: String, direct: Boolean) {
+        if (nfcAnimationContainer.visibility != View.VISIBLE) return
+        keepOverlayShown()
 
         currentOverlayActionMode = OverlayActionMode.ERROR
-        
-        // Reset to bold/stronger style for error title
-        animationResultLabelText.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-        animationResultLabelText.letterSpacing = 0f
-        animationResultLabelText.alpha = 1f
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        animationResultLabelText.typeface = interFont(R.font.inter_semi_bold)
+        animationResultLabelText.letterSpacing = -0.02f
+        animationResultLabelText.setTextColor(android.graphics.Color.WHITE)
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, RESULT_HEADLINE_TEXT_SP)
         animationResultLabelText.maxLines = 2
         animationResultAmountText.text = ""
         animationResultLabelText.text = getString(R.string.payment_failure_title)
-        nfcAnimationView.showError(message)
+
+        if (direct) {
+            nfcAnimationView.showErrorDirect(message)
+        } else {
+            nfcAnimationView.showError(message)
+        }
+        hideWaitingHint(animated = !direct)
+        hideWaitingTotal(animated = !direct)
+        showResultTextWithTransition(showAmount = false, direct = direct)
     }
 
     private fun onNfcAnimationResultDisplayed(success: Boolean) {
@@ -2563,7 +2926,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "success_rendered_ms=$elapsedMs")
 
         val mode = if (success) OverlayActionMode.SUCCESS else OverlayActionMode.ERROR
-        animateResultTextIn(showAmount = success)
         showResultActionsAnimated(mode)
 
         if (success) pendingNfcSuccessToken?.let { token ->
@@ -2579,7 +2941,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun showResultActionsAnimated(mode: OverlayActionMode) {
-        applyFullscreenForAnimationOverlay()
+        applyFullscreenForAnimationOverlay(onResultColor = true)
         ViewCompat.requestApplyInsets(nfcAnimationContainer)
 
         currentOverlayActionMode = mode
@@ -2603,94 +2965,167 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationCloseButton.visibility = View.VISIBLE
         animationCloseButton.isEnabled = true
 
+        if (!isAnimationEnabled()) {
+            animationActionsContainer.alpha = 1f
+            animationActionsContainer.translationY = 0f
+            animationActionsContainer.visibility = View.VISIBLE
+            return
+        }
+
         // Start from invisible and below
         animationActionsContainer.alpha = 0f
-        animationActionsContainer.translationY = 60f
+        animationActionsContainer.translationY = dpToPx(RESULT_ACTIONS_TRAVEL_DP).toFloat()
         animationActionsContainer.visibility = View.VISIBLE
 
         // Animate in with fade + slide up
         animationActionsContainer.animate()
             .alpha(1f)
             .translationY(0f)
-            .setDuration(400)
-            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .setDuration(RESULT_ACTIONS_DURATION_MS)
+            .setInterpolator(resultEnterInterpolator)
             .start()
     }
 
-    private fun animateResultTextIn(showAmount: Boolean) {
-        val amountStartTranslation = animationAmountBaseTranslationY - dpToPx(16f).toFloat()
-        val labelStartTranslation = animationLabelBaseTranslationY - dpToPx(12f).toFloat()
+    /**
+     * Places the result stack under the circle and brings it in alongside the result transition.
+     */
+    private fun showResultTextWithTransition(showAmount: Boolean, direct: Boolean = false) {
+        nfcAnimationContainer.doOnLayout {
+            positionOverlayTextBelowDisc()
+            if (showAmount) fitResultAmountToWidth()
+            animateResultTextIn(showAmount, direct)
+        }
+    }
 
-        if (showAmount) {
-            animationResultAmountText.visibility = View.VISIBLE
-            animationResultAmountText.alpha = 0f
-            animationResultAmountText.translationY = amountStartTranslation
-        } else {
-            animationResultAmountText.visibility = View.GONE
+    /** The text rises into place as the check is drawn; the actions follow once it has landed. */
+    private fun animateResultTextIn(showAmount: Boolean, direct: Boolean = false) {
+        animationResultAmountText.visibility = if (showAmount) View.VISIBLE else View.GONE
+        animationResultLabelText.visibility = View.VISIBLE
+
+        val container = animationResultTextContainer
+        val travel = dpToPx(RESULT_TEXT_TRAVEL_DP).toFloat()
+        val delayMs = if (direct) DIRECT_RESULT_TEXT_DELAY_MS else RESULT_TEXT_DELAY_MS
+
+        resultTextAnimator?.cancel()
+        if (container != null) {
+            animationResultAmountText.alpha = 1f
+            animationResultLabelText.alpha = 1f
+            container.visibility = View.VISIBLE
+            if (!isAnimationEnabled()) {
+                container.alpha = 1f
+                container.translationY = 0f
+                return
+            }
+            container.alpha = 0f
+            container.translationY = travel
+            resultTextAnimator = AnimatorSet().apply {
+                startDelay = delayMs
+                duration = RESULT_TEXT_DURATION_MS
+                interpolator = resultEnterInterpolator
+                playTogether(
+                    ObjectAnimator.ofFloat(container, View.ALPHA, 0f, 1f),
+                    ObjectAnimator.ofFloat(container, View.TRANSLATION_Y, travel, 0f),
+                )
+                start()
+            }
+            return
         }
 
-        animationResultLabelText.visibility = View.VISIBLE
+        // Fallback when views are injected directly without inflating the XML container in unit tests.
+        if (!isAnimationEnabled()) {
+            animationResultAmountText.alpha = 1f
+            animationResultLabelText.alpha = 1f
+            return
+        }
+        if (showAmount) {
+            animationResultAmountText.alpha = 0f
+            animationResultAmountText.translationY = travel
+        }
         animationResultLabelText.alpha = 0f
-        animationResultLabelText.translationY = labelStartTranslation
-
+        animationResultLabelText.translationY = travel
         val animators = mutableListOf<android.animation.Animator>().apply {
             if (showAmount) {
                 add(ObjectAnimator.ofFloat(animationResultAmountText, View.ALPHA, 0f, 1f))
-                add(
-                    ObjectAnimator.ofFloat(
-                        animationResultAmountText,
-                        View.TRANSLATION_Y,
-                        amountStartTranslation,
-                        animationAmountBaseTranslationY,
-                    ),
-                )
+                add(ObjectAnimator.ofFloat(animationResultAmountText, View.TRANSLATION_Y, travel, 0f))
             }
             add(ObjectAnimator.ofFloat(animationResultLabelText, View.ALPHA, 0f, 1f))
-            add(
-                ObjectAnimator.ofFloat(
-                    animationResultLabelText,
-                    View.TRANSLATION_Y,
-                    labelStartTranslation,
-                    animationLabelBaseTranslationY,
-                ),
-            )
+            add(ObjectAnimator.ofFloat(animationResultLabelText, View.TRANSLATION_Y, travel, 0f))
         }
-
-        AnimatorSet().apply {
-            if (showAmount) {
-                startDelay = 120L
-            }
-            duration = 320L
-            interpolator = android.view.animation.DecelerateInterpolator()
+        resultTextAnimator = AnimatorSet().apply {
+            startDelay = delayMs
+            duration = RESULT_TEXT_DURATION_MS
+            interpolator = resultEnterInterpolator
             playTogether(animators)
             start()
         }
     }
 
+    /** Shows the amount at the foot of the waiting screen, as the card tap screen does. */
+    private fun showWaitingTotal() {
+        val container = animationTotalContainer ?: return
+        animationTotalAmountText?.text = formattedAmountString
+        container.animate().cancel()
+        if (!isAnimationEnabled()) {
+            container.alpha = 1f
+            container.visibility = View.VISIBLE
+            return
+        }
+        container.alpha = 0f
+        container.visibility = View.VISIBLE
+        container.animate()
+            .alpha(1f)
+            .setDuration(WAITING_TOTAL_FADE_IN_MS)
+            .setInterpolator(resultEnterInterpolator)
+            .start()
+    }
+
+    /** The result shows the amount under the disc, and the actions take the total's place. */
+    private fun hideWaitingTotal(animated: Boolean) {
+        val container = animationTotalContainer ?: return
+        container.animate().cancel()
+        if (!animated || container.visibility != View.VISIBLE || !isAnimationEnabled()) {
+            container.visibility = View.GONE
+            return
+        }
+        container.animate()
+            .alpha(0f)
+            .setDuration(WAITING_TOTAL_FADE_OUT_MS)
+            .withEndAction { container.visibility = View.GONE }
+            .start()
+    }
+
     private fun resetResultTextViews() {
+        hideWaitingHint(animated = false)
+        hideWaitingTotal(animated = false)
+        resultTextAnimator?.cancel()
+        resultTextAnimator = null
+        animationResultTextContainer?.apply {
+            animate().cancel()
+            visibility = View.GONE
+            alpha = 0f
+            translationY = 0f
+        }
         animationResultAmountText.animate().cancel()
         animationResultAmountText.visibility = View.GONE
         animationResultAmountText.alpha = 0f
-        animationResultAmountText.translationY = animationAmountBaseTranslationY
+        animationResultAmountText.translationY = 0f
         animationResultAmountText.text = ""
 
         animationResultLabelText.animate().cancel()
         animationResultLabelText.visibility = View.GONE
         animationResultLabelText.alpha = 0f
-        animationResultLabelText.translationY = animationLabelBaseTranslationY
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
-        animationResultLabelText.typeface = android.graphics.Typeface.DEFAULT
+        animationResultLabelText.translationY = 0f
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, RESULT_CAPTION_TEXT_SP)
         animationResultLabelText.letterSpacing = 0f
         animationResultLabelText.maxLines = 3
         animationResultLabelText.text = ""
     }
 
-    private fun formatErrorLabel(message: String): String {
-        return if (message.contains(". ")) {
-            message.replaceFirst(". ", ".\n")
-        } else {
-            message
-        }
+    private fun interFont(resId: Int): android.graphics.Typeface = try {
+        ResourcesCompat.getFont(this, resId)
+            ?: android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+    } catch (_: Exception) {
+        android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
     }
 
     private fun resetResultActionButtons() {
@@ -2707,39 +3142,78 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationCloseButton.text = getString(R.string.payment_request_animation_close)
     }
 
-    private fun applyFullscreenForAnimationOverlay() {
+    private fun isDarkTheme(): Boolean =
+        (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+
+    private fun applyFullscreenForAnimationOverlay(onResultColor: Boolean = false) {
+        isStatusBarHiddenForWaiting = false
+        currentOverlayBarStyle = if (onResultColor) OverlayBarStyle.RESULT_COLOR else OverlayBarStyle.TAP_SURFACE
+        val useDarkBarIcons = !onResultColor && !isDarkTheme()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
             show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
+            isAppearanceLightStatusBars = useDarkBarIcons
+            isAppearanceLightNavigationBars = useDarkBarIcons
         }
         window.statusBarColor = android.graphics.Color.TRANSPARENT
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
     }
 
+    /**
+     * The card tap screen has no status bar, so the waiting screen has none either. The result
+     * and the return to checkout both show the bars again.
+     */
+    private fun hideStatusBarWhileWaiting() {
+        isStatusBarHiddenForWaiting = true
+        WindowInsetsControllerCompat(window, window.decorView)
+            .hide(WindowInsetsCompat.Type.statusBars())
+    }
+
     private fun restoreSystemBarsAfterAnimation() {
+        isStatusBarHiddenForWaiting = false
+        val useDarkBarIcons = !isDarkTheme()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
             show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
-            isAppearanceLightStatusBars = true
-            isAppearanceLightNavigationBars = true
+            isAppearanceLightStatusBars = useDarkBarIcons
+            isAppearanceLightNavigationBars = useDarkBarIcons
         }
-        ViewCompat.requestApplyInsets(findViewById(R.id.payment_request_root))
+        findViewById<View?>(R.id.payment_request_root)?.let { ViewCompat.requestApplyInsets(it) }
     }
 
     private fun adjustAnimationActionsBottomMargin(insets: WindowInsetsCompat) {
         val systemInsets = insets.getInsetsIgnoringVisibility(
             WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
         )
-        val minBottomSpacingPx = dpToPx(72f)
-        val targetBottomMargin = maxOf(minBottomSpacingPx, systemInsets.bottom + dpToPx(24f))
+        setBottomMargin(
+            animationActionsContainer,
+            systemInsets.bottom + dpToPx(RESULT_ACTIONS_BOTTOM_GAP_DP),
+        )
+        // The card tap screen keeps its total a fixed gap from the screen's edge, over the
+        // gesture bar. A taller navigation bar would cover the amount, so it sits above that.
+        val totalGap = dpToPx(WAITING_TOTAL_BOTTOM_GAP_DP)
+        val gestureBarMax = dpToPx(GESTURE_BAR_MAX_HEIGHT_DP)
+        setBottomMargin(
+            animationTotalContainer,
+            if (systemInsets.bottom <= gestureBarMax) totalGap else systemInsets.bottom,
+        )
+    }
 
-        val layoutParams = animationActionsContainer.layoutParams as? ViewGroup.MarginLayoutParams ?: return
-        if (layoutParams.bottomMargin != targetBottomMargin) {
-            layoutParams.bottomMargin = targetBottomMargin
-            animationActionsContainer.layoutParams = layoutParams
+    private fun setTopMargin(view: View?, topMargin: Int) {
+        val layoutParams = view?.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        if (layoutParams.topMargin != topMargin) {
+            layoutParams.topMargin = topMargin
+            view.layoutParams = layoutParams
+        }
+    }
+
+    private fun setBottomMargin(view: View?, bottomMargin: Int) {
+        val layoutParams = view?.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        if (layoutParams.bottomMargin != bottomMargin) {
+            layoutParams.bottomMargin = bottomMargin
+            view.layoutParams = layoutParams
         }
     }
 
@@ -2789,7 +3263,36 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "PaymentRequestActivity"
-        private const val NFC_READ_TIMEOUT_MS = 5_000L
+        private const val DISABLED_ALPHA = 0.38f
+        private const val NFC_HINT_ALPHA = 1f
+        private const val NFC_HINT_TEXT_SP = 18f
+        private const val NFC_HINT_GAP_DP = 24f
+        private const val NFC_HINT_SWAP_OUT_MS = 90L
+        private const val NFC_HINT_SWAP_IN_MS = 160L
+        private const val OVERLAY_FADE_IN_MS = 180L
+        private const val OVERLAY_FADE_OUT_MS = 120L
+        private const val QR_REVEAL_MS = 180L
+        private const val QR_SPINNER_FADE_MS = 120L
+        private const val NFC_RESULT_GAP_DP = 28f
+        private const val RESULT_AMOUNT_MAX_TEXT_SP = 56f
+        private const val RESULT_AMOUNT_MIN_TEXT_SP = 36f
+        private const val RESULT_AMOUNT_TEXT_STEP_SP = 2f
+        private const val RESULT_CAPTION_TEXT_SP = 18f
+        private const val RESULT_HEADLINE_TEXT_SP = 28f
+        private const val RESULT_TEXT_TRAVEL_DP = 12f
+        private const val RESULT_TEXT_DELAY_MS = 180L
+        private const val DIRECT_RESULT_TEXT_DELAY_MS = 140L
+        private const val RESULT_TEXT_DURATION_MS = 260L
+        private const val RESULT_ACTIONS_TRAVEL_DP = 16f
+        private const val RESULT_ACTIONS_DURATION_MS = 300L
+        private const val RESULT_ACTIONS_BOTTOM_GAP_DP = 24f
+        private const val RESULT_ACTIONS_RESERVE_DP = 168f
+        private const val RESULT_STACK_MIN_HEIGHT_DP = 104f
+        private const val WAITING_TOTAL_BOTTOM_GAP_DP = 16f
+        private const val GESTURE_BAR_MAX_HEIGHT_DP = 24f
+        private const val WAITING_TOTAL_FADE_IN_MS = 200L
+        private const val WAITING_TOTAL_FADE_OUT_MS = 150L
+        private const val NFC_READ_TIMEOUT_MS = 12_000L
         private const val BTCPAY_INVOICE_TIMEOUT_MS = 15 * 60 * 1000L // 15 min
         private const val BTCPAY_MAX_POLL_ERRORS = 5
         private const val PILL_IN_MS = 220L
