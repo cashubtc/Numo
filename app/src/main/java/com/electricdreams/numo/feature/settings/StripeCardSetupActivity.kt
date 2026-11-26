@@ -36,12 +36,19 @@ import com.google.android.material.transition.MaterialFadeThrough
 import com.google.android.material.transition.MaterialSharedAxis
 import java.util.Locale
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.ActivityStripeCardSetupBinding
+import com.electricdreams.numo.payment.card.AddressLookup
+import com.electricdreams.numo.payment.card.AddressQuery
+import com.electricdreams.numo.payment.card.AddressSuggestion
+import com.electricdreams.numo.payment.card.PhotonAddressLookup
 import com.electricdreams.numo.payment.card.StripeCardConfig
 import com.electricdreams.numo.payment.card.StripeCardSettings
 import com.electricdreams.numo.payment.card.StripeConnectionTokenClient.StripeApiException
@@ -97,6 +104,21 @@ class StripeCardSetupActivity : AppCompatActivity() {
         override fun getFilter(): Filter = countryFilter
     }
 
+    private inner class StreetSuggestionAdapter : ArrayAdapter<AddressSuggestion>(
+        this,
+        android.R.layout.simple_list_item_1,
+        mutableListOf(),
+    ) {
+        private val serverResultsFilter = object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults =
+                FilterResults().apply { count = this@StreetSuggestionAdapter.count }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) = Unit
+        }
+
+        override fun getFilter(): Filter = serverResultsFilter
+    }
+
     private lateinit var binding: ActivityStripeCardSetupBinding
 
     /** Replaceable so tests can store a key without the Android Keystore. */
@@ -104,6 +126,8 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
     /** Replaceable so tests can answer for Stripe. */
     internal var locationsClient = StripeLocationsClient()
+
+    internal var addressLookup: AddressLookup = PhotonAddressLookup()
 
     private lateinit var mode: Mode
     private var locationRequestId: String? = null
@@ -115,6 +139,9 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private var locationListingDenied = false
     private var selectedLocationId: String? = null
     private val countryCodesByName = linkedMapOf<String, String>()
+    private lateinit var streetSuggestionAdapter: ArrayAdapter<AddressSuggestion>
+    private var streetLookupJob: Job? = null
+    private var suppressStreetLookup = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -158,6 +185,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private fun showStep(target: Step, animate: Boolean = true) {
         val forward = target.ordinal >= step.ordinal
         step = target
+        if (target != Step.ADD_LOCATION) streetLookupJob?.cancel()
         hideKeyboard()
         if (animate) {
             // Steps slide along one axis, so going back visibly goes back.
@@ -572,7 +600,72 @@ class StripeCardSetupActivity : AppCompatActivity() {
             }
         }
         binding.postalInput.setOnEditorActionListener(submitOnAction)
+        setupStreetLookup()
     }
+
+    private fun setupStreetLookup() {
+        streetSuggestionAdapter = StreetSuggestionAdapter()
+        binding.streetInput.setAdapter(streetSuggestionAdapter)
+        binding.streetInput.setOnItemClickListener { _, _, position, _ ->
+            val suggestion = streetSuggestionAdapter.getItem(position) ?: return@setOnItemClickListener
+            suppressStreetLookup = true
+            binding.streetInput.setText(suggestion.line1)
+            suggestion.postalCode?.let(binding.postalInput::setText)
+            suggestion.city?.let(binding.cityInput::setText)
+            suggestion.state?.let(binding.stateInput::setText)
+            suggestion.countryCode?.let { code ->
+                countryCodesByName.entries.firstOrNull { it.value == code }?.let {
+                    binding.countryInput.setText(it.key, false)
+                }
+            }
+            suppressStreetLookup = false
+            locationRequestId = null
+            binding.streetInput.dismissDropDown()
+        }
+        listOf(binding.streetInput, binding.postalInput, binding.cityInput).forEach { input ->
+            input.doAfterTextChanged { scheduleStreetLookup() }
+        }
+        binding.countryInput.doAfterTextChanged {
+            locationRequestId = null
+            scheduleStreetLookup()
+        }
+    }
+
+    private fun scheduleStreetLookup() {
+        if (suppressStreetLookup) return
+        streetLookupJob?.cancel()
+        val query = currentAddressQuery()
+        if (query.street.length < MIN_STREET_QUERY_LENGTH) {
+            streetSuggestionAdapter.clear()
+            binding.streetInput.dismissDropDown()
+            return
+        }
+        streetLookupJob = lifecycleScope.launch {
+            delay(STREET_LOOKUP_DEBOUNCE_MS)
+            try {
+                val suggestions = withContext(Dispatchers.IO) { addressLookup.search(query) }
+                if (currentAddressQuery() != query) return@launch
+                streetSuggestionAdapter.clear()
+                streetSuggestionAdapter.addAll(suggestions)
+                if (suggestions.isNotEmpty() && binding.streetInput.hasFocus()) {
+                    binding.streetInput.showDropDown()
+                } else {
+                    binding.streetInput.dismissDropDown()
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                Log.w(TAG, "Address lookup failed (${error.javaClass.simpleName})")
+            }
+        }
+    }
+
+    private fun currentAddressQuery() = AddressQuery(
+        street = binding.streetInput.text.toString().trim(),
+        postalCode = binding.postalInput.text.toString().trim(),
+        city = binding.cityInput.text.toString().trim(),
+        countryCode = countryCodesByName[binding.countryInput.text.toString()],
+    )
 
     private fun addressFields(): List<Pair<TextInputLayout, EditText>> = listOf(
         binding.shopNameLayout to binding.shopNameInput,
@@ -690,6 +783,8 @@ class StripeCardSetupActivity : AppCompatActivity() {
             "&permissions%5B%5D=rak_terminal_location_read"
         private const val HTTP_UNAUTHORIZED = 401
         private const val HTTP_FORBIDDEN = 403
+        private const val MIN_STREET_QUERY_LENGTH = 3
+        private const val STREET_LOOKUP_DEBOUNCE_MS = 400L
         private const val STEP_ANIMATION_MS = 240L
         private const val CAPTION_SCALE = 0.85f
 

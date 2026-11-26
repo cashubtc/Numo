@@ -91,6 +91,7 @@
     <string name="stripe_card_add_location_name">Location name</string>
     <string name="stripe_card_add_location_country">Country</string>
     <string name="stripe_card_add_location_street">Street address</string>
+    <string name="stripe_card_address_attribution">Address suggestions by Photon / OpenStreetMap contributors</string>
     <string name="stripe_card_add_location_unit">Address line 2</string>
     <string name="stripe_card_add_location_city">City</string>
     <string name="stripe_card_add_location_state">State or region</string>

@@ -10,6 +10,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.SecretCipher
 import com.electricdreams.numo.core.prefs.ThreadSafePreferences
+import com.electricdreams.numo.payment.card.AddressLookup
+import com.electricdreams.numo.payment.card.AddressQuery
+import com.electricdreams.numo.payment.card.AddressSuggestion
 import com.electricdreams.numo.payment.card.StripeCardSettings
 import com.electricdreams.numo.payment.card.StripeLocationsClient
 import com.google.android.material.textfield.TextInputEditText
@@ -31,6 +34,7 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowToast
+import java.time.Duration
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import org.robolectric.annotation.Config
@@ -313,6 +317,49 @@ class StripeCardSetupActivityTest {
             assertEquals("tml_new", list.findViewById<View>(list.checkedRadioButtonId).tag)
             assertFalse(activity.isFinishing)
             assertNull(shadowOf(activity).nextStartedActivity)
+        }
+    }
+
+    @Test
+    fun `selecting a street suggestion fills the remaining address fields`() {
+        submitKey { activity, _, _ ->
+            activity.findViewById<View>(R.id.add_location_button).performClick()
+            var seenQuery: AddressQuery? = null
+            activity.addressLookup = AddressLookup { query ->
+                seenQuery = query
+                listOf(
+                    AddressSuggestion(
+                        line1 = "Main Street 12",
+                        postalCode = "10115",
+                        city = "Berlin",
+                        state = "Berlin",
+                        countryCode = "DE",
+                    )
+                )
+            }
+            val street = activity.findViewById<AutoCompleteTextView>(R.id.street_input)
+            activity.findViewById<EditText>(R.id.postal_input).setText("101")
+            activity.findViewById<EditText>(R.id.city_input).setText("Ber")
+            street.setText("Main")
+            street.requestFocus()
+
+            shadowOf(activity.mainLooper).idleFor(Duration.ofMillis(500))
+            activity.idleUntil { seenQuery != null }
+            activity.idleUntil { street.adapter.count == 1 }
+            assertEquals("Main", seenQuery?.street)
+            assertEquals("101", seenQuery?.postalCode)
+            assertEquals("Ber", seenQuery?.city)
+
+            street.onItemClickListener.onItemClick(null, null, 0, 0)
+
+            assertEquals("Main Street 12", street.text.toString())
+            assertEquals("10115", activity.findViewById<EditText>(R.id.postal_input).text.toString())
+            assertEquals("Berlin", activity.findViewById<EditText>(R.id.city_input).text.toString())
+            assertEquals("Berlin", activity.findViewById<EditText>(R.id.state_input).text.toString())
+            assertEquals(
+                Locale("", "DE").getDisplayCountry(Locale.getDefault()),
+                activity.findViewById<AutoCompleteTextView>(R.id.country_input).text.toString(),
+            )
         }
     }
 
