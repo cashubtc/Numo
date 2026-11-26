@@ -170,11 +170,11 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Keypad with fixed height -->
+        <!-- Keypad: PosKeypadSizer shortens it on screens too short to also fit the amount -->
         <GridLayout
             android:id="@+id/keypad"
             android:layout_width="0dp"
-            android:layout_height="360dp"
+            android:layout_height="@dimen/pos_keypad_max_height"
             android:layout_marginHorizontal="@dimen/space_2xl"
             android:layout_marginBottom="@dimen/space_l"
             android:alignmentMode="alignBounds"
