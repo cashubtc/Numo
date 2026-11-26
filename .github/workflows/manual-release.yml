@@ -127,9 +127,11 @@ jobs:
         run: bash scripts/manual_release.sh download-release-apk
 
       - name: Install Zapstore publishing tools
+        if: ${{ !inputs.pre_release }}
         run: bash scripts/manual_release.sh install-zsp
 
       - name: Publish to Zapstore
+        if: ${{ !inputs.pre_release }}
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}

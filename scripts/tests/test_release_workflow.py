@@ -153,6 +153,13 @@ class ManualReleaseTest(unittest.TestCase):
         self.assertEqual(b"existing arm64 apk", apk.read_bytes())
         self.assertEqual("RELEASE_COMMIT=tagcommit\n", github_env.read_text())
 
+    def test_zapstore_skips_pre_releases(self):
+        self.environment["PRE_RELEASE"] = "true"
+
+        result = self.run_command("publish-zapstore")
+
+        self.assertIn("Skipping Zapstore publication for pre-release v1.10", result.stdout)
+
     def test_zapstore_publishes_the_arm64_apk_then_links_the_signing_key(self):
         runner_temp = self.root / "runner temp"
         runner_temp.mkdir()
@@ -202,15 +209,15 @@ class ManualReleaseTest(unittest.TestCase):
             KEYTOOL_LOG=str(keytool_log), ZSP_LOG=str(zsp_log), NAK_LOG=str(nak_log),
             PATH=f"{fake_bin}{os.pathsep}{os.environ['PATH']}")
 
-        for pre_release, channel, fail_jks in (("false", "main", False), ("true", "beta", True)):
-            with self.subTest(channel=channel, fail_jks=fail_jks):
+        for fail_jks in (False, True):
+            with self.subTest(fail_jks=fail_jks):
                 keytool_log.write_text("")
                 zsp_log.write_text("")
                 nak_log.write_text("")
-                self.environment["PRE_RELEASE"] = pre_release
+                self.environment["PRE_RELEASE"] = "false"
                 self.environment["FAIL_JKS"] = "1" if fail_jks else "0"
-                expected_commit = "tagcommit" if pre_release == "true" else "abc123"
-                if pre_release == "true":
+                expected_commit = "tagcommit" if fail_jks else "abc123"
+                if fail_jks:
                     self.environment["RELEASE_COMMIT"] = "tagcommit"
                 else:
                     self.environment.pop("RELEASE_COMMIT", None)
@@ -222,7 +229,7 @@ class ManualReleaseTest(unittest.TestCase):
                 self.assertEqual([
                     ["publish", "--quiet", "--skip-preview", "--skip-certificate-linking",
                      "--overwrite-release", "--no-color", "--commit", expected_commit,
-                     "--channel", channel, "release/zapstore.yaml"],
+                     "--channel", "main", "release/zapstore.yaml"],
                     ["identity", "--link-key", str(runner_temp / "zapstore-release-key.p12"),
                      "--link-key-expiry", "2y", "--offline", "--no-color"],
                 ], [json.loads(line) for line in zsp_log.read_text().splitlines()])
