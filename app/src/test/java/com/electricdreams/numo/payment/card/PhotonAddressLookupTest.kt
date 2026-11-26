@@ -28,7 +28,7 @@ class PhotonAddressLookupTest {
             val lookup = PhotonAddressLookup(server.url("/"))
             val suggestions = lookup.search(
                 AddressQuery(
-                    street = "Main Street",
+                    street = "Main Street 12",
                     postalCode = "10115",
                     city = "Berlin",
                     countryCode = "DE",
@@ -38,6 +38,7 @@ class PhotonAddressLookupTest {
             val request = server.takeRequest()
             assertEquals("/structured", request.path?.substringBefore('?'))
             assertEquals("Main Street", request.requestUrl?.queryParameter("street"))
+            assertEquals("12", request.requestUrl?.queryParameter("housenumber"))
             assertEquals("10115", request.requestUrl?.queryParameter("postcode"))
             assertEquals("Berlin", request.requestUrl?.queryParameter("city"))
             assertEquals("DE", request.requestUrl?.queryParameter("countrycode"))

@@ -338,6 +338,7 @@ class StripeCardSetupActivityTest {
                 )
             }
             val street = activity.findViewById<AutoCompleteTextView>(R.id.street_input)
+            assertTrue(street.paddingStart > 0)
             activity.findViewById<EditText>(R.id.postal_input).setText("101")
             activity.findViewById<EditText>(R.id.city_input).setText("Ber")
             street.setText("Main")
@@ -385,12 +386,14 @@ class StripeCardSetupActivityTest {
     fun `country rules validate before submission and retries reuse the request key`() {
         submitKey { activity, _, server ->
             activity.findViewById<View>(R.id.add_location_button).performClick()
+            assertEquals(View.GONE, activity.findViewById<View>(R.id.next_button).visibility)
+            assertTrue(activity.findViewById<View>(R.id.add_location_submit_button).isShown)
             fun field(id: Int) = activity.findViewById<EditText>(id)
             fun country(code: String) {
                 activity.findViewById<AutoCompleteTextView>(R.id.country_input)
                     .setText(Locale("", code).getDisplayCountry(Locale.getDefault()), false)
             }
-            val next = activity.findViewById<View>(R.id.next_button)
+            val next = activity.findViewById<View>(R.id.add_location_submit_button)
             field(R.id.shop_name_input).setText("Shop")
             field(R.id.street_input).setText("1 Main")
             country("US")

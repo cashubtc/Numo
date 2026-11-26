@@ -201,6 +201,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
         ).forEach { (containerStep, view) ->
             view.visibility = if (containerStep == target) View.VISIBLE else View.GONE
         }
+        binding.nextButton.visibility = if (target == Step.ADD_LOCATION) View.GONE else View.VISIBLE
 
         val position = if (target == Step.KEY) 1 else 2
         binding.progressHeader.visibility = if (mode == Mode.SETUP) View.VISIBLE else View.GONE
@@ -246,12 +247,14 @@ class StripeCardSetupActivity : AppCompatActivity() {
     }
 
     private fun updateNextButton() {
-        binding.nextButton.isEnabled = !isBusy && when (step) {
+        val enabled = !isBusy && when (step) {
             Step.KEY -> true
             Step.LOCATION -> binding.locationIdInput.text?.isNotBlank() == true ||
                 (selectedLocationId != null && locations != null)
             Step.ADD_LOCATION -> true
         }
+        binding.nextButton.isEnabled = enabled
+        binding.addLocationSubmitButton.isEnabled = enabled
         binding.nextButton.setText(
             when {
                 isBusy && step == Step.KEY -> R.string.stripe_card_setup_checking_key
@@ -260,12 +263,17 @@ class StripeCardSetupActivity : AppCompatActivity() {
                 else -> R.string.stripe_card_setup_next
             }
         )
+        binding.addLocationSubmitButton.setText(
+            if (isBusy) R.string.stripe_card_add_location_saving
+            else R.string.stripe_card_add_location_submit
+        )
     }
 
     private fun setBusy(busy: Boolean) {
         isBusy = busy
         // A waiting button that shows no motion looks frozen.
         binding.nextButton.icon = if (busy) busyIndicator else null
+        binding.addLocationSubmitButton.icon = if (busy) busyIndicator else null
         updateNextButton()
     }
 
@@ -600,6 +608,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
             }
         }
         binding.postalInput.setOnEditorActionListener(submitOnAction)
+        binding.addLocationSubmitButton.setOnClickListener { onNext() }
         setupStreetLookup()
     }
 

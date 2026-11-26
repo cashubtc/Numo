@@ -335,6 +335,8 @@
                             android:id="@+id/country_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:paddingStart="@dimen/row_padding_horizontal"
+                            android:paddingEnd="@dimen/row_padding_horizontal"
                             android:completionThreshold="1"
                             android:fontFamily="sans-serif"
                             android:imeOptions="actionNext"
@@ -357,6 +359,8 @@
                             android:id="@+id/street_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:paddingStart="@dimen/row_padding_horizontal"
+                            android:paddingEnd="@dimen/row_padding_horizontal"
                             android:completionThreshold="3"
                             android:fontFamily="sans-serif"
                             android:importantForAutofill="no"
@@ -368,13 +372,6 @@
                             android:textColorHint="?attr/colorOnSurfaceVariant" />
 
                     </com.google.android.material.textfield.TextInputLayout>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_xs"
-                        android:text="@string/stripe_card_address_attribution"
-                        android:textAppearance="@style/Text.SettingsCaption" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/unit_layout"
@@ -478,6 +475,15 @@
                         android:textAppearance="@style/Text.SettingsBody"
                         android:textColor="@color/color_error"
                         android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/add_location_submit_button"
+                        style="@style/Widget.Numo.Button.Dialog.Confirm"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:minHeight="56dp"
+                        android:text="@string/stripe_card_add_location_submit" />
 
                 </LinearLayout>
 

@@ -37,11 +37,17 @@ internal class PhotonAddressLookup(
     private val httpClient: OkHttpClient = StripeHttp.defaultClient,
 ) : AddressLookup {
     override fun search(query: AddressQuery): List<AddressSuggestion> {
+        val houseNumber = HOUSE_NUMBER_AT_END.matchEntire(query.street)
         val url = baseUrl.newBuilder()
             .addPathSegment("structured")
-            .addQueryParameter("street", query.street)
+            .addQueryParameter(
+                "street",
+                houseNumber?.groupValues?.get(1)?.trim()?.ifEmpty { null } ?: query.street,
+            )
             .addQueryParameter("limit", "5")
             .apply {
+                houseNumber?.groupValues?.get(2)
+                    ?.let { addQueryParameter("housenumber", it) }
                 query.postalCode.takeIf { it.isNotBlank() }
                     ?.let { addQueryParameter("postcode", it) }
                 query.city.takeIf { it.isNotBlank() }?.let { addQueryParameter("city", it) }
@@ -84,5 +90,6 @@ internal class PhotonAddressLookup(
 
     private companion object {
         const val DEFAULT_BASE_URL = "https://photon.komoot.io/"
+        val HOUSE_NUMBER_AT_END = Regex("""^(.*?)\s+(\d+[A-Za-z]?(?:[-/]\d+[A-Za-z]?)?)$""")
     }
 }
