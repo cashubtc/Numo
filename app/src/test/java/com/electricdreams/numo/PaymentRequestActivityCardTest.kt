@@ -146,7 +146,7 @@ class PaymentRequestActivityCardTest {
         assertEquals(activity.getString(R.string.card_payment_button_preparing), cardButton.text.toString())
         assertTrue(ReflectionHelpers.getField(activity, "isCardCollecting"))
 
-        showCardIdle(activity.getString(R.string.card_payment_status_cancelled), needsStatusCheck = false)
+        showCardIdle(activity.getString(R.string.card_payment_status_cancelled))
 
         assertFalse(ReflectionHelpers.getField(activity, "isCardCollecting"))
         assertEquals(activity.getString(R.string.card_payment_status_cancelled), cardMessage.text.toString())
@@ -167,7 +167,7 @@ class PaymentRequestActivityCardTest {
         verify(animationView).startProcessingDirectly(animateIn = true)
         verify(animationView, never()).startReading(false)
 
-        showCardIdle(activity.getString(R.string.card_payment_status_unresolved), needsStatusCheck = true)
+        showCardIdle(activity.getString(R.string.card_payment_status_unresolved))
         // The waiting screen fades out over checkout before it goes.
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
         assertEquals(View.GONE, overlay.visibility)
@@ -188,7 +188,7 @@ class PaymentRequestActivityCardTest {
         assertTrue(ReflectionHelpers.getField(activity, "isCardSurfaceCovered"))
         verify(animationView).showSurfaceCover()
 
-        showCardIdle(activity.getString(R.string.card_payment_status_cancelled), needsStatusCheck = false)
+        showCardIdle(activity.getString(R.string.card_payment_status_cancelled))
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
         assertFalse(ReflectionHelpers.getField(activity, "isCardSurfaceCovered"))
         assertEquals(View.GONE, overlay.visibility)
@@ -209,7 +209,8 @@ class PaymentRequestActivityCardTest {
 
     @Test
     fun `card attempt with an unknown outcome turns the button into a status check`() {
-        showCardIdle(activity.getString(R.string.card_payment_status_unresolved), needsStatusCheck = true)
+        setReviewRequired(true)
+        showCardIdle(activity.getString(R.string.card_payment_status_unresolved))
 
         assertTrue(cardButton.isEnabled)
         assertEquals(activity.getString(R.string.card_payment_action_check), cardButton.text.toString())
@@ -234,11 +235,13 @@ class PaymentRequestActivityCardTest {
     }
 
     @Test
-    fun `uncertain card outcome is saved until its status is checked`() {
+    fun `uncertain card outcome disables bitcoin until its status is checked`() {
         val paymentId = addPendingPayment()
+        val bitcoinViews = attachBitcoinViews()
 
         setReviewRequired(true)
 
+        bitcoinViews.forEach { assertEquals(View.INVISIBLE, it.visibility) }
         assertTrue(
             PaymentsHistoryActivity.getPaymentEntryById(activity, paymentId)
                 ?.cardPaymentReviewRequired == true,
@@ -246,10 +249,29 @@ class PaymentRequestActivityCardTest {
 
         setReviewRequired(false)
 
+        bitcoinViews.forEach { assertEquals(View.VISIBLE, it.visibility) }
         assertFalse(
             PaymentsHistoryActivity.getPaymentEntryById(activity, paymentId)
                 ?.cardPaymentReviewRequired == true,
         )
+    }
+
+    @Test
+    fun `uncertain card outcome starts its status check when checkout reopens`() {
+        val bitcoinViews = attachBitcoinViews()
+        ReflectionHelpers.setField(
+            activity,
+            "cardAmount",
+            CardAmountResolver.CardAmount(minorUnits = 1_250, currency = "usd"),
+        )
+
+        call("resumeCardPaymentReview")
+
+        // The check ran straight away: with no Stripe key in this test it stops at "not set up".
+        assertEquals(activity.getString(R.string.card_payment_status_not_configured), cardMessage.text.toString())
+        assertFalse(cardButton.isEnabled)
+        assertEquals(activity.getString(R.string.card_payment_action_check), cardButton.text.toString())
+        bitcoinViews.forEach { assertEquals(View.INVISIBLE, it.visibility) }
     }
 
     @Test
@@ -358,13 +380,26 @@ class PaymentRequestActivityCardTest {
         ReflectionHelpers.setStaticField(StripeTerminalManager::class.java, "isCharging", charging)
     }
 
-    private fun showCardIdle(message: String, needsStatusCheck: Boolean) {
+    /** Gives the activity the QR, instruction and share views that the review lock hides. */
+    private fun attachBitcoinViews(): List<View> {
+        val qr = View(activity).apply { id = R.id.qr_card }
+        val instruction = TextView(activity).apply { id = R.id.instruction_text }
+        val share = View(activity)
+        activity.window.setContentView(FrameLayout(activity).apply {
+            id = R.id.payment_request_root
+            addView(qr)
+            addView(instruction)
+        })
+        ReflectionHelpers.setField(activity, "shareButton", share)
+        return listOf(qr, instruction, share)
+    }
+
+    private fun showCardIdle(message: String) {
         ReflectionHelpers.callInstanceMethod<Any?>(
             activity,
             "showCardIdle",
             ReflectionHelpers.ClassParameter.from(String::class.java, message),
             ReflectionHelpers.ClassParameter.from(Boolean::class.javaPrimitiveType, true),
-            ReflectionHelpers.ClassParameter.from(Boolean::class.javaPrimitiveType, needsStatusCheck),
         )
     }
 

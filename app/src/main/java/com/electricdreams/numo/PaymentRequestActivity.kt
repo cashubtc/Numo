@@ -136,6 +136,11 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var cardMessageText: TextView
     private var cardAmount: CardAmountResolver.CardAmount? = null
     private var cardJob: Job? = null
+
+    /**
+     * True when the last card attempt's outcome is unknown. The sale may already be paid, so
+     * bitcoin stays off the screen and the next tap checks on the attempt. Saved with the sale.
+     */
     private var cardPaymentReviewRequired = false
 
     /** True while the phone is reading a card, when it must not also emulate a payment tag. */
@@ -159,9 +164,6 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     /** Tracks whether the unified QR has already revealed once so only the first reveal fades in. */
     private var hasShownUnifiedQr = false
-
-    /** True when the last attempt's outcome is unknown and the next tap checks on it. */
-    private var cardNeedsStatusCheck = false
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -1211,7 +1213,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToCashu() {
-        if (isCardCollecting) return
+        if (isCardCollecting || cardPaymentReviewRequired) return
         val request = hcePaymentRequest ?: run {
             Log.w(TAG, "setHceToCashu() called but hcePaymentRequest is null")
             return
@@ -1232,7 +1234,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToLightning() {
-        if (isCardCollecting) return
+        if (isCardCollecting || cardPaymentReviewRequired) return
         val invoice = lightningInvoice ?: run {
             Log.w(TAG, "setHceToLightning() called but lightningInvoice is null")
             return
@@ -1255,7 +1257,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToUnified() {
-        if (isCardCollecting) return
+        if (isCardCollecting || cardPaymentReviewRequired) return
         val payload = unifiedPaymentRequest() ?: return
 
         try {
@@ -1496,8 +1498,11 @@ class PaymentRequestActivity : AppCompatActivity() {
             if (isFinishing || isDestroyed || hasTerminalOutcome) return@ReadyListener
             Log.d(TAG, "Setting up NDEF payment with HCE service")
 
-            if (isCardCollecting || isCardConfirming || isProcessingNfcPayment) {
-                // Never emulate a payment tag while reading a card or redeeming an NFC token.
+            if (isCardCollecting || isCardConfirming || isProcessingNfcPayment ||
+                cardPaymentReviewRequired
+            ) {
+                // Never emulate a payment tag while reading a card, redeeming an NFC token, or
+                // waiting to learn whether a card was charged.
                 hceService.clearPaymentRequest()
             } else {
                 publishHcePaymentRequest()
@@ -1680,17 +1685,30 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     /** Offers the card button when Stripe is configured, the device qualifies, and the unit is sats. */
     private fun setupCardPayments() {
-        val reviewRequired = pendingPaymentId?.let { paymentId ->
-            PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)?.cardPaymentReviewRequired
-        } == true
-        setCardPaymentReviewRequired(reviewRequired, persist = false)
         val available = paymentUnit.equals("sat", ignoreCase = true) &&
             StripeTerminalManager.isDeviceSupported(this) &&
             StripeCardSettings.getInstance(this).isReady()
         val visibility = if (available) View.VISIBLE else View.GONE
         cardPayButton.visibility = visibility
         cardMessageText.visibility = visibility
-        if (available) resolveCardAmount()
+        // Without the card button there is no way to check on an attempt, so bitcoin stays on offer.
+        if (!available) return
+
+        resolveCardAmount()
+        val reviewRequired = pendingPaymentId?.let { paymentId ->
+            PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)?.cardPaymentReviewRequired
+        } == true
+        if (reviewRequired) resumeCardPaymentReview()
+    }
+
+    /**
+     * Reopens a sale whose last card attempt has an unknown outcome: bitcoin stays off the
+     * screen and the status check starts at once, without waiting for a tap.
+     */
+    private fun resumeCardPaymentReview() {
+        setCardPaymentReviewRequired(true, persist = false)
+        showCardIdle(getString(R.string.card_payment_status_unresolved), showAction = true)
+        startCardPayment()
     }
 
     /**
@@ -1714,7 +1732,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     /** The amount is already shown above, so the button only names the action. */
     private fun updateCardButtonLabel() {
         cardPayButton.text = getString(
-            if (cardNeedsStatusCheck) R.string.card_payment_action_check else R.string.card_payment_button
+            if (cardPaymentReviewRequired) R.string.card_payment_action_check
+            else R.string.card_payment_button
         )
     }
 
@@ -1755,7 +1774,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setCardPaymentReviewRequired(reviewRequired: Boolean, persist: Boolean = true) {
+        val changed = cardPaymentReviewRequired != reviewRequired
         cardPaymentReviewRequired = reviewRequired
+        if (changed) applyCardPaymentReview()
         if (!persist) return
         val paymentId = pendingPaymentId ?: return
         val saved = PaymentsHistoryActivity.updatePendingCardPaymentReview(
@@ -1764,6 +1785,26 @@ class PaymentRequestActivity : AppCompatActivity() {
             reviewRequired = reviewRequired,
         )
         if (!saved) Log.w(TAG, "Could not save card payment review state for $paymentId")
+    }
+
+    /**
+     * Takes bitcoin off the screen and off NFC while a card attempt's outcome is unknown, and
+     * puts it back once the status check settles it. The views are hidden in place, so nothing
+     * else on the screen moves.
+     */
+    private fun applyCardPaymentReview() {
+        if (isFinishing || isDestroyed) return
+        val locked = cardPaymentReviewRequired
+        val bitcoin = if (locked) View.INVISIBLE else View.VISIBLE
+        findViewById<View>(R.id.qr_card)?.visibility = bitcoin
+        findViewById<View>(R.id.instruction_text)?.visibility = bitcoin
+        if (::shareButton.isInitialized) shareButton.visibility = bitcoin
+        if (locked) {
+            NdefHostCardEmulationService.getInstance()?.clearPaymentRequest()
+        } else if (!isCardCollecting && !hasTerminalOutcome) {
+            publishHcePaymentRequest()
+        }
+        if (::cardPayButton.isInitialized) updateCardButtonLabel()
     }
 
     private fun persistCardPaymentIntent(paymentIntent: PaymentIntent) {
@@ -1863,7 +1904,6 @@ class PaymentRequestActivity : AppCompatActivity() {
                             else -> getString(R.string.card_payment_status_failed, e.message.orEmpty())
                         },
                         showAction = true,
-                        needsStatusCheck = e.isUnresolved,
                     )
                 }
             } catch (e: Exception) {
@@ -1955,10 +1995,11 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     /**
-     * The card attempt ended without a charge: bitcoin is on offer again and [message] says
-     * what happened. [showAction] is false for problems another tap cannot fix.
+     * The card attempt ended without a charge and [message] says what happened. Bitcoin is on
+     * offer again unless the attempt's outcome is unknown. [showAction] is false for problems
+     * another tap cannot fix.
      */
-    private fun showCardIdle(message: String, showAction: Boolean, needsStatusCheck: Boolean = false) {
+    private fun showCardIdle(message: String, showAction: Boolean) {
         isCardTapScreenLaunched = false
         if (isCardConfirming || isCardSurfaceCovered) {
             isCardConfirming = false
@@ -1969,7 +2010,6 @@ class PaymentRequestActivity : AppCompatActivity() {
             isCardCollecting = false
             if (!hasTerminalOutcome) publishHcePaymentRequest()
         }
-        cardNeedsStatusCheck = needsStatusCheck
         cardMessageText.text = message
         cardPayButton.setIconResource(R.drawable.ic_card)
         cardPayButton.isEnabled = showAction && !hasTerminalOutcome
