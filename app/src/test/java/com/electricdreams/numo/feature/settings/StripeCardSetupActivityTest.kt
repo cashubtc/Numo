@@ -76,7 +76,21 @@ class StripeCardSetupActivityTest {
     }
 
     @Test
-    fun `a key that cannot list locations is refused on the key step`() {
+    fun `stripe key creation requests location read rather than write`() {
+        ActivityScenario.launch(StripeCardSetupActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.findViewById<View>(R.id.open_stripe_button).performClick()
+
+                val url = shadowOf(activity).nextStartedActivity.dataString.orEmpty()
+                assertTrue(url.contains("rak_terminal_connection_token_write"))
+                assertTrue(url.contains("rak_terminal_location_read"))
+                assertFalse(url.contains("rak_terminal_location_write"))
+            }
+        }
+    }
+
+    @Test
+    fun `a key that cannot list locations accepts a pasted location ID`() {
         val server = MockWebServer()
         server.enqueue(
             MockResponse().setResponseCode(403).setBody(
@@ -87,23 +101,38 @@ class StripeCardSetupActivityTest {
         try {
             ActivityScenario.launch(StripeCardSetupActivity::class.java).use { scenario ->
                 scenario.onActivity { activity ->
+                    val settings = StripeCardSettings(
+                        ThreadSafePreferences(activity, "stripe_card_setup_test"),
+                        FakeCipher(),
+                    ).also { it.clear() }
+                    activity.settings = settings
                     activity.locationsClient = StripeLocationsClient(server.url("/"))
-                    val layout = activity.findViewById<TextInputLayout>(R.id.stripe_key_layout)
                     activity.findViewById<TextInputEditText>(R.id.stripe_key_input)
                         .setText("rk_test_abc123")
-                    activity.findViewById<View>(R.id.next_button).performClick()
+                    val next = activity.findViewById<View>(R.id.next_button)
+                    next.performClick()
 
-                    activity.idleUntil { layout.error != null }
+                    activity.idleUntil {
+                        activity.findViewById<View>(R.id.location_container).visibility == View.VISIBLE
+                    }
 
+                    assertNull(activity.findViewById<TextInputLayout>(R.id.stripe_key_layout).error)
+                    assertTrue(settings.hasStoredKey())
+                    val input = activity.findViewById<TextInputEditText>(R.id.location_id_input)
+                    input.setText("not-a-location")
+                    next.performClick()
                     assertEquals(
-                        "This key can't see your locations. In Stripe, give it Write access to " +
-                            "Terminal Locations, then paste it again.",
-                        layout.error?.toString(),
+                        activity.getString(R.string.stripe_card_location_id_invalid),
+                        activity.findViewById<TextInputLayout>(R.id.location_id_layout).error?.toString(),
                     )
-                    assertEquals(
-                        View.VISIBLE,
-                        activity.findViewById<View>(R.id.key_container).visibility,
-                    )
+                    assertFalse(activity.isFinishing)
+
+                    input.setText(" tml_manual1 ")
+                    next.performClick()
+                    activity.idleUntil { activity.isFinishing }
+                    assertEquals("tml_manual1", settings.storedLocationId())
+                    assertNull(settings.storedLocationName())
+                    assertEquals(1, server.requestCount)
                 }
             }
         } finally {
@@ -176,15 +205,41 @@ class StripeCardSetupActivityTest {
     }
 
     @Test
-    fun `an account with no location goes straight to adding one`() {
+    fun `a pasted location ID can replace a listed choice`() {
+        submitKey(
+            location("tml_one1", "Corner shop"),
+            location("tml_two2", "Market stall"),
+        ) { activity, settings, server ->
+            activity.findViewById<TextInputEditText>(R.id.location_id_input)
+                .setText("tml_manual2")
+            activity.findViewById<View>(R.id.next_button).performClick()
+            activity.idleUntil { activity.isFinishing }
+
+            assertEquals("tml_manual2", settings.storedLocationId())
+            assertNull(settings.storedLocationName())
+            assertEquals(1, server.requestCount)
+        }
+    }
+
+    @Test
+    fun `an account with no location offers adding one or pasting its ID`() {
         submitKey { activity, settings, _ ->
             assertEquals("", settings.storedLocationId())
             assertEquals(
                 View.VISIBLE,
-                activity.findViewById<View>(R.id.add_location_container).visibility,
+                activity.findViewById<View>(R.id.location_container).visibility,
+            )
+            assertEquals(
+                View.VISIBLE,
+                activity.findViewById<View>(R.id.add_location_button).visibility,
+            )
+            assertEquals(
+                View.VISIBLE,
+                activity.findViewById<View>(R.id.location_id_input).visibility,
             )
         }
     }
+
     @Test
     fun `a failed location save leaves the picker open with the same selection`() {
         submitKey(location("tml_old", "Old"), location("tml_new", "New")) { activity, settings, _ ->
@@ -208,6 +263,7 @@ class StripeCardSetupActivityTest {
     @Test
     fun `country rules validate before submission and retries reuse the request key`() {
         submitKey { activity, _, server ->
+            activity.findViewById<View>(R.id.add_location_button).performClick()
             fun field(id: Int) = activity.findViewById<EditText>(id)
             fun country(code: String) {
                 activity.findViewById<AutoCompleteTextView>(R.id.country_input)

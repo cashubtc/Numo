@@ -32,9 +32,9 @@ data class StripeLocationAddress(
 )
 
 /**
- * Lists and creates Terminal Locations with the merchant's restricted key, so setup never asks
- * for a location ID. The key needs the "Terminal Locations: Write" permission for this; taking
- * payments does not.
+ * Lists and creates Terminal Locations with the merchant's restricted key. Listing needs Read
+ * access and creating needs Write; taking payments needs neither. Setup also accepts a pasted
+ * location ID when the key cannot list locations.
  */
 class StripeLocationsClient(
     private val baseUrl: HttpUrl = StripeConnectionTokenClient.DEFAULT_BASE_URL.toHttpUrl(),

@@ -225,7 +225,43 @@
                         android:text="@string/stripe_card_location_add"
                         android:visibility="gone" />
 
-                    <!-- Only for a key stored before keys had to list locations -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:text="@string/stripe_card_location_id_title"
+                        android:textAppearance="@style/Text.SettingsBody" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/location_id_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:hint="@string/stripe_card_location_id_label"
+                        app:endIconContentDescription="@string/stripe_card_setup_paste"
+                        app:endIconDrawable="@drawable/ic_paste"
+                        app:endIconMode="custom"
+                        app:endIconTint="?attr/colorOnSurfaceVariant"
+                        app:errorEnabled="true"
+                        app:errorIconDrawable="@null">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/location_id_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:imeOptions="actionGo"
+                            android:importantForAutofill="no"
+                            android:inputType="text|textNoSuggestions"
+                            android:maxLines="1"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/use_other_key_button"
                         style="@style/Widget.Button.Secondary.Outlined"
