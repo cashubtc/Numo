@@ -11,7 +11,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.R
 import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,7 +70,6 @@ class PaymentTabManagerCardTest {
             cardTabIcon = ImageView(context),
             cardContainer = cardContainer,
         )
-        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.LIGHTNING)
         manager.setup(object : PaymentTabManager.TabSelectionListener {
             override fun onTabSelected(tab: PaymentTab) {
                 selected += tab
@@ -123,33 +121,5 @@ class PaymentTabManagerCardTest {
         assertEquals(View.GONE, cardTab.visibility)
         assertEquals(PaymentTab.UNIFIED, manager.getCurrentTab())
         assertEquals(View.INVISIBLE, cardContainer.visibility)
-    }
-
-    @Test
-    fun `card default is selected only after the card tab is available`() {
-        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.CARD)
-
-        manager.selectDefaultPaymentMethod()
-        assertEquals(PaymentTab.UNIFIED, manager.getCurrentTab())
-
-        manager.setCardTabAvailable(true)
-        manager.selectDefaultPaymentMethod()
-
-        assertEquals(PaymentTab.CARD, manager.getCurrentTab())
-        assertEquals(PaymentTab.CARD, selected.last())
-    }
-
-    @Test
-    fun `long pressing either checkout tab saves it as the default`() {
-        val defaults = DefaultPaymentMethodManager.getInstance(context)
-        manager.setCardTabAvailable(true)
-
-        assertTrue(cardTab.performLongClick())
-        assertEquals(PaymentTab.CARD, defaults.getDefaultPaymentMethod())
-        assertEquals(PaymentTab.CARD, manager.getCurrentTab())
-
-        assertTrue(unifiedTab.performLongClick())
-        assertEquals(PaymentTab.UNIFIED, defaults.getDefaultPaymentMethod())
-        assertEquals(PaymentTab.UNIFIED, manager.getCurrentTab())
     }
 }

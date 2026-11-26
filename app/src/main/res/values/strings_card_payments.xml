@@ -171,7 +171,6 @@
     <string name="card_payment_action_charge">Charge %1$s</string>
     <string name="card_payment_action_retry">Try again</string>
     <string name="transaction_detail_payment_type_card_value">Card (Stripe)</string>
-    <string name="default_payment_method_option_card">Card</string>
     <string name="developer_settings_simulate_stripe_reader">Simulate Stripe card reader</string>
     <string name="card_payment_simulation_requires_test_key">The simulated reader requires a Stripe sandbox key (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe requires a release build for physical taps. For sandbox testing, enable the simulated reader in Developer settings.</string>

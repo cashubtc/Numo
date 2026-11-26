@@ -12,8 +12,6 @@ import com.electricdreams.numo.databinding.ActivitySettingsBinding
 import com.electricdreams.numo.feature.pin.PinManager
 import com.electricdreams.numo.feature.pin.PinEntryActivity
 import com.electricdreams.numo.feature.pin.PinProtectionHelper
-import com.electricdreams.numo.payment.DefaultPaymentMethodManager
-import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -32,15 +30,13 @@ class SettingsActivityTest {
 
     @Before
     fun resetPreferences() {
-        listOf(PinManager::class.java, MintManager::class.java,
-            DefaultPaymentMethodManager::class.java).forEach { manager ->
+        listOf(PinManager::class.java, MintManager::class.java).forEach { manager ->
             manager.getDeclaredField("instance").apply { isAccessible = true }.set(null, null)
         }
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         PreferenceStore.app(context).putBoolean("btcpay_enabled", false)
         DeveloperPrefs.setDeveloperModeEnabled(context, false)
         MintManager.getInstance(context).setPreferredUnit("sat")
-        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.UNIFIED)
         context.getSharedPreferences("pin_prefs", android.content.Context.MODE_PRIVATE).edit().clear().apply()
         PinProtectionHelper.clearVerification()
     }
@@ -80,8 +76,8 @@ class SettingsActivityTest {
             assertEquals(View.VISIBLE, binding.btcpaySettingsItem.visibility)
             assertEquals(View.VISIBLE, binding.webhooksSettingsItem.visibility)
             assertEquals(View.GONE, binding.checkoutSection.visibility)
-            binding.settingsSearch.setText("bitcoin")
-            assertEquals(View.VISIBLE, binding.defaultPaymentMethodSettingsItem.visibility)
+            binding.settingsSearch.setText("default fiat")
+            assertEquals(View.VISIBLE, binding.currencySettingsItem.visibility)
         }
     }
 
@@ -129,17 +125,14 @@ class SettingsActivityTest {
     }
 
     @Test
-    fun `returning updates payment selection and developer visibility`() {
+    fun `returning updates developer visibility`() {
         Robolectric.buildActivity(SettingsActivity::class.java).setup().use { controller ->
             val activity = controller.get()
             val binding = bind(activity)
             controller.pause()
             DeveloperPrefs.setDeveloperModeEnabled(activity, true)
-            DefaultPaymentMethodManager.getInstance(activity).setDefaultPaymentMethod(PaymentTab.CARD)
             controller.resume()
             assertEquals(View.VISIBLE, binding.developerSection.visibility)
-            assertEquals(activity.getString(R.string.default_payment_method_option_card),
-                binding.defaultPaymentMethodSettingsItem.findViewById<TextView>(R.id.row_subtitle).text)
             binding.settingsSearch.setText("debugging")
             assertEquals(View.VISIBLE, binding.developerSettingsItem.visibility)
             assertEquals(View.GONE, binding.searchEmptyState.visibility)

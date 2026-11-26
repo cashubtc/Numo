@@ -796,11 +796,6 @@
     
     <string name="settings_item_withdrawals_title">Withdrawals</string>
     <string name="settings_item_withdrawals_subtitle">Auto-withdraw settings and history</string>
-    <string name="settings_item_default_payment_method_title">Default Payment</string>
-    <string name="default_payment_method_explainer_title">Quick Settings</string>
-    <string name="default_payment_method_explainer_body">You can change the default payment method directly from checkout by long-pressing the Bitcoin or Card tab.</string>
-    <string name="default_payment_method_section_options">Default payment method</string>
-    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
 
     
     <string name="manual_withdraw_section_title">Manual Withdraw</string>
@@ -979,7 +974,6 @@
     <string name="pin_reset_paste_clipboard">Paste from Clipboard</string>
     <string name="pin_reset_button">Reset PIN</string>
     <string name="payment_request_tab_unified">Bitcoin</string>
-    <string name="payment_request_default_method_set">%1$s set as default payment method</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
 

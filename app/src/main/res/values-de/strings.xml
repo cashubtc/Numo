@@ -771,11 +771,6 @@
 
     <string name="settings_item_withdrawals_title">Abhebungen</string>
     <string name="settings_item_withdrawals_subtitle">Auto-Abhebungseinstellungen und -verlauf</string>
-    <string name="settings_item_default_payment_method_title">Standardzahlung</string>
-    <string name="default_payment_method_explainer_title">Schnelleinstellungen</string>
-    <string name="default_payment_method_explainer_body">Du kannst die Standardzahlungsmethode direkt im Checkout ändern, indem du den Tab Bitcoin oder Karte lange drückst.</string>
-    <string name="default_payment_method_section_options">STANDARDZAHLUNGSMETHODE</string>
-    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
 
 
     <string name="manual_withdraw_section_title">Manuelle Abhebung</string>
@@ -951,7 +946,6 @@
     <string name="pin_reset_paste_clipboard">Aus Zwischenablage einfügen</string>
     <string name="pin_reset_button">PIN zurücksetzen</string>
     <string name="payment_request_tab_unified">Bitcoin</string>
-    <string name="payment_request_default_method_set">%1$s als Standardzahlungsmethode festgelegt</string>
     <string name="payment_request_default_description">Zahlung von %1$d Sats</string>
     <string name="payment_request_lightning_description">Numo-POS-Zahlung von %1$d Sats</string>
 

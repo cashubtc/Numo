@@ -735,12 +735,6 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="onboarding_mints_default_section_title">Mint Padrão</string>
     <string name="onboarding_mints_add_different_button">+ Novo Mint</string>
     <string name="onboarding_mints_scan_row_title">Escanear Código QR</string>
-    <string name="settings_item_default_payment_method_title">Pagamento padrão</string>
-    <string name="default_payment_method_explainer_title">Configurações rápidas</string>
-    <string name="default_payment_method_explainer_body">Você pode alterar o método de pagamento padrão diretamente no checkout mantendo pressionada a aba Bitcoin ou Cartão.</string>
-    <string name="default_payment_method_section_options">MÉTODO DE PAGAMENTO PADRÃO</string>
-    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
-    <string name="payment_request_default_method_set">%1$s definido como método de pagamento padrão</string>
     <!-- Tela de Estatísticas / Vendas -->
     <string name="insights_open">Vendas</string>
     <string name="insights_title">Vendas</string>

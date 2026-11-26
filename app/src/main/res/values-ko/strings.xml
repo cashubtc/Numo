@@ -896,12 +896,6 @@
     <string name="onboarding_generating_hint">잠시만 기다려 주세요</string>
     <string name="onboarding_fetching_searching_backup">백업 검색 중…</string>
     <string name="onboarding_fetching_checking_relays">민트 설정에 대한 Nostr 릴레이 확인 중</string>
-    <string name="settings_item_default_payment_method_title">기본 결제 수단</string>
-    <string name="default_payment_method_explainer_title">빠른 설정</string>
-    <string name="default_payment_method_explainer_body">결제 화면에서 Bitcoin 또는 카드 탭을 길게 누르면 기본 결제 수단을 빠르게 변경할 수 있습니다.</string>
-    <string name="default_payment_method_section_options">기본 결제 수단</string>
-    <string name="default_payment_method_option_unified">Bitcoin (Cashu + Lightning)</string>
-    <string name="payment_request_default_method_set">%1$s(이)가 기본 결제 수단으로 설정되었습니다</string>
     <!-- Insights Screen -->
     <string name="insights_open">매출</string>
     <string name="insights_title">매출</string>

@@ -21,8 +21,6 @@ import org.robolectric.annotation.Config
 import com.electricdreams.numo.BuildConfig
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
-import com.electricdreams.numo.payment.DefaultPaymentMethodManager
-import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
 import com.electricdreams.numo.payment.card.StripeCardConfig
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 
@@ -34,11 +32,6 @@ class SettingsPreferencesUiTest {
 
     @Before
     fun resetPreferences() {
-        DefaultPaymentMethodManager::class.java.getDeclaredField("instance").apply {
-            isAccessible = true
-            set(null, null)
-        }
-        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.UNIFIED)
         PreferenceStore.app(context).putString(ThemeSettingsActivity.PREF_THEME, ThemeSettingsActivity.THEME_GREEN)
         PreferenceStore.app(context).putBoolean("darkMode", false)
         DeveloperPrefs.setLightningInvoiceDelayed(context, false)
@@ -48,31 +41,6 @@ class SettingsPreferencesUiTest {
     fun restoreAppearance() {
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-    }
-
-    @Test
-    fun `payment choices restore the saved option and persist row taps`() {
-        DefaultPaymentMethodManager.getInstance(context).setDefaultPaymentMethod(PaymentTab.CARD)
-        ActivityScenario.launch(DefaultPaymentMethodSettingsActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val card = activity.findViewById<MaterialRadioButton>(R.id.radio_card)
-                val unified = activity.findViewById<MaterialRadioButton>(R.id.radio_unified)
-                assertTrue(card.isChecked)
-                assertEquals(2,
-                    activity.findViewById<android.widget.RadioGroup>(
-                        R.id.payment_method_radio_group).childCount)
-
-                unified.performClick()
-                assertTrue(unified.isChecked)
-                assertFalse(card.isChecked)
-                assertEquals(PaymentTab.UNIFIED,
-                    DefaultPaymentMethodManager.getInstance(activity).getDefaultPaymentMethod())
-
-                card.performClick()
-                assertEquals(PaymentTab.CARD,
-                    DefaultPaymentMethodManager.getInstance(activity).getDefaultPaymentMethod())
-            }
-        }
     }
 
     @Test

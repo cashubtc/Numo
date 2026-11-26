@@ -111,13 +111,6 @@
                 <LinearLayout style="@style/Widget.Numo.SettingsGroup">
 
                     <com.electricdreams.numo.ui.components.SettingsRowView
-                        android:id="@+id/default_payment_method_settings_item"
-                        style="@style/Widget.Numo.SettingsRow"
-                        app:rowIcon="@drawable/ic_qr_code"
-                        app:rowTitle="@string/settings_item_default_payment_method_title"
-                        app:rowSubtitle="@string/default_payment_method_option_unified" />
-
-                    <com.electricdreams.numo.ui.components.SettingsRowView
                         android:id="@+id/currency_settings_item"
                         style="@style/Widget.Numo.SettingsRow"
                         app:rowIcon="@drawable/ic_switch_currency"

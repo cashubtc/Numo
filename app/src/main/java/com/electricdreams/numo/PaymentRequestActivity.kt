@@ -1650,11 +1650,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         resolveCardAmount()
         tabManager.setCardTabAvailable(true)
-        if (reviewRequired) {
-            tabManager.selectTab(PaymentTabManager.PaymentTab.CARD)
-        } else {
-            tabManager.selectDefaultPaymentMethod()
-        }
+        if (reviewRequired) tabManager.selectTab(PaymentTabManager.PaymentTab.CARD)
     }
 
     /**

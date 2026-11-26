@@ -30,7 +30,6 @@
     <string name="card_payment_action_charge">%1$s belasten</string>
     <string name="card_payment_action_retry">Erneut versuchen</string>
     <string name="transaction_detail_payment_type_card_value">Karte (Stripe)</string>
-    <string name="default_payment_method_option_card">Karte</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe-Kartenleser simulieren</string>
     <string name="card_payment_simulation_requires_test_key">Der simulierte Kartenleser benötigt einen Stripe-Sandbox-Schlüssel (rk_test_…).</string>
     <string name="card_payment_debug_reader_unsupported">Stripe benötigt für kontaktlose Kartenzahlungen einen Release-Build. Aktiviere für Sandbox-Tests den simulierten Kartenleser in den Entwicklereinstellungen.</string>

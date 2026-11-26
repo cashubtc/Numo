@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.core.prefs.SecretCipher
 import com.electricdreams.numo.core.prefs.ThreadSafePreferences
-import com.electricdreams.numo.payment.DefaultPaymentMethodManager
-import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -205,25 +203,5 @@ class StripeCardSettingsTest {
         val text = StripeCardConfig("rk_live_secretvalue", "tml_shop").toString()
 
         assertFalse(text.contains("rk_live_secretvalue"))
-    }
-
-    @Test
-    fun `card is returned as the default payment method`() {
-        val manager = DefaultPaymentMethodManager.getInstance(context)
-
-        manager.setDefaultPaymentMethod(PaymentTab.CARD)
-
-        assertEquals(PaymentTab.CARD, manager.getDefaultPaymentMethod())
-    }
-
-    @Test
-    fun `legacy bitcoin defaults resolve to unified bitcoin`() {
-        val manager = DefaultPaymentMethodManager.getInstance(context)
-
-        listOf(PaymentTab.CASHU, PaymentTab.LIGHTNING).forEach { legacyMethod ->
-            manager.setDefaultPaymentMethod(legacyMethod)
-
-            assertEquals(PaymentTab.UNIFIED, manager.getDefaultPaymentMethod())
-        }
     }
 }

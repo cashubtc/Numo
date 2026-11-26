@@ -30,7 +30,6 @@
     <string name="card_payment_action_charge">%1$s を請求</string>
     <string name="card_payment_action_retry">再試行</string>
     <string name="transaction_detail_payment_type_card_value">カード (Stripe)</string>
-    <string name="default_payment_method_option_card">カード</string>
     <string name="developer_settings_simulate_stripe_reader">Stripe カードリーダーをシミュレート</string>
     <string name="card_payment_simulation_requires_test_key">シミュレーションには Stripe のサンドボックスキー（rk_test_…）が必要です。</string>
     <string name="card_payment_debug_reader_unsupported">実際のカードを読み取るにはリリースビルドが必要です。サンドボックスでテストするには、開発者設定でカードリーダーのシミュレーションを有効にしてください。</string>
