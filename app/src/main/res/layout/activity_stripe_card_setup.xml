@@ -335,8 +335,10 @@
                             android:id="@+id/country_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:completionThreshold="1"
                             android:fontFamily="sans-serif"
-                            android:inputType="none"
+                            android:imeOptions="actionNext"
+                            android:inputType="text|textNoSuggestions"
                             android:minHeight="56dp"
                             android:textAppearance="@style/Text.SettingsInput"
                             android:textColor="@color/color_text_primary" />

@@ -16,6 +16,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.Filter
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -61,6 +62,40 @@ class StripeCardSetupActivity : AppCompatActivity() {
     private enum class Mode { SETUP, EDIT_KEY, EDIT_LOCATION }
 
     private enum class Step { KEY, LOCATION, ADD_LOCATION }
+
+    private data class CountryChoice(val name: String, val code: String) {
+        override fun toString(): String = name
+    }
+
+    private inner class CountryAdapter(choices: List<CountryChoice>) : ArrayAdapter<CountryChoice>(
+        this,
+        android.R.layout.simple_list_item_1,
+        choices,
+    ) {
+        private val allChoices = choices.toList()
+        private val countryFilter = object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val query = constraint?.toString()?.trim().orEmpty()
+                val filtered = if (query.isEmpty()) allChoices else allChoices.filter { choice ->
+                    choice.name.contains(query, ignoreCase = true) ||
+                        choice.code.startsWith(query, ignoreCase = true)
+                }
+                return FilterResults().apply {
+                    values = filtered
+                    count = filtered.size
+                }
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                clear()
+                val filtered = (results?.values as? List<*>).orEmpty().filterIsInstance<CountryChoice>()
+                addAll(filtered)
+                notifyDataSetChanged()
+            }
+        }
+
+        override fun getFilter(): Filter = countryFilter
+    }
 
     private lateinit var binding: ActivityStripeCardSetupBinding
 
@@ -253,7 +288,7 @@ class StripeCardSetupActivity : AppCompatActivity() {
 
     private fun submitKey() {
         val typed = binding.stripeKeyInput.text?.toString()?.trim().orEmpty()
-        val key = typed.ifEmpty { settings.storedKey().orEmpty() }
+        val key = if (mode == Mode.EDIT_KEY) typed.ifEmpty { settings.storedKey().orEmpty() } else typed
         if (!StripeCardConfig.isValidRestrictedKey(key)) {
             showFieldError(binding.stripeKeyLayout, getString(R.string.stripe_card_invalid_key))
             return
@@ -524,12 +559,12 @@ class StripeCardSetupActivity : AppCompatActivity() {
             .filter { (name, _) -> name.isNotBlank() }
             .sortedBy { (name, _) -> name }
             .forEach { (name, code) -> countryCodesByName[name] = code }
-        binding.countryInput.setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_list_item_1, countryCodesByName.keys.toList())
-        )
         countryCodesByName.entries.firstOrNull { it.value == locale.country }?.let {
             binding.countryInput.setText(it.key, false)
         }
+        binding.countryInput.setAdapter(
+            CountryAdapter(countryCodesByName.map { (name, code) -> CountryChoice(name, code) })
+        )
         addressFields().forEach { (layout, input) ->
             input.doAfterTextChanged {
                 layout.error = null

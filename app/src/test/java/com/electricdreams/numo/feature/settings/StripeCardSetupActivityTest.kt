@@ -76,6 +76,62 @@ class StripeCardSetupActivityTest {
     }
 
     @Test
+    fun `fresh setup does not reuse a partially stored key`() {
+        ActivityScenario.launch(StripeCardSetupActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.settings = StripeCardSettings(
+                    ThreadSafePreferences(activity, "stripe_card_setup_test"),
+                    FakeCipher(),
+                ).also {
+                    it.clear()
+                    assertTrue(it.saveKey("rk_test_abc123"))
+                }
+
+                activity.findViewById<View>(R.id.next_button).performClick()
+
+                assertEquals(
+                    activity.getString(R.string.stripe_card_invalid_key),
+                    activity.findViewById<TextInputLayout>(R.id.stripe_key_layout).error?.toString(),
+                )
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.key_container).visibility)
+                assertFalse(activity.isFinishing)
+            }
+        }
+    }
+
+    @Test
+    fun `editing a key can still submit the stored key`() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setBody("""{"data":[]}"""))
+        server.start()
+        try {
+            val intent = StripeCardSetupActivity.editKeyIntent(
+                ApplicationProvider.getApplicationContext(),
+                thenCheck = false,
+            )
+            ActivityScenario.launch<StripeCardSetupActivity>(intent).use { scenario ->
+                scenario.onActivity { activity ->
+                    activity.settings = StripeCardSettings(
+                        ThreadSafePreferences(activity, "stripe_card_setup_test"),
+                        FakeCipher(),
+                    ).also {
+                        it.clear()
+                        assertTrue(it.saveKey("rk_test_abc123"))
+                    }
+                    activity.locationsClient = StripeLocationsClient(server.url("/"))
+
+                    activity.findViewById<View>(R.id.next_button).performClick()
+
+                    activity.idleUntil { activity.isFinishing }
+                    assertEquals(1, server.requestCount)
+                }
+            }
+        } finally {
+            server.shutdown()
+        }
+    }
+
+    @Test
     fun `stripe key creation requests location read rather than write`() {
         ActivityScenario.launch(StripeCardSetupActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
@@ -257,6 +313,24 @@ class StripeCardSetupActivityTest {
             assertEquals("tml_new", list.findViewById<View>(list.checkedRadioButtonId).tag)
             assertFalse(activity.isFinishing)
             assertNull(shadowOf(activity).nextStartedActivity)
+        }
+    }
+
+    @Test
+    fun `country search filters by ISO initials`() {
+        submitKey { activity, _, _ ->
+            activity.findViewById<View>(R.id.add_location_button).performClick()
+            val input = activity.findViewById<AutoCompleteTextView>(R.id.country_input)
+            val initialCount = input.adapter.count
+            val unitedStates = Locale("", "US").getDisplayCountry(Locale.getDefault())
+
+            input.setText("US")
+
+            activity.idleUntil {
+                input.adapter.count < initialCount &&
+                    (0 until input.adapter.count).any { input.adapter.getItem(it).toString() == unitedStates }
+            }
+            assertTrue(input.adapter.count < initialCount)
         }
     }
 
