@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tells the live-card test build apart from Numo on the home screen. -->
+    <string name="app_name" translatable="false">Numo Live</string>
+</resources>
