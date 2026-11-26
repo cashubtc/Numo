@@ -39,9 +39,8 @@ object CardAmountResolver {
             !enteredAmount.currency.isBtc &&
             enteredAmount.currency.name.equals(code, ignoreCase = true)
         ) {
-            val numoDigits = if (enteredAmount.currency.isZeroDecimal()) 0 else 2
             BigDecimal.valueOf(enteredAmount.value)
-                .movePointLeft(numoDigits)
+                .movePointLeft(NUMO_FIAT_DIGITS)
                 .movePointRight(stripeDigits)
                 .setScale(0, RoundingMode.HALF_UP)
                 .toLong()
@@ -59,9 +58,20 @@ object CardAmountResolver {
         return CardAmount(minorUnits, code.lowercase(Locale.US))
     }
 
+    /**
+     * Stripe's minor units, taken from ISO 4217. These match Stripe for every currency Tap to Pay
+     * can charge today. Stripe's special cases (ISK, UGX, MGA, three-decimal currencies) differ
+     * from ISO and need their own rule if Tap to Pay ever supports them.
+     */
     private fun isoFractionDigits(code: String): Int? = runCatching {
         JavaCurrency.getInstance(code).defaultFractionDigits
     }.getOrNull()?.takeIf { it >= 0 }
 
     private const val SATS_DECIMALS = 8
+
+    /**
+     * [Amount] stores every fiat value in hundredths, including currencies without minor
+     * units: ¥1,500 is held as 150000. See [Amount.parse].
+     */
+    private const val NUMO_FIAT_DIGITS = 2
 }

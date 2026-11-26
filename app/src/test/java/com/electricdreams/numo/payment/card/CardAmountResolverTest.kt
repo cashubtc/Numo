@@ -73,15 +73,29 @@ class CardAmountResolverTest {
     }
 
     @Test
-    fun `entered JPY amount is passed through without scaling`() {
-        val result = CardAmountResolver.resolve(
-            enteredAmount = Amount(1_500L, Currency.JPY),
-            amountSats = 10_000L,
-            currencyCode = "JPY",
-            btcPrice = 0.0,
-        )
+    fun `entered JPY amount is charged in whole yen`() {
+        val result = resolveEntered("¥1,500", "JPY")
 
         assertEquals(CardAmountResolver.CardAmount(1_500L, "jpy"), result)
+    }
+
+    @Test
+    fun `entered two decimal amount is charged in cents`() {
+        val result = resolveEntered("€12.34", "EUR")
+
+        assertEquals(CardAmountResolver.CardAmount(1_234L, "eur"), result)
+    }
+
+    /** Parses [formatted] the way checkout does, then resolves it with no price fallback. */
+    private fun resolveEntered(formatted: String, code: String): CardAmountResolver.CardAmount? {
+        val entered = Amount.parse(formatted, Currency.fromCode(code))
+        assertEquals(code, entered?.currency?.name)
+        return CardAmountResolver.resolve(
+            enteredAmount = entered,
+            amountSats = 10_000L,
+            currencyCode = code,
+            btcPrice = 0.0,
+        )
     }
 
     @Test
