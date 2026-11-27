@@ -97,19 +97,26 @@ class PaymentsHistoryActivityTest {
             context, 1_000L, "sat", 1_000L, 50_000.0, null, "1,000 sat",
         )
 
+        val quote = PaymentHistoryEntry.CardQuote(
+            minorUnits = 1_250,
+            currency = "usd",
+            createdAtSeconds = 1_800_000_000,
+        )
         assertTrue(
             PaymentsHistoryActivity.updatePendingWithCardPaymentAttempt(
-                context, id, "pi_recover", "pi_recover_secret_test",
+                context, id, "pi_recover", "pi_recover_secret_test", quote,
             )
         )
         PaymentsHistoryActivity.updatePendingWithLightningInfo(
             context, id, "lnbc1unused", "ln-quote", "https://mint.example",
         )
         PaymentsHistoryActivity.updatePendingWithNostrInfo(context, id, "nprofile", "secret")
+        PaymentsHistoryActivity.updatePendingCardPaymentReview(context, id, reviewRequired = true)
 
         val restored = PaymentsHistoryActivity.getPaymentEntryById(context, id)
         assertEquals("pi_recover", restored?.cardPaymentIntentId)
         assertEquals("pi_recover_secret_test", restored?.cardPaymentClientSecret)
+        assertEquals(quote, restored?.cardQuote)
 
         PaymentsHistoryActivity.completePendingPayment(
             context = context,

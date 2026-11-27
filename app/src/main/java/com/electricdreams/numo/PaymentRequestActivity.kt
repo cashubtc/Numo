@@ -86,6 +86,7 @@ import com.electricdreams.numo.core.payment.BtcPayQrCodeBuilder
 import com.electricdreams.numo.core.payment.IPaymentService
 import com.electricdreams.numo.core.payment.PaymentServiceFactory
 import com.electricdreams.numo.core.payment.PaymentState
+import com.electricdreams.numo.core.payment.PriceLock
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import com.electricdreams.numo.core.wallet.WalletError
 import kotlinx.coroutines.CancellationException
@@ -1719,14 +1720,48 @@ class PaymentRequestActivity : AppCompatActivity() {
         cardAmount?.let { return it }
         val currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
         val enteredAmount = Amount.parse(formattedAmountString, Amount.Currency.fromCode(currencyCode))
-        cardAmount = CardAmountResolver.resolve(
+        val current = CardAmountResolver.resolve(
             enteredAmount = enteredAmount,
             amountSats = paymentAmount,
             currencyCode = currencyCode,
             btcPrice = bitcoinPriceWorker?.getCurrentPrice() ?: 0.0,
         )
+        val locked = current?.let(::lockedCardQuote)
+        cardAmount = locked ?: current
+        if (locked != null && locked != current) showLockedCardPrice(locked)
         updateCardButtonLabel()
         return cardAmount
+    }
+
+    /**
+     * The price of this sale's earlier card attempt while it still holds, so a reopened sale
+     * shows and charges what it was quoted at instead of following every bitcoin price move.
+     */
+    private fun lockedCardQuote(current: CardAmountResolver.CardAmount): CardAmountResolver.CardAmount? {
+        val paymentId = pendingPaymentId ?: return null
+        val quote = PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)?.cardQuote ?: return null
+        val holds = StripeTerminalManager.priceHolds(
+            intentAmount = quote.minorUnits,
+            intentCurrency = quote.currency,
+            intentCreatedSeconds = quote.createdAtSeconds,
+            amount = current,
+        )
+        return if (holds) CardAmountResolver.CardAmount(quote.minorUnits, quote.currency) else null
+    }
+
+    /**
+     * Shows a locked card price on the fiat line. Only a sale entered in sats can have one that
+     * differs from the current price: a fiat sale charges the amount typed, so its quote and
+     * current amount are equal, or differ in currency and the quote no longer holds.
+     */
+    private fun showLockedCardPrice(amount: CardAmountResolver.CardAmount) {
+        val digits = runCatching {
+            java.util.Currency.getInstance(amount.currency.uppercase(java.util.Locale.US)).defaultFractionDigits
+        }.getOrNull()?.takeIf { it >= 0 } ?: return
+        val major = java.math.BigDecimal.valueOf(amount.minorUnits).movePointLeft(digits).toDouble()
+        convertedAmountDisplay.text = bitcoinPriceWorker?.formatFiatAmount(major)
+            ?: CurrencyManager.getInstance(this).formatCurrencyAmount(major)
+        convertedAmountDisplay.visibility = View.VISIBLE
     }
 
     /** The amount is already shown above, so the button only names the action. */
@@ -1816,6 +1851,13 @@ class PaymentRequestActivity : AppCompatActivity() {
                 paymentId = paymentId,
                 paymentIntentId = paymentIntent.id,
                 clientSecret = clientSecret,
+                quote = paymentIntent.currency?.let { currency ->
+                    PaymentHistoryEntry.CardQuote(
+                        minorUnits = paymentIntent.amount,
+                        currency = currency.lowercase(java.util.Locale.US),
+                        createdAtSeconds = paymentIntent.created,
+                    )
+                },
             )
         if (!saved) {
             throw StripeTerminalManager.CardPaymentException(
@@ -3293,7 +3335,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         private const val WAITING_TOTAL_FADE_IN_MS = 200L
         private const val WAITING_TOTAL_FADE_OUT_MS = 150L
         private const val NFC_READ_TIMEOUT_MS = 12_000L
-        private const val BTCPAY_INVOICE_TIMEOUT_MS = 15 * 60 * 1000L // 15 min
+        private const val BTCPAY_INVOICE_TIMEOUT_MS = PriceLock.DURATION_MS
         private const val BTCPAY_MAX_POLL_ERRORS = 5
         private const val PILL_IN_MS = 220L
         private const val PILL_OUT_MS = 160L
