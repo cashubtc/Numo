@@ -131,6 +131,10 @@ data class PaymentHistoryEntry(
     @SerializedName("cardCurrency")
     val cardCurrency: String? = null,
 
+    /** Price of the saved card attempt, held for the price lock while the sale is pending. */
+    @SerializedName("cardQuote")
+    val cardQuote: CardQuote? = null,
+
     /** User-assigned label for this transaction */
     @SerializedName("label")
     override val label: String? = null,
@@ -257,6 +261,19 @@ data class PaymentHistoryEntry(
         paymentRequest = null,
         rawStatus = STATUS_COMPLETED,
         paymentType = TYPE_CASHU,
+    )
+
+    /**
+     * The amount a card attempt charges, as Stripe created its PaymentIntent.
+     *
+     * @property minorUnits amount in the currency's smallest unit, as Stripe expects it.
+     * @property currency lowercase ISO currency code.
+     * @property createdAtSeconds when Stripe created the PaymentIntent, in Unix seconds.
+     */
+    data class CardQuote(
+        @SerializedName("minorUnits") val minorUnits: Long,
+        @SerializedName("currency") val currency: String,
+        @SerializedName("createdAtSeconds") val createdAtSeconds: Long,
     )
 
     companion object {

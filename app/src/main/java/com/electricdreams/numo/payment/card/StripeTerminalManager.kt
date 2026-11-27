@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.payment.PriceLock
 import com.electricdreams.numo.feature.settings.DeveloperPrefs
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.TerminalApplicationDelegate
@@ -113,6 +114,13 @@ object StripeTerminalManager {
         /** Collect a card again on the same intent, e.g. after a decline. */
         COLLECT,
 
+        /**
+         * No card was collected, and the intent's price no longer holds: Numo's currency
+         * changed, or the price lock ran out and the amount moved. Cancel it and start a new
+         * one at the current amount.
+         */
+        REPLACE,
+
         /** A card was collected but not charged yet; only confirm it. */
         CONFIRM,
 
@@ -120,13 +128,42 @@ object StripeTerminalManager {
         UNRESOLVED,
     }
 
-    /** Maps a PaymentIntent status to the safe next step. Unknown states never charge. */
-    fun retryStepFor(status: PaymentIntentStatus?): RetryStep = when (status) {
-        PaymentIntentStatus.SUCCEEDED -> RetryStep.ALREADY_PAID
-        PaymentIntentStatus.CANCELED -> RetryStep.NEW_INTENT
-        PaymentIntentStatus.REQUIRES_PAYMENT_METHOD -> RetryStep.COLLECT
-        PaymentIntentStatus.REQUIRES_CONFIRMATION -> RetryStep.CONFIRM
-        else -> RetryStep.UNRESOLVED
+    /**
+     * Maps a PaymentIntent status to the safe next step. Unknown states never charge.
+     *
+     * @param priceHolds whether the intent's price still holds for the sale (see [priceHolds]).
+     *   Only an intent without a collected card is replaced when it doesn't; later states are
+     *   settled as they are.
+     */
+    fun retryStepFor(status: PaymentIntentStatus?, priceHolds: Boolean = true): RetryStep =
+        when (status) {
+            PaymentIntentStatus.SUCCEEDED -> RetryStep.ALREADY_PAID
+            PaymentIntentStatus.CANCELED -> RetryStep.NEW_INTENT
+            PaymentIntentStatus.REQUIRES_PAYMENT_METHOD ->
+                if (priceHolds) RetryStep.COLLECT else RetryStep.REPLACE
+            PaymentIntentStatus.REQUIRES_CONFIRMATION -> RetryStep.CONFIRM
+            else -> RetryStep.UNRESOLVED
+        }
+
+    /**
+     * Whether an earlier intent may still be charged for a sale that now costs [amount].
+     *
+     * The intent locks the price it was created with for [PriceLock.DURATION_MS], so reopening
+     * a sale doesn't replace it every time the bitcoin price moves. A different currency never
+     * holds; after the lock, only the exact current amount does.
+     *
+     * @param intentCreatedSeconds the intent's creation time in Unix seconds, as Stripe reports it.
+     */
+    fun priceHolds(
+        intentAmount: Long,
+        intentCurrency: String?,
+        intentCreatedSeconds: Long,
+        amount: CardAmountResolver.CardAmount,
+        nowMillis: Long = System.currentTimeMillis(),
+    ): Boolean {
+        if (!intentCurrency.equals(amount.currency, ignoreCase = true)) return false
+        if (intentAmount == amount.minorUnits) return true
+        return nowMillis - intentCreatedSeconds * 1_000 < PriceLock.DURATION_MS
     }
 
     internal fun isUnresolvedFailure(confirmationStarted: Boolean, retrievalPending: Boolean): Boolean =
@@ -356,6 +393,8 @@ object StripeTerminalManager {
      *
      * Pass the persisted reference from a failed attempt as [previous]. Its status is fetched
      * from Stripe first, and the same intent is reused, so a retry never charges the card twice.
+     * Its price holds for [PriceLock.DURATION_MS]; an intent without a collected card whose price
+     * no longer holds (see [priceHolds]) is cancelled and replaced at [amount].
      * [onPaymentIntent] must persist each new intent before collection or confirmation starts.
      * Collection can be cancelled by cancelling the calling coroutine until the card has been
      * read; after that [isCharging] is true and the caller must let the charge finish.
@@ -388,12 +427,31 @@ object StripeTerminalManager {
             retrievalPending = false
             intent = current
             onPaymentIntent(current)
-            val step = if (previous == null) RetryStep.COLLECT else retryStepFor(current.status)
-            Log.d(TAG, "Card payment ${current.id}: status=${current.status}, step=$step")
+            val step = if (previous == null) {
+                RetryStep.COLLECT
+            } else {
+                retryStepFor(
+                    current.status,
+                    priceHolds(current.amount, current.currency, current.created, amount),
+                )
+            }
+            Log.d(
+                TAG,
+                "Card payment ${current.id}: status=${current.status}, step=$step, " +
+                    "charges ${current.amount} ${current.currency}, created ${current.created}",
+            )
             when (step) {
                 RetryStep.ALREADY_PAID -> return current
                 RetryStep.UNRESOLVED -> throw unresolved(current)
-                RetryStep.NEW_INTENT -> {
+                RetryStep.NEW_INTENT, RetryStep.REPLACE -> {
+                    if (step == RetryStep.REPLACE) {
+                        Log.d(
+                            TAG,
+                            "Card payment ${current.id} charges ${current.amount} ${current.currency}; " +
+                                "replacing it with ${amount.minorUnits} ${amount.currency}",
+                        )
+                        cancelPaymentIntent(terminal, current)
+                    }
                     current = createPaymentIntent(terminal, amount, description, metadata)
                     intent = current
                     onPaymentIntent(current)
@@ -462,6 +520,14 @@ object StripeTerminalManager {
         clientSecret: String,
     ): PaymentIntent = suspendCancellableCoroutine { continuation ->
         terminal.retrievePaymentIntent(clientSecret, continuation.asPaymentIntentCallback())
+    }
+
+    /** Cancels an intent no card was collected on, so it can never be charged. */
+    private suspend fun cancelPaymentIntent(
+        terminal: Terminal,
+        intent: PaymentIntent,
+    ): PaymentIntent = suspendCancellableCoroutine { continuation ->
+        terminal.cancelPaymentIntent(intent, continuation.asPaymentIntentCallback())
     }
 
     /** Shows Stripe's tap screen and reads a card. Cancelling the coroutine cancels it. */

@@ -628,6 +628,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     cardPaymentReviewRequired = entry.cardPaymentReviewRequired,
                     cardAmountMinorUnits = entry.cardAmountMinorUnits,
                     cardCurrency = entry.cardCurrency,
+                    cardQuote = entry.cardQuote,
                     rawStatus = PaymentHistoryEntry.STATUS_EXPIRED,
                     paymentType = entry.paymentType,
                     lightningInvoice = entry.lightningInvoice,
@@ -769,6 +770,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = cardAmountMinorUnits ?: existing.cardAmountMinorUnits,
                     cardCurrency = cardCurrency ?: existing.cardCurrency,
+                    cardQuote = existing.cardQuote,
                     rawStatus = PaymentHistoryEntry.STATUS_COMPLETED,
                     paymentType = paymentType,
                     lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
@@ -801,6 +803,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             paymentId: String,
             paymentIntentId: String?,
             clientSecret: String,
+            quote: PaymentHistoryEntry.CardQuote? = null,
         ): Boolean {
             val history = getPaymentHistory(context).toMutableList()
             val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
@@ -809,6 +812,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             history[index] = history[index].copy(
                 cardPaymentIntentId = paymentIntentId,
                 cardPaymentClientSecret = clientSecret,
+                cardQuote = quote,
             )
             return context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .edit()
@@ -867,6 +871,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = existing.cardAmountMinorUnits,
                     cardCurrency = existing.cardCurrency,
+                    cardQuote = existing.cardQuote,
                     rawStatus = existing.status,
                     paymentType = paymentType ?: existing.paymentType,
                     lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
@@ -943,6 +948,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = existing.cardAmountMinorUnits,
                     cardCurrency = existing.cardCurrency,
+                    cardQuote = existing.cardQuote,
                     rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,
@@ -999,6 +1005,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = existing.cardAmountMinorUnits,
                     cardCurrency = existing.cardCurrency,
+                    cardQuote = existing.cardQuote,
                     rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,
@@ -1049,6 +1056,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                 cardAmountMinorUnits = existing.cardAmountMinorUnits,
                 cardCurrency = existing.cardCurrency,
+                cardQuote = existing.cardQuote,
                 rawStatus = PaymentHistoryEntry.STATUS_EXPIRED,
                 paymentType = existing.paymentType,
                 lightningInvoice = existing.lightningInvoice,
@@ -1094,6 +1102,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                 cardAmountMinorUnits = existing.cardAmountMinorUnits,
                 cardCurrency = existing.cardCurrency,
+                cardQuote = existing.cardQuote,
                 rawStatus = PaymentHistoryEntry.STATUS_FAILED,
                 paymentType = existing.paymentType,
                 lightningInvoice = existing.lightningInvoice,
@@ -1168,6 +1177,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     cardPaymentReviewRequired = existing.cardPaymentReviewRequired,
                     cardAmountMinorUnits = existing.cardAmountMinorUnits,
                     cardCurrency = existing.cardCurrency,
+                    cardQuote = existing.cardQuote,
                     rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,
