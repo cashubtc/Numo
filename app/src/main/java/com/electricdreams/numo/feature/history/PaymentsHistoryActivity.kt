@@ -592,7 +592,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
      *   in [PaymentHistoryEntry.lightningQuoteId] but have no lightningMintUrl/nostrNprofile;
      *   without an active BTCPay connection these can never settle)
      *
-     * Card attempts are exempt until their persisted PaymentIntent has been checked at Stripe.
+     * A card attempt expires like any other sale. A charge is recorded when it happens, so a
+     * pending sale with a card attempt was not charged. The exception is a card attempt under
+     * review ([PaymentHistoryEntry.cardPaymentReviewRequired]): Numo could not confirm its
+     * outcome, so it stays pending until the merchant checks it at Stripe.
      */
     private fun expireStaleBtcPayEntries() {
         val appContext = applicationContext
@@ -602,7 +605,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
         var modified = false
         history.forEachIndexed { index, entry ->
-            if (entry.isPending() && entry.cardPaymentClientSecret == null && (
+            if (entry.isPending() && !entry.cardPaymentReviewRequired && (
                 // Ark addresses can still receive funds after quote expiry.
                 // Keep their pending entries resumable so late payments can be claimed.
                 (entry.date.time < cutoff && entry.arkoorQuoteId == null) ||
