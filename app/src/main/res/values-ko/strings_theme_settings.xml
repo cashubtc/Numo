@@ -7,4 +7,7 @@
     <string name="theme_settings_option_obsidian">옵시디언</string>
     <string name="theme_settings_section_app_theme">앱 테마</string>
     <string name="theme_settings_option_white">화이트</string>
+    <string name="theme_settings_section_display">디스플레이</string>
+    <string name="theme_settings_qr_brightness_label">QR 코드 표시 시 화면 밝게</string>
+    <string name="theme_settings_qr_brightness_description">결제 QR 코드가 표시되는 동안 화면을 최대 밝기로 설정하여 고객이 쉽게 스캔할 수 있게 합니다. 화면을 나가면 밝기가 원래대로 돌아갑니다. 결제 화면의 해 아이콘을 눌러 전환할 수도 있습니다.</string>
 </resources>

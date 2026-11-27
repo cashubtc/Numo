@@ -44,6 +44,7 @@ import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.TooltipCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.WindowCompat
@@ -78,6 +79,7 @@ import com.electricdreams.numo.payment.card.CardAmountResolver
 import com.electricdreams.numo.payment.card.StripeCardSettings
 import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
+import com.electricdreams.numo.ui.util.QrBrightnessBoost
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.ui.util.isAnimationEnabled
 import com.electricdreams.numo.ui.util.shake
@@ -113,6 +115,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var closeButton: View
     private lateinit var shareButton: View
+    private lateinit var brightnessButton: ImageView
+    private val qrBrightness = QrBrightnessBoost(this)
     private lateinit var lightningLoadingSpinner: View
     private lateinit var unifiedLoadingSpinner: View
     private lateinit var cashuLoadingSpinner: View
@@ -330,6 +334,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         statusText = findViewById(R.id.payment_status_text)
         closeButton = findViewById(R.id.close_button)
         shareButton = findViewById(R.id.share_button)
+        brightnessButton = findViewById(R.id.brightness_button)
         lightningLoadingSpinner = findViewById(R.id.lightning_loading_spinner)
         unifiedLoadingSpinner = findViewById(R.id.unified_loading_spinner)
         cashuLoadingSpinner = findViewById(R.id.cashu_loading_spinner)
@@ -442,6 +447,18 @@ class PaymentRequestActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, R.string.payment_request_error_nothing_to_share, Toast.LENGTH_SHORT).show()
             }
+        }
+
+        updateBrightnessButton(QrBrightnessBoost.isEnabled(this))
+        brightnessButton.setOnClickListener {
+            val enabled = qrBrightness.toggle()
+            updateBrightnessButton(enabled)
+            Toast.makeText(
+                this,
+                if (enabled) R.string.payment_request_brightness_on_toast
+                else R.string.payment_request_brightness_off_toast,
+                Toast.LENGTH_SHORT,
+            ).show()
         }
 
         // Create pending payment entry if this is a new payment (not resuming)
@@ -1799,6 +1816,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         findViewById<View>(R.id.qr_card)?.visibility = bitcoin
         findViewById<View>(R.id.instruction_text)?.visibility = bitcoin
         if (::shareButton.isInitialized) shareButton.visibility = bitcoin
+        refreshQrBrightness()
         if (locked) {
             NdefHostCardEmulationService.getInstance()?.clearPaymentRequest()
         } else if (!isCardCollecting && !hasTerminalOutcome) {
@@ -2791,6 +2809,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun clearHiddenOverlay() {
         nfcAnimationContainer.visibility = View.GONE
+        refreshQrBrightness()
         nfcAnimationContainer.alpha = 1f
         nfcAnimationView.reset()
         resetResultTextViews()
@@ -2805,6 +2824,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun revealOverlay(animated: Boolean, onShown: () -> Unit = {}) {
         nfcAnimationContainer.animate().cancel()
         nfcAnimationContainer.visibility = View.VISIBLE
+        refreshQrBrightness()
         if (!animated || !isAnimationEnabled()) {
             nfcAnimationContainer.alpha = 1f
             onShown()
@@ -3255,6 +3275,26 @@ class PaymentRequestActivity : AppCompatActivity() {
                 entry = entry,
             ),
         )
+    }
+
+    /** Full brightness only while a scannable QR is actually on screen. */
+    private fun refreshQrBrightness() {
+        if (!::nfcAnimationContainer.isInitialized) return
+        qrBrightness.setQrVisible(
+            nfcAnimationContainer.visibility != View.VISIBLE && !cardPaymentReviewRequired,
+        )
+    }
+
+    private fun updateBrightnessButton(enabled: Boolean) {
+        brightnessButton.setImageResource(
+            if (enabled) R.drawable.ic_light_mode else R.drawable.ic_brightness_boost_off,
+        )
+        val label = getString(
+            if (enabled) R.string.payment_request_brightness_turn_off
+            else R.string.payment_request_brightness_turn_on,
+        )
+        brightnessButton.contentDescription = label
+        TooltipCompat.setTooltipText(brightnessButton, label)
     }
 
     private fun dpToPx(dp: Float): Int {

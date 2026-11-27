@@ -7,4 +7,7 @@
     <string name="theme_settings_option_bitcoin_orange">Bitcoin-Orange</string>
     <string name="theme_settings_option_green">Grün</string>
     <string name="theme_settings_option_white">Weiß</string>
+    <string name="theme_settings_section_display">ANZEIGE</string>
+    <string name="theme_settings_qr_brightness_label">Bildschirm für QR-Codes aufhellen</string>
+    <string name="theme_settings_qr_brightness_description">Stellt die volle Helligkeit ein, solange ein Zahlungs-QR-Code angezeigt wird, damit Kunden ihn leicht scannen können. Beim Verlassen des Bildschirms kehrt die Helligkeit zum Normalwert zurück. Du kannst auch auf das Sonnensymbol im Zahlungsbildschirm tippen.</string>
 </resources>

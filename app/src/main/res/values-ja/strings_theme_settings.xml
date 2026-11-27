@@ -7,4 +7,7 @@
     <string name="theme_settings_option_obsidian">オブシディアン</string>
     <string name="theme_settings_section_app_theme">アプリのテーマ</string>
     <string name="theme_settings_option_white">ホワイト</string>
+    <string name="theme_settings_section_display">ディスプレイ</string>
+    <string name="theme_settings_qr_brightness_label">QRコード表示時に画面を明るくする</string>
+    <string name="theme_settings_qr_brightness_description">支払い用QRコードの表示中は画面を最大の明るさにし、お客様がスキャンしやすくします。画面を離れると明るさは元に戻ります。支払い画面の太陽アイコンをタップして切り替えることもできます。</string>
 </resources>

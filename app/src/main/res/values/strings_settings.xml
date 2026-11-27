@@ -52,7 +52,7 @@
 
     <!-- Settings items: theme -->
     <string name="settings_item_theme_title">Theme</string>
-    <string name="settings_item_theme_subtitle">Switch between light and dark mode</string>
+    <string name="settings_item_theme_subtitle">Dark mode, app theme and QR brightness</string>
 
     <!-- Settings items: security -->
     <string name="settings_item_security_title">Security &amp; Privacy</string>

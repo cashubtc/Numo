@@ -8,4 +8,7 @@
     <string name="theme_settings_option_green">Green</string>
     <string name="theme_settings_option_white">White</string>
     <string name="theme_settings_preview_description">Home screen preview with a sample amount, keypad, and Charge button</string>
+    <string name="theme_settings_section_display">Display</string>
+    <string name="theme_settings_qr_brightness_label">Brighten screen for QR codes</string>
+    <string name="theme_settings_qr_brightness_description">Sets full brightness while a payment QR code is showing, so customers can scan it easily. Brightness returns to normal when you leave the screen. You can also tap the sun icon on the payment screen.</string>
 </resources>

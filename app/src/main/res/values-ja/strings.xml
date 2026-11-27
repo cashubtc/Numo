@@ -59,6 +59,10 @@
     
     <string name="payment_request_close_content_description">近い</string>
     <string name="payment_request_share_content_description">共有</string>
+    <string name="payment_request_brightness_turn_off">QRの明るさ最大化をオフにする</string>
+    <string name="payment_request_brightness_turn_on">QRの明るさ最大化をオンにする</string>
+    <string name="payment_request_brightness_on_toast">明るさ最大化：オン</string>
+    <string name="payment_request_brightness_off_toast">明るさ最大化：オフ</string>
     <string name="payment_request_instruction_scan_or_tap">スキャンまたはタップして支払う</string>
     <string name="payment_request_nfc_reading">NFCから読み取り中...</string>
     <string name="payment_request_animation_close">終わり</string>

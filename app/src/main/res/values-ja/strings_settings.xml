@@ -107,7 +107,7 @@ Ecashトークンはサードパーティのmintによって保持されます�
     <string name="settings_about_dialog_privacy_title">プライバシーポリシー</string>
     <string name="about_website">ウェブサイト</string>
     <string name="settings_item_developer_subtitle">詳細設定とデバッグツール</string>
-    <string name="settings_item_theme_subtitle">ライトモードとダークモードの切り替え</string>
+    <string name="settings_item_theme_subtitle">ダークモード、テーマ、QRの明るさ</string>
     <string name="about_email_subject">Numoサポート</string>
     <string name="currency_settings_option_gbp">イギリスポンド (GBP)</string>
     <string name="about_title">情報</string>

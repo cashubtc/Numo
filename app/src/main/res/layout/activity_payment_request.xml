@@ -42,6 +42,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Quick toggle for the QR brightness boost; follows the share button's inset margin -->
+    <ImageButton
+        android:id="@+id/brightness_button"
+        android:layout_width="@dimen/icon_size_large"
+        android:layout_height="@dimen/icon_size_large"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_light_mode"
+        android:contentDescription="@string/payment_request_brightness_turn_off"
+        app:tint="@color/color_text_primary"
+        app:layout_constraintEnd_toStartOf="@id/share_button"
+        app:layout_constraintTop_toTopOf="@id/share_button"
+        app:layout_constraintBottom_toBottomOf="@id/share_button" />
+
     <!-- Offline marker: lives in the header row instead of the app-wide strip, so the QR never
          moves while a customer may be scanning it -->
     <LinearLayout

@@ -10,6 +10,7 @@ import com.google.android.material.materialswitch.MaterialSwitch
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.databinding.ActivityThemeSettingsBinding
+import com.electricdreams.numo.ui.util.QrBrightnessBoost
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class ThemeSettingsActivity : AppCompatActivity() {
@@ -51,6 +52,11 @@ class ThemeSettingsActivity : AppCompatActivity() {
             AppCompatDelegate.setDefaultNightMode(
                 if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             )
+        }
+
+        binding.qrBrightnessSwitch.isChecked = QrBrightnessBoost.isEnabled(this)
+        binding.qrBrightnessSwitch.setOnCheckedChangeListener { _, isChecked ->
+            QrBrightnessBoost.setEnabled(this, isChecked)
         }
 
         // Initialize theme radio buttons
