@@ -606,7 +606,27 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
-    fun `old card attempts stay pending until stripe status is checked`() {
+    fun `old card attempts expire like other sales`() {
+        val entry = PaymentHistoryEntry(
+            token = "", amount = 330L, enteredAmount = 330L,
+            date = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L),
+            rawStatus = PaymentHistoryEntry.STATUS_PENDING,
+            cardPaymentIntentId = "pi_cancelled",
+            cardPaymentClientSecret = "pi_cancelled_secret_test",
+        )
+        context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE).edit()
+            .putString("history", com.google.gson.Gson().toJson(listOf(entry))).apply()
+
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+
+        val restored = PaymentsHistoryActivity.getPaymentHistory(context).single()
+        assertTrue(restored.isExpired())
+        assertEquals("pi_cancelled", restored.cardPaymentIntentId)
+        controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun `old card attempts under review stay pending`() {
         val entry = PaymentHistoryEntry(
             token = "", amount = 330L, enteredAmount = 330L,
             date = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L),
