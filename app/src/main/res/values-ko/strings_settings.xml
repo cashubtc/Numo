@@ -107,7 +107,7 @@ Ecash 토큰은 타사 mint가 보유합니다. 이러한 mint는 실패하거�
     <string name="settings_about_dialog_privacy_title">개인정보처리방침</string>
     <string name="about_website">웹사이트</string>
     <string name="settings_item_developer_subtitle">고급 설정 및 디버깅 도구</string>
-    <string name="settings_item_theme_subtitle">라이트 및 다크 모드 전환</string>
+    <string name="settings_item_theme_subtitle">다크 모드, 테마 및 QR 밝기</string>
     <string name="about_email_subject">Numo 지원</string>
     <string name="currency_settings_option_gbp">영국 파운드 (GBP)</string>
     <string name="about_title">정보</string>

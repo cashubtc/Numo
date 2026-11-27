@@ -30,7 +30,7 @@
     <string name="settings_item_basket_names_title">Nombres de cestas</string>
     <string name="settings_item_basket_names_subtitle">Crea nombres predefinidos para guardar cestas rápidamente</string>
     <string name="settings_item_theme_title">Tema</string>
-    <string name="settings_item_theme_subtitle">Cambiar entre modo claro y oscuro</string>
+    <string name="settings_item_theme_subtitle">Modo oscuro, tema y brillo de QR</string>
     <string name="settings_item_security_title">Seguridad y privacidad</string>
     <string name="settings_item_security_subtitle">Copia de la frase semilla, restaurar cartera</string>
     <string name="settings_item_developer_title">Opciones de desarrollo</string>

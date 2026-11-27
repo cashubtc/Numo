@@ -67,6 +67,36 @@
                     android:paddingVertical="@dimen/settings_row_padding"
                     android:background="@drawable/bg_settings_group" />
 
+                <!-- Display Section Header -->
+
+                <TextView
+                    android:text="@string/theme_settings_section_display"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:accessibilityHeading="true" />
+
+                <!-- QR Brightness Boost Toggle -->
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/qr_brightness_switch"
+                    style="@style/Widget.Numo.SettingsSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/settings_switch_height"
+                    android:text="@string/theme_settings_qr_brightness_label"
+                    android:textAppearance="@style/Text.RowTitle"
+                    android:paddingHorizontal="0dp"
+                    android:paddingVertical="@dimen/settings_row_padding"
+                    android:background="@drawable/bg_settings_group" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="@string/theme_settings_qr_brightness_description"
+                    android:textAppearance="@style/Text.SettingsCaption" />
+
                 <!-- App Theme Section Header -->
 
                 <TextView

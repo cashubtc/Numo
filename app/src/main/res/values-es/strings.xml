@@ -44,6 +44,10 @@
     <string name="tip_selection_main_confirm">Confirmar</string>
     <string name="payment_request_close_content_description">Cerrar</string>
     <string name="payment_request_share_content_description">Compartir</string>
+    <string name="payment_request_brightness_turn_off">Desactivar el brillo máximo para QR</string>
+    <string name="payment_request_brightness_turn_on">Activar el brillo máximo para QR</string>
+    <string name="payment_request_brightness_on_toast">Brillo máximo activado</string>
+    <string name="payment_request_brightness_off_toast">Brillo máximo desactivado</string>
     <string name="payment_request_instruction_scan_or_tap">Escanea o acerca para pagar</string>
     <string name="payment_request_nfc_reading">Leyendo desde NFC...</string>
     <string name="payment_request_animation_close">Listo</string>

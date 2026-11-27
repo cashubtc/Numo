@@ -59,6 +59,10 @@
 
     <string name="payment_request_close_content_description">Schließen</string>
     <string name="payment_request_share_content_description">Teilen</string>
+    <string name="payment_request_brightness_turn_off">QR-Helligkeitsverstärkung ausschalten</string>
+    <string name="payment_request_brightness_turn_on">QR-Helligkeitsverstärkung einschalten</string>
+    <string name="payment_request_brightness_on_toast">Helligkeitsverstärkung an</string>
+    <string name="payment_request_brightness_off_toast">Helligkeitsverstärkung aus</string>
     <string name="payment_request_instruction_scan_or_tap">Scannen oder tippen zum Bezahlen</string>
     <string name="payment_request_nfc_reading">Lesen von NFC...</string>
     <string name="payment_request_animation_close">Fertig</string>

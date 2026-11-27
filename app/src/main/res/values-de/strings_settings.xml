@@ -52,7 +52,7 @@
 
     <!-- Settings items: theme -->
     <string name="settings_item_theme_title">Design</string>
-    <string name="settings_item_theme_subtitle">Zwischen hellem und dunklem Modus wechseln</string>
+    <string name="settings_item_theme_subtitle">Dunkler Modus, App-Design und QR-Helligkeit</string>
 
     <!-- Settings items: security -->
     <string name="settings_item_security_title">Sicherheit &amp; Datenschutz</string>

@@ -59,6 +59,10 @@
     
     <string name="payment_request_close_content_description">Close</string>
     <string name="payment_request_share_content_description">Share</string>
+    <string name="payment_request_brightness_turn_off">Turn off QR brightness boost</string>
+    <string name="payment_request_brightness_turn_on">Turn on QR brightness boost</string>
+    <string name="payment_request_brightness_on_toast">Brightness boost on</string>
+    <string name="payment_request_brightness_off_toast">Brightness boost off</string>
     <string name="payment_request_instruction_scan_or_tap">Scan or tap to pay</string>
     <string name="payment_request_nfc_reading">Reading from NFC...</string>
     <string name="payment_request_animation_close">Done</string>

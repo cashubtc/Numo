@@ -59,6 +59,10 @@
     
     <string name="payment_request_close_content_description">닫다</string>
     <string name="payment_request_share_content_description">공유하다</string>
+    <string name="payment_request_brightness_turn_off">QR 밝기 최대화 끄기</string>
+    <string name="payment_request_brightness_turn_on">QR 밝기 최대화 켜기</string>
+    <string name="payment_request_brightness_on_toast">밝기 최대화 켜짐</string>
+    <string name="payment_request_brightness_off_toast">밝기 최대화 꺼짐</string>
     <string name="payment_request_instruction_scan_or_tap">스캔하거나 탭하여 결제하세요</string>
     <string name="payment_request_nfc_reading">NFC에서 읽는 중...</string>
     <string name="payment_request_animation_close">완료</string>

@@ -7,4 +7,7 @@
     <string name="theme_settings_option_bitcoin_orange">Bitcoin naranja</string>
     <string name="theme_settings_option_green">Verde</string>
     <string name="theme_settings_option_white">Blanco</string>
+    <string name="theme_settings_section_display">PANTALLA</string>
+    <string name="theme_settings_qr_brightness_label">Aumentar el brillo para códigos QR</string>
+    <string name="theme_settings_qr_brightness_description">Pone el brillo al máximo mientras se muestra un código QR de pago para que los clientes puedan escanearlo fácilmente. El brillo vuelve a la normalidad al salir de la pantalla. También puedes tocar el icono del sol en la pantalla de pago.</string>
 </resources>
